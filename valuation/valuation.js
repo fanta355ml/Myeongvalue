@@ -109,6 +109,27 @@ function buildExclusionTable(rows) {
     <tr><td>${escapeHtml(displayOrDash(row.detail))}</td><td>${escapeHtml(displayOrDash(row.reason))}</td></tr>`).join('');
 }
 
+function highlightReviewLine(line) {
+  let html = escapeHtml(line);
+
+  // 최종 가치금액: 예) 11.5~12억 원
+  html = html.replace(/(\d+(?:\.\d+)?(?:\s*~\s*\d+(?:\.\d+)?)?\s*억\s*원)/g, '<strong>$1</strong>');
+
+  // 평가대상특허 적용제품/사업화제품 핵심구문
+  html = html.replace(
+    /(평가대상특허\s*(?:관련\s*)?(?:적용제품|사업화제품)은\s*[^.。!?]*(?:이다|임|것임))/g,
+    '<strong>$1</strong>'
+  );
+
+  // 특허매출비중 핵심 수치
+  html = html.replace(
+    /((?:특허매출비중|평가대상특허\s*관련\s*매출\s*비중)\s*\d+(?:\.\d+)?%)/g,
+    '<strong>$1</strong>'
+  );
+
+  return html;
+}
+
 function buildReviewLines(text) {
   const normalized = clean(text);
   if (!normalized) return '<div class="review-line">-</div>';
@@ -116,7 +137,7 @@ function buildReviewLines(text) {
     .split(/\r?\n/)
     .map(line => clean(line))
     .filter(Boolean)
-    .map(line => `<div class="review-line">${escapeHtml(line)}</div>`)
+    .map(line => `<div class="review-line">${highlightReviewLine(line)}</div>`)
     .join('');
 }
 
