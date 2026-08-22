@@ -14,7 +14,14 @@ const clean = (value) => {
   return text === '#NAME?' || text === '#VALUE!' || text === '#REF!' ? '' : text;
 };
 
-const cell = (sheet, addr) => clean(sheet[addr]?.v);
+// Excel 화면에 보이는 서식값(.w)을 우선 사용한다.
+// 퍼센트, 금액, 날짜, 단위 등이 원본 Excel 표시형식과 동일하게 출력된다.
+const cell = (sheet, addr) => {
+  const target = sheet[addr];
+  if (!target) return '';
+  return clean(target.w !== undefined ? target.w : target.v);
+};
+
 const displayOrDash = (value) => clean(value) || '-';
 
 function readPatentRows(sheet) {
@@ -49,7 +56,7 @@ function readWorkbookData(workbook) {
   const sheet = workbook.Sheets['통합_가평가'];
   if (!sheet) throw new Error('통합_가평가 시트를 찾을 수 없습니다.');
 
-  const data = {
+  return {
     company: cell(sheet, 'B2'),
     businessNo: cell(sheet, 'F2'),
     institution: cell(sheet, 'B3'),
@@ -74,8 +81,6 @@ function readWorkbookData(workbook) {
     reviewOpinion: cell(sheet, 'B60'),
     disclaimer: cell(sheet, 'A63'),
   };
-
-  return data;
 }
 
 function escapeHtml(str) {
@@ -177,7 +182,7 @@ fileInput.addEventListener('change', async (event) => {
     fileStatus.textContent = 'Excel을 읽는 중입니다...';
     fileStatus.className = 'status';
     const buffer = await file.arrayBuffer();
-    const workbook = XLSX.read(buffer, { type: 'array', cellDates: false });
+    const workbook = XLSX.read(buffer, { type: 'array', cellDates: false, cellNF: true });
     currentData = readWorkbookData(workbook);
     notesInput.value = currentData.specialNotes || '';
     guideEl.textContent = `※ ${currentData.specialGuide}`;
