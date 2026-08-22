@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>IP 간이감정 | 명밸류 파트너스</title>
+  <meta name="description" content="통합_가평가 시트의 값을 불러와 IP 간이감정 결과보고서를 생성합니다.">
+  <link rel="icon" href="../assets/logo.png">
+  <link rel="stylesheet" href="valuation.css">
+</head>
+<body>
+  <header class="valuation-header">
+    <a class="brand" href="../"><img src="../assets/logo.png" alt="명밸류 파트너스"><span>명밸류 파트너스</span></a>
+    <a class="back-link" href="../">홈으로</a>
+  </header>
+
+  <main class="valuation-shell">
+    <section class="intro-panel">
+      <p class="kicker">15-MINUTE QUICK VALUATION</p>
+      <h1>IP 간이감정 보고서 생성</h1>
+      <p class="lead">가평가 Excel의 <strong>통합_가평가</strong> 시트만 읽어 결과보고서를 구성합니다. 파일은 브라우저에서만 처리되며 별도 서버로 업로드하지 않습니다.</p>
+
+      <div class="upload-card">
+        <label class="upload-label" for="excelFile">
+          <span class="upload-title">가평가 Excel 업로드</span>
+          <span class="upload-desc">.xlsx / .xlsm / .xls 파일을 선택하세요.</span>
+        </label>
+        <input id="excelFile" type="file" accept=".xlsx,.xlsm,.xls">
+        <div id="fileStatus" class="status">파일을 선택하면 자동으로 미리보기를 생성합니다.</div>
+      </div>
+
+      <div class="edit-card">
+        <label for="specialNotes">특이사항 <span>직접 수정 가능</span></label>
+        <p id="specialGuide" class="field-guide">※ 예비평가/IP지원신청 통과 관련 예상 이슈 및 필요조치 기재</p>
+        <textarea id="specialNotes" rows="7" placeholder="예: ■ 연차료 납부 필요&#10;■ 대표자 명의이전 필요"></textarea>
+      </div>
+
+      <div class="action-row">
+        <button id="printBtn" class="button button-primary" type="button" disabled>보고서 인쇄 / PDF 저장</button>
+        <button id="resetBtn" class="button" type="button">초기화</button>
+      </div>
+    </section>
+
+    <section id="reportArea" class="report-area is-empty" aria-live="polite">
+      <div class="empty-report">
+        <strong>간이감정 보고서 미리보기</strong>
+        <p>Excel을 업로드하면 이 영역에 보고서가 표시됩니다.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="valuation-footer">© 명밸류 파트너스 · IP &amp; Technology Valuation</footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="valuation.js"></script>
+</body>
+</html>
