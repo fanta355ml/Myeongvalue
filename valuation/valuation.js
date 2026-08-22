@@ -99,6 +99,21 @@ function escapeHtml(str) {
     .replaceAll("'", '&#039;');
 }
 
+function formatContact(value) {
+  const text = clean(value);
+  if (!text) return '-';
+
+  const phonePattern = /(?:\+?82[-\s]?)?(?:0\d{1,2})[-\s]?\d{3,4}[-\s]?\d{4}/;
+  const match = text.match(phonePattern);
+  if (!match || match.index === undefined || match.index === 0) return escapeHtml(text);
+
+  const firstLine = text.slice(0, match.index).trim().replace(/[\/|·,;:\-]+$/, '').trim();
+  const secondLine = text.slice(match.index).trim();
+  if (!firstLine) return escapeHtml(text);
+
+  return `${escapeHtml(firstLine)}<br>${escapeHtml(secondLine)}`;
+}
+
 function buildPatentTable(rows) {
   if (!rows.length) return '<tr><td colspan="6">평가대상특허 정보 없음</td></tr>';
   return rows.map((row) => `
@@ -240,7 +255,7 @@ function renderReport() {
         <div><dt>기업명</dt><dd>${escapeHtml(displayOrDash(currentData.company))}</dd></div>
         <div><dt>사업자번호</dt><dd>${escapeHtml(displayOrDash(currentData.businessNo))}</dd></div>
         <div><dt>평가기관</dt><dd>${escapeHtml(displayOrDash(currentData.institution))}</dd></div>
-        <div><dt>문의처</dt><dd>${escapeHtml(displayOrDash(currentData.contact))}</dd></div>
+        <div><dt>문의처</dt><dd>${formatContact(currentData.contact)}</dd></div>
         <div class="value-box"><dt>가치평가금액</dt><dd>${escapeHtml(displayOrDash(valuationAmount))}</dd></div>
       </dl>
 
