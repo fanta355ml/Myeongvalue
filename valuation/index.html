@@ -46,6 +46,7 @@
   <header class="valuation-header">
     <a id="headerBrand" class="brand is-myeongvalue" href="../"><img id="headerBrandLogo" src="../assets/logo.png" alt="명밸류 파트너스"><span id="headerBrandName">명밸류 파트너스</span></a>
     <div class="header-actions">
+      <span id="activeAgencyName" class="active-agency-name" hidden></span>
       <button id="agencySwitchBtn" class="back-link agency-switch-link" type="button" hidden>기관 변경</button>
       <a class="back-link" href="../">홈으로</a>
     </div>
@@ -64,6 +65,14 @@
         </label>
         <input id="excelFile" type="file" accept=".xlsx,.xlsm,.xls">
         <div id="fileStatus" class="status">파일을 선택하면 자동으로 미리보기를 생성합니다.</div>
+      </div>
+
+      <div class="edit-card">
+        <label for="contactSelect">문의처 선택 <span>Excel 인력 불러오기</span></label>
+        <p id="contactGuide" class="field-guide">Excel 업로드 후 데이터처리 시트의 인력·연락처·이메일을 불러옵니다.</p>
+        <select id="contactSelect" class="edit-input" disabled>
+          <option value="">Excel 업로드 후 선택할 수 있습니다.</option>
+        </select>
       </div>
 
       <div class="edit-card">
