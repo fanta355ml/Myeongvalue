@@ -3,11 +3,9 @@
    - D17:R17: 현금흐름 추정기간의 차년도별 매출액
    - D24:R24: 세후 로열티수입 할인 후 현재가치
    - D26: 지식재산유효성
-   - H32:H36: 사업화주체 결산일자
-   - J32:J36: 사업화주체 영업이익률
    업종평균
-   - D4:H4: 동업종 연도
-   - D17:H17: 동업종 영업이익률
+   - J22:N25: 사업화주체/동업종 영업이익률 비교 블록
+     최근 공통 3개년 평균을 우선 사용하고, 유효값 부족 시 2개년 → 1개년 순으로 축소
 */
 (() => {
   window.quickValuationProjectedSalesSeries = [];
@@ -32,9 +30,20 @@
     return String(target.w ?? target.v ?? '').trim();
   };
 
-  const percentValue = (value) => {
-    if (!Number.isFinite(value)) return null;
-    return Math.abs(value) <= 1 ? value * 100 : value;
+  const percentValue = (sheet, address) => {
+    const target = sheet?.[address];
+    if (!target) return null;
+
+    const display = String(target.w ?? '').trim();
+    const displayMatch = display.match(/-?\d+(?:\.\d+)?\s*%/);
+    if (displayMatch) {
+      const value = Number(displayMatch[0].replace('%', '').trim());
+      return Number.isFinite(value) ? value : null;
+    }
+
+    const raw = numericCell(sheet, address);
+    if (!Number.isFinite(raw)) return null;
+    return Math.abs(raw) <= 1 ? raw * 100 : raw;
   };
 
   const yearFromCell = (sheet, address) => {
@@ -122,46 +131,76 @@
   }
 
   function extractOperatingMargins(workbook) {
-    const companySheet = workbook?.Sheets?.['가평가시트'];
-    const industrySheet = workbook?.Sheets?.['업종평균'];
-    if (!companySheet || !industrySheet) return { series: [], meta: null };
-
-    const company = new Map();
-    for (let row = 32; row <= 36; row += 1) {
-      const year = yearFromCell(companySheet, `H${row}`);
-      const margin = percentValue(numericCell(companySheet, `J${row}`));
-      if (!year || !Number.isFinite(margin)) continue;
-      company.set(year, margin);
+    const sheet = workbook?.Sheets?.['업종평균'];
+    if (!sheet) {
+      return { series: [], meta: { available: false, reason: '업종평균 시트 없음' } };
     }
 
-    const industry = new Map();
-    const columns = ['D', 'E', 'F', 'G', 'H'];
-    columns.forEach(colCode => {
-      const year = yearFromCell(industrySheet, `${colCode}4`);
-      const margin = percentValue(numericCell(industrySheet, `${colCode}17`));
-      if (!year || !Number.isFinite(margin)) return;
-      industry.set(year, margin);
+    const rows = [22, 23, 24, 25];
+    const cols = ['J', 'K', 'L', 'M', 'N'];
+    const rowText = row => cols.map(col => textCell(sheet, `${col}${row}`)).join(' ').trim();
+    const yearCount = row => cols.filter(col => yearFromCell(sheet, `${col}${row}`)).length;
+    const numericCount = row => cols.filter(col => Number.isFinite(percentValue(sheet, `${col}${row}`))).length;
+
+    let headerRow = rows.reduce((best, row) => yearCount(row) > yearCount(best) ? row : best, rows[0]);
+    if (yearCount(headerRow) === 0) headerRow = null;
+
+    let companyRow = rows.find(row => /(사업화주체|동사|기업|회사)/.test(rowText(row))) || null;
+    let industryRow = rows.find(row => /(동업종|업종평균|동종업종)/.test(rowText(row))) || null;
+
+    if (!companyRow || !industryRow) {
+      const candidates = rows
+        .filter(row => row !== headerRow)
+        .filter(row => numericCount(row) > 0)
+        .filter(row => !/(차이|격차)/.test(rowText(row)));
+
+      if (!companyRow && candidates.length) companyRow = candidates[0];
+      if (!industryRow && candidates.length >= 2) industryRow = candidates.find(row => row !== companyRow) || null;
+    }
+
+    if (!companyRow || !industryRow || companyRow === industryRow) {
+      return { series: [], meta: { available: false, reason: '비교 행 인식 실패' } };
+    }
+
+    const pairs = [];
+    cols.forEach((col, index) => {
+      const company = percentValue(sheet, `${col}${companyRow}`);
+      const industry = percentValue(sheet, `${col}${industryRow}`);
+      if (!Number.isFinite(company) || !Number.isFinite(industry)) return;
+
+      const year = headerRow ? yearFromCell(sheet, `${col}${headerRow}`) : null;
+      pairs.push({
+        year,
+        order: index,
+        company,
+        industry,
+      });
     });
 
-    const commonYears = [...company.keys()]
-      .filter(year => industry.has(year))
-      .sort((a, b) => a - b);
+    pairs.sort((a, b) => {
+      if (a.year && b.year) return a.year - b.year;
+      return a.order - b.order;
+    });
 
-    const comparisonYears = commonYears.slice(-3);
-    const series = comparisonYears.map(year => ({
-      year,
-      company: company.get(year),
-      industry: industry.get(year),
-    }));
+    const selected = pairs.slice(-3);
+    if (!selected.length) {
+      return { series: [], meta: { available: false, reason: '유효 비교값 없음' } };
+    }
+
+    const average = key => selected.reduce((sum, item) => sum + item[key], 0) / selected.length;
+    const years = selected.map(item => item.year).filter(Boolean);
 
     return {
-      series,
+      series: selected,
       meta: {
+        available: true,
         companyLabel: '사업화주체',
         industryLabel: '동업종',
-        industrySource: '업로드 Excel 업종평균 시트',
-        commonYearCount: commonYears.length,
-        comparisonYears,
+        companyAverage: average('company'),
+        industryAverage: average('industry'),
+        periodCount: selected.length,
+        years,
+        source: '업종평균!J22:N25',
       },
     };
   }
@@ -211,7 +250,7 @@
         window.quickValuationAnnualValueSeries = [];
         window.quickValuationAnnualValueMeta = null;
         window.quickValuationOperatingMarginSeries = [];
-        window.quickValuationOperatingMarginMeta = null;
+        window.quickValuationOperatingMarginMeta = { available: false, reason: '읽기 오류' };
       }
 
       document.dispatchEvent(new CustomEvent('quickvaluation:chartdata'));
