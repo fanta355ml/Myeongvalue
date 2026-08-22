@@ -4,8 +4,11 @@
    - D24:R24: 세후 로열티수입 할인 후 현재가치
    - D26: 지식재산유효성
    업종평균
-   - J22:N25: 사업화주체/동업종 영업이익률 비교 블록
-     최근 공통 3개년 평균을 우선 사용하고, 유효값 부족 시 2개년 → 1개년 순으로 축소
+   - 영업이익률 기준 비교 결과표
+     · L23/L24: 최근 1개년 사업화주체/동업종 영업이익률
+     · M23/M24: 최근 2개년 평균 사업화주체/동업종 영업이익률
+     · N23/N24: 최근 3개년 평균 사업화주체/동업종 영업이익률
+     최근 3개년을 우선 사용하고 오류·공란 시 2개년 → 1개년 순으로 축소
 */
 (() => {
   window.quickValuationProjectedSalesSeries = [];
@@ -35,6 +38,8 @@
     if (!target) return null;
 
     const display = String(target.w ?? '').trim();
+    if (!display || /#(?:DIV\/0!|N\/A|VALUE!|REF!|NAME\?|NUM!|NULL!)/i.test(display)) return null;
+
     const displayMatch = display.match(/-?\d+(?:\.\d+)?\s*%/);
     if (displayMatch) {
       const value = Number(displayMatch[0].replace('%', '').trim());
@@ -44,35 +49,6 @@
     const raw = numericCell(sheet, address);
     if (!Number.isFinite(raw)) return null;
     return Math.abs(raw) <= 1 ? raw * 100 : raw;
-  };
-
-  const yearFromCell = (sheet, address) => {
-    const target = sheet?.[address];
-    if (!target) return null;
-
-    const display = String(target.w ?? '').trim();
-    const displayMatch = display.match(/(?:19|20)\d{2}/);
-    if (displayMatch) return Number(displayMatch[0]);
-
-    const raw = target.v;
-    if (raw instanceof Date && !Number.isNaN(raw.getTime())) return raw.getFullYear();
-
-    if (typeof raw === 'number' && Number.isFinite(raw)) {
-      if (raw >= 1900 && raw <= 2200) return Math.round(raw);
-      if (raw > 30000 && raw < 70000) {
-        try {
-          const parsed = XLSX?.SSF?.parse_date_code?.(raw);
-          if (parsed?.y) return Number(parsed.y);
-        } catch (error) {
-          // fallback below
-        }
-        const date = new Date(Date.UTC(1899, 11, 30) + raw * 86400000);
-        if (!Number.isNaN(date.getTime())) return date.getUTCFullYear();
-      }
-    }
-
-    const rawMatch = String(raw ?? '').match(/(?:19|20)\d{2}/);
-    return rawMatch ? Number(rawMatch[0]) : null;
   };
 
   function extractProjectedSales(sheet) {
@@ -136,71 +112,46 @@
       return { series: [], meta: { available: false, reason: '업종평균 시트 없음' } };
     }
 
-    const rows = [22, 23, 24, 25];
-    const cols = ['J', 'K', 'L', 'M', 'N'];
-    const rowText = row => cols.map(col => textCell(sheet, `${col}${row}`)).join(' ').trim();
-    const yearCount = row => cols.filter(col => yearFromCell(sheet, `${col}${row}`)).length;
-    const numericCount = row => cols.filter(col => Number.isFinite(percentValue(sheet, `${col}${row}`))).length;
+    // 엑셀 우측의 '영업이익률 기준 비교' 결과표를 그대로 사용한다.
+    // 동일기간 비교가 이미 반영된 결과이며, 3개년 → 2개년 → 1개년 순으로 확인한다.
+    const candidates = [
+      { periodCount: 3, companyCell: 'N23', industryCell: 'N24', label: '최근 3개년 평균' },
+      { periodCount: 2, companyCell: 'M23', industryCell: 'M24', label: '최근 2개년 평균' },
+      { periodCount: 1, companyCell: 'L23', industryCell: 'L24', label: '최근 1개년' },
+    ];
 
-    let headerRow = rows.reduce((best, row) => yearCount(row) > yearCount(best) ? row : best, rows[0]);
-    if (yearCount(headerRow) === 0) headerRow = null;
+    for (const candidate of candidates) {
+      const company = percentValue(sheet, candidate.companyCell);
+      const industry = percentValue(sheet, candidate.industryCell);
+      if (!Number.isFinite(company) || !Number.isFinite(industry)) continue;
 
-    let companyRow = rows.find(row => /(사업화주체|동사|기업|회사)/.test(rowText(row))) || null;
-    let industryRow = rows.find(row => /(동업종|업종평균|동종업종)/.test(rowText(row))) || null;
-
-    if (!companyRow || !industryRow) {
-      const candidates = rows
-        .filter(row => row !== headerRow)
-        .filter(row => numericCount(row) > 0)
-        .filter(row => !/(차이|격차)/.test(rowText(row)));
-
-      if (!companyRow && candidates.length) companyRow = candidates[0];
-      if (!industryRow && candidates.length >= 2) industryRow = candidates.find(row => row !== companyRow) || null;
+      return {
+        series: [{
+          periodCount: candidate.periodCount,
+          company,
+          industry,
+        }],
+        meta: {
+          available: true,
+          companyLabel: '사업화주체',
+          industryLabel: '동업종',
+          companyAverage: company,
+          industryAverage: industry,
+          periodCount: candidate.periodCount,
+          periodLabel: candidate.label,
+          companyCell: candidate.companyCell,
+          industryCell: candidate.industryCell,
+          source: 'CRETOP 기업정보 검색결과, 한국과학기술정보연구원(StarValue)',
+        },
+      };
     }
-
-    if (!companyRow || !industryRow || companyRow === industryRow) {
-      return { series: [], meta: { available: false, reason: '비교 행 인식 실패' } };
-    }
-
-    const pairs = [];
-    cols.forEach((col, index) => {
-      const company = percentValue(sheet, `${col}${companyRow}`);
-      const industry = percentValue(sheet, `${col}${industryRow}`);
-      if (!Number.isFinite(company) || !Number.isFinite(industry)) return;
-
-      const year = headerRow ? yearFromCell(sheet, `${col}${headerRow}`) : null;
-      pairs.push({
-        year,
-        order: index,
-        company,
-        industry,
-      });
-    });
-
-    pairs.sort((a, b) => {
-      if (a.year && b.year) return a.year - b.year;
-      return a.order - b.order;
-    });
-
-    const selected = pairs.slice(-3);
-    if (!selected.length) {
-      return { series: [], meta: { available: false, reason: '유효 비교값 없음' } };
-    }
-
-    const average = key => selected.reduce((sum, item) => sum + item[key], 0) / selected.length;
-    const years = selected.map(item => item.year).filter(Boolean);
 
     return {
-      series: selected,
+      series: [],
       meta: {
-        available: true,
-        companyLabel: '사업화주체',
-        industryLabel: '동업종',
-        companyAverage: average('company'),
-        industryAverage: average('industry'),
-        periodCount: selected.length,
-        years,
-        source: '업종평균!J22:N25',
+        available: false,
+        reason: '최근 3개년·2개년·1개년 동일기간 비교값 모두 없음',
+        source: 'CRETOP 기업정보 검색결과, 한국과학기술정보연구원(StarValue)',
       },
     };
   }
