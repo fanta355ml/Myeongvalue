@@ -1,0 +1,197 @@
+/* =========================================================
+   Quick Valuation - AI Background Concept A
+   화면용 오버라이드 CSS
+   ========================================================= */
+
+:root {
+  --ai-pattern-opacity: 0.18;
+  --ai-glow-opacity: 0.18;
+  --ai-line-opacity: 0.12;
+}
+
+/* 기본 배경: 밝은 네이비 톤 + 깊이감 */
+body {
+  position: relative;
+  isolation: isolate;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(217, 179, 95, 0.22), transparent 30%),
+    radial-gradient(circle at 84% 16%, rgba(94, 139, 205, 0.20), transparent 34%),
+    radial-gradient(circle at 30% 78%, rgba(59, 107, 176, 0.11), transparent 28%),
+    linear-gradient(180deg, #14315f 0%, #0d2449 54%, #071831 100%);
+}
+
+/* 네트워크 패턴 */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 76px 0 0 0;
+  pointer-events: none;
+  z-index: -2;
+  opacity: var(--ai-pattern-opacity);
+
+  background-image:
+    radial-gradient(circle at 12% 12%, rgba(243, 213, 138, 0.95) 0 2px, transparent 3px),
+    radial-gradient(circle at 20% 19%, rgba(160, 196, 245, 0.92) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 31% 11%, rgba(160, 196, 245, 0.75) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 40% 25%, rgba(243, 213, 138, 0.80) 0 2px, transparent 3px),
+    radial-gradient(circle at 7% 36%, rgba(160, 196, 245, 0.70) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 27% 42%, rgba(160, 196, 245, 0.82) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 43% 49%, rgba(243, 213, 138, 0.68) 0 1.5px, transparent 2.5px),
+    linear-gradient(28deg,
+      transparent 0 18%,
+      rgba(157, 192, 239, var(--ai-line-opacity)) 18.2% 18.35%,
+      transparent 18.55% 100%),
+    linear-gradient(153deg,
+      transparent 0 28%,
+      rgba(157, 192, 239, var(--ai-line-opacity)) 28.15% 28.28%,
+      transparent 28.5% 100%),
+    linear-gradient(74deg,
+      transparent 0 37%,
+      rgba(217, 179, 95, 0.07) 37.12% 37.24%,
+      transparent 37.44% 100%),
+    linear-gradient(rgba(150, 184, 230, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(150, 184, 230, 0.028) 1px, transparent 1px);
+
+  background-size:
+    auto, auto, auto, auto, auto, auto, auto,
+    760px 540px,
+    840px 620px,
+    920px 680px,
+    54px 54px,
+    54px 54px;
+
+  background-position:
+    0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0,
+    left top,
+    left 8% top 5%,
+    left 3% top 18%,
+    left top,
+    left top;
+
+  background-repeat:
+    no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat,
+    no-repeat, no-repeat, no-repeat,
+    repeat, repeat;
+
+  mask-image: linear-gradient(
+    90deg,
+    rgba(0,0,0,1) 0%,
+    rgba(0,0,0,0.95) 34%,
+    rgba(0,0,0,0.38) 57%,
+    rgba(0,0,0,0.08) 78%,
+    transparent 100%
+  );
+}
+
+/* 하단 wave / ambient glow */
+body::after {
+  content: "";
+  position: fixed;
+  left: -14vw;
+  bottom: -22vh;
+  width: 82vw;
+  height: 70vh;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.72;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(77, 129, 202, var(--ai-glow-opacity)) 0%,
+      rgba(52, 96, 163, 0.10) 32%,
+      transparent 66%
+    );
+
+  border-radius: 50%;
+  box-shadow:
+    0 -1px 0 rgba(243, 213, 138, 0.08),
+    0 -26px 0 -25px rgba(149, 185, 236, 0.09),
+    0 -54px 0 -53px rgba(149, 185, 236, 0.06),
+    0 -82px 0 -81px rgba(217, 179, 95, 0.045);
+  transform: rotate(-7deg);
+}
+
+.valuation-header,
+.valuation-shell,
+.valuation-footer {
+  position: relative;
+}
+
+.valuation-shell,
+.valuation-footer {
+  z-index: 1;
+}
+
+.upload-card,
+.edit-card {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.105),
+      rgba(255, 255, 255, 0.050)
+    );
+  border-color: rgba(217, 179, 95, 0.34);
+  box-shadow:
+    0 20px 58px rgba(2, 10, 26, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.edit-input,
+textarea {
+  background: rgba(5, 23, 51, 0.60);
+  box-shadow: inset 0 1px 12px rgba(0, 0, 0, 0.08);
+}
+
+.empty-report {
+  background: rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(1.5px);
+}
+
+.report-paper {
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 1050px) {
+  body::before {
+    opacity: 0.11;
+    mask-image: linear-gradient(
+      180deg,
+      rgba(0,0,0,0.85) 0%,
+      rgba(0,0,0,0.45) 48%,
+      transparent 88%
+    );
+  }
+
+  body::after {
+    opacity: 0.45;
+    width: 120vw;
+  }
+}
+
+/* 인쇄 시 화면 배경은 완전히 제거하고, 보고서 내부 색상만 유지 */
+@media print {
+  html,
+  body,
+  .valuation-shell,
+  .report-area {
+    background: #fff !important;
+    background-image: none !important;
+  }
+
+  body::before,
+  body::after {
+    content: none !important;
+    display: none !important;
+    background: none !important;
+    box-shadow: none !important;
+  }
+
+  .report-paper {
+    background: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

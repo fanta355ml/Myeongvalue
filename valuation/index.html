@@ -5,21 +5,61 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
   <title>IP 간이감정 | 명밸류 파트너스</title>
-  <meta name="description" content="통합_가평가 시트의 값을 불러와 IP 간이감정 결과보고서를 생성합니다.">
+  <meta name="description" content="IP 간이감정 결과보고서를 빠르게 생성하고 발급 전 내용을 검토·수정할 수 있습니다.">
   <link rel="icon" href="../assets/logo.png">
   <link rel="stylesheet" href="valuation.css">
+  <link rel="stylesheet" href="valuation-ai-background.css">
+  <link rel="stylesheet" href="valuation-auth.css">
+  <link rel="stylesheet" href="valuation-chart.css">
+  <link rel="stylesheet" href="valuation-rating.css">
+  <link rel="stylesheet" href="valuation-seal.css">
 </head>
-<body>
+<body class="auth-locked">
+  <div id="agencyGate" class="agency-gate" aria-hidden="false">
+    <section class="agency-login-card" aria-labelledby="agencyLoginTitle">
+      <div class="agency-login-head">
+        <img src="../assets/logo.png" alt="명밸류 파트너스">
+        <div><strong>Quick Valuation</strong><span>AUTHORIZED ACCESS</span></div>
+      </div>
+      <h2 id="agencyLoginTitle">평가기관 선택</h2>
+      <p class="agency-login-desc">사용할 평가기관을 선택한 뒤 해당 기관의 암호를 입력해 주세요.</p>
+
+      <div class="agency-choice-grid" role="group" aria-label="평가기관 선택">
+        <button class="agency-choice is-selected" type="button" data-agency="myeongvalue" aria-pressed="true">
+          <img src="../assets/logo.png" alt="">
+          <strong>명밸류 파트너스</strong>
+          <small>MYEONG VALUE PARTNERS</small>
+        </button>
+        <button class="agency-choice" type="button" data-agency="kodata" aria-pressed="false">
+          <img src="../assets/kodata-logo.png" alt="">
+          <strong>한국평가데이터(주)</strong>
+        </button>
+      </div>
+
+      <label class="agency-password-label" for="agencyPassword">기관 암호</label>
+      <div class="agency-password-wrap">
+        <input id="agencyPassword" type="password" autocomplete="current-password" placeholder="암호 입력">
+        <button id="agencyEnterBtn" class="agency-enter" type="button">입장</button>
+      </div>
+      <div id="agencyLoginStatus" class="agency-login-status" aria-live="polite"></div>
+      <p class="agency-login-note">※ 현재 단계의 암호 기능은 시연·내부 사용을 위한 간편 진입 제한 방식입니다.</p>
+    </section>
+  </div>
+
   <header class="valuation-header">
-    <a class="brand" href="../"><img src="../assets/logo.png" alt="명밸류 파트너스"><span>명밸류 파트너스</span></a>
-    <a class="back-link" href="../">홈으로</a>
+    <a id="headerBrand" class="brand is-myeongvalue" href="../"><img id="headerBrandLogo" src="../assets/logo.png" alt="명밸류 파트너스"><span id="headerBrandName">명밸류 파트너스</span></a>
+    <div class="header-actions">
+      <span id="activeAgencyName" class="active-agency-name" hidden></span>
+      <button id="agencySwitchBtn" class="back-link agency-switch-link" type="button" hidden>기관 변경</button>
+      <a class="back-link" href="../">홈으로</a>
+    </div>
   </header>
 
   <main class="valuation-shell">
     <section class="intro-panel">
       <p class="kicker">15-MINUTE QUICK VALUATION</p>
       <h1>IP 간이감정 보고서 생성</h1>
-      <p class="lead">가평가 Excel의 <strong>통합_가평가</strong> 시트만 읽어 결과보고서를 구성합니다. 파일은 브라우저에서만 처리되며 별도 서버로 업로드하지 않습니다.</p>
+      <p class="lead">파일은 브라우저에서만 처리되며 별도 서버로 업로드되지 않습니다.</p>
 
       <div class="upload-card">
         <label class="upload-label" for="excelFile">
@@ -31,15 +71,40 @@
       </div>
 
       <div class="edit-card">
+        <label for="contactSelect">문의처 선택 <span>평가위원 불러오기</span></label>
+        <p id="contactGuide" class="field-guide">Excel 업로드 후 데이터처리 시트의 평가위원 정보를 불러옵니다.</p>
+        <select id="contactSelect" class="edit-input" disabled>
+          <option value="">Excel 업로드 후 선택할 수 있습니다.</option>
+        </select>
+      </div>
+
+      <div class="edit-card">
+        <label for="valuationAmountEdit">가치평가금액 <span>직접 수정 가능</span></label>
+        <p class="field-guide">Excel의 가치평가금액을 불러오며, 발급 전 최종 표시금액을 수정할 수 있습니다.</p>
+        <input id="valuationAmountEdit" class="edit-input" type="text" placeholder="예: 11.5~12억 원">
+      </div>
+
+      <div class="edit-card">
         <label for="specialNotes">특이사항 <span>직접 수정 가능</span></label>
         <p id="specialGuide" class="field-guide">※ 예비평가/IP지원신청 통과 관련 예상 이슈 및 필요조치 기재</p>
-        <textarea id="specialNotes" rows="7" placeholder="예: ■ 연차료 납부 필요&#10;■ 대표자 명의이전 필요"></textarea>
+        <textarea id="specialNotes" rows="7" placeholder="예: ▪ 연차료 납부 필요&#10;▪ 대표자 명의이전 필요"></textarea>
+      </div>
+
+      <div class="edit-card">
+        <label for="reviewOpinionEdit">검토의견 <span>직접 수정 가능</span></label>
+        <p class="field-guide">Excel의 검토의견을 자동으로 불러옵니다. 발급 전 문구를 자유롭게 수정할 수 있으며 기존 강조 규칙은 유지됩니다.</p>
+        <textarea id="reviewOpinionEdit" rows="13" placeholder="Excel 업로드 후 검토의견이 자동으로 표시됩니다."></textarea>
       </div>
 
       <div class="action-row">
         <button id="printBtn" class="button button-primary" type="button" disabled>보고서 인쇄 / PDF 저장</button>
+        <label id="sealOption" class="seal-option" for="includeSeal">
+          <input id="includeSeal" type="checkbox" checked>
+          <span>직인 포함</span>
+        </label>
         <button id="resetBtn" class="button" type="button">초기화</button>
       </div>
+      <p class="print-guide">※ 인쇄/PDF 저장 시 브라우저 인쇄 설정에서 <strong>배경 그래픽</strong>을 반드시 선택해 주세요.</p>
     </section>
 
     <section id="reportArea" class="report-area is-empty" aria-live="polite">
@@ -52,7 +117,14 @@
 
   <footer class="valuation-footer">© 명밸류 파트너스 · IP &amp; Technology Valuation</footer>
 
+  <script src="valuation-auth.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="valuation-notes-ui.js"></script>
   <script src="valuation.js"></script>
+  <script src="valuation-contact-map.js"></script>
+  <script src="valuation-chart-data.js"></script>
+  <script src="valuation-chart.js"></script>
+  <script src="valuation-rating.js"></script>
+  <script src="valuation-seal.js"></script>
 </body>
 </html>
