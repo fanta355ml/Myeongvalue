@@ -76,6 +76,7 @@ function applyAgency(agencyId) {
   const headerBrand = document.getElementById('headerBrand');
   const headerLogo = document.getElementById('headerBrandLogo');
   const headerName = document.getElementById('headerBrandName');
+  const activeAgencyName = document.getElementById('activeAgencyName');
   const footer = document.querySelector('.valuation-footer');
   const switchButton = document.getElementById('agencySwitchBtn');
 
@@ -87,7 +88,14 @@ function applyAgency(agencyId) {
     headerLogo.src = agency.logo;
     headerLogo.alt = agency.name;
   }
-  if (headerName) headerName.textContent = agency.name;
+  if (headerName) {
+    headerName.textContent = agency.name;
+    headerName.hidden = agency.id === 'kodata';
+  }
+  if (activeAgencyName) {
+    activeAgencyName.textContent = agency.id === 'kodata' ? agency.name : '';
+    activeAgencyName.hidden = agency.id !== 'kodata';
+  }
   if (footer) footer.textContent = `© ${agency.name} · IP & Technology Valuation`;
   if (switchButton) switchButton.hidden = false;
 
