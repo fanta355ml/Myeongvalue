@@ -28,7 +28,6 @@
     { area:'사업성', name:'수익성', definition:'대상기술제품의 현금흐름 추정기간 평균 영업이익률과 동업종 최근 평균 영업이익률을 비교하여 평가함.' },
   ];
 
-  const GRADE = {1:'매우 미흡',2:'미흡',3:'보통',4:'우수',5:'매우 우수'};
   const normalize = value => String(value ?? '').replace(/\s+/g,'').replace(/[·ㆍ/()\-]/g,'').trim();
   const isMark = value => /^(●|○|◉|■|✓|✔|v)$/i.test(String(value ?? '').trim());
 
@@ -107,9 +106,17 @@
     return ratings;
   }
 
-  function rowHtml(item) {
-    const scoreHtml = item.score ? `${item.score}점<br><span>${GRADE[item.score]}</span>` : '정보없음';
-    return `<div class="myeong-rating-row"><div class="myeong-rating-name">${item.name.replace(/([가-힣])([A-Z])/g,'$1 $2')}</div><div class="myeong-rating-definition">${item.definition}</div><div class="myeong-rating-score ${item.score ? '' : 'is-missing'}">${scoreHtml}</div></div>`;
+  const markCell = (item, score) => `<td class="myeong-rating-grade ${item.score === score ? 'is-selected' : ''}">${item.score === score ? '●' : ''}</td>`;
+
+  function areaTableHtml(area, items) {
+    return `<div class="myeong-rating-card">
+      <div class="myeong-rating-area-title">${area}</div>
+      <table class="myeong-rating-table">
+        <colgroup><col class="col-name"><col class="col-definition"><col class="col-grade"><col class="col-grade"><col class="col-grade"><col class="col-grade"><col class="col-grade"></colgroup>
+        <thead><tr><th>평가항목</th><th>정의</th><th>매우우수</th><th>우수</th><th>보통</th><th>미흡</th><th>매우미흡</th></tr></thead>
+        <tbody>${items.map(item => `<tr><td class="myeong-rating-name">${item.name}</td><td class="myeong-rating-definition">${item.definition}</td>${markCell(item,5)}${markCell(item,4)}${markCell(item,3)}${markCell(item,2)}${markCell(item,1)}</tr>`).join('')}</tbody>
+      </table>
+    </div>`;
   }
 
   function renderRatings() {
@@ -121,24 +128,15 @@
     if (!report) return;
 
     const areas = ['기술성','권리성','시장성','사업성'];
-    const cards = areas.map(area => {
-      const items = ratings.filter(item => item.area === area);
-      return `<div class="myeong-rating-card"><h3>${area}</h3>${items.map(rowHtml).join('')}</div>`;
-    });
-
     const section = document.createElement('section');
     section.className = 'report-section myeong-rating-section';
-    section.innerHTML = `<h2>3. 세부 평가등급</h2><div class="myeong-rating-layout"><div class="myeong-rating-column">${cards[0]}${cards[1]}</div><div class="myeong-rating-column">${cards[2]}${cards[3]}</div></div><div class="myeong-rating-scale"><strong>평점 기준</strong> · 1 매우 미흡 · 2 미흡 · 3 보통 · 4 우수 · 5 매우 우수</div><div class="myeong-rating-note">* 평가요인 정의는 IP담보평가 평가요약 기준을 적용하며, 점수는 업로드 Excel에서 확인 가능한 값을 표시함.</div>`;
+    section.innerHTML = `<h2>5. 세부 평가등급</h2>
+      <div class="myeong-rating-layout">${areas.map(area => areaTableHtml(area,ratings.filter(item => item.area === area))).join('')}</div>
+      <div class="myeong-rating-note">* 선택된 평가등급은 ●로 표시함. 평가요인 정의는 IP담보평가 평가요인 기준을 적용하며, 등급은 업로드 Excel에서 확인 가능한 값을 표시함.</div>`;
 
-    const chartSection = report.querySelector('.myeong-chart-section');
-    const summarySection = report.querySelector('.summary-grid')?.closest('.report-section');
-    (chartSection || summarySection)?.after(section);
-
-    report.querySelectorAll('.report-section > h2').forEach(h2 => {
-      const text = h2.textContent.trim();
-      if (/평가대상특허 제외 사유$/.test(text)) h2.textContent = '4. 평가대상특허 제외 사유';
-      if (/검토의견$/.test(text)) h2.textContent = '5. 검토의견';
-    });
+    const disclaimer = report.querySelector('.disclaimer');
+    if (disclaimer && disclaimer.parentElement === report) report.insertBefore(section, disclaimer);
+    else report.appendChild(section);
   }
 
   let renderQueued = false;
