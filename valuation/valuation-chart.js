@@ -1,5 +1,5 @@
 /* Myeongvalue-only value indicator charts
-   - Main 1: projected sales after daily proration
+   - Main 1: projected sales over the valuation cash-flow period
    - Main 2: annual IP value contribution (discounted after-tax royalty × IP validity)
    - Sub left: recent yearly sales
    - Sub right: operating margin comparison (company vs industry)
@@ -134,8 +134,8 @@
       <div class="myeong-chart-card myeong-chart-card-main">
         <div class="myeong-chart-head">
           <div>
-            <div class="myeong-chart-title">차년도별 추정매출액(일할조정 후)</div>
-            <div class="myeong-chart-sub">현금흐름 추정기간 동안 가치산정에 적용되는 차년도별 일할계산 후 매출액임.</div>
+            <div class="myeong-chart-title">차년도별 추정매출액</div>
+            <div class="myeong-chart-sub">현금흐름 추정기간 동안 가치산정에 적용되는 차년도별 매출액임.</div>
           </div>
         </div>
         ${makeBarLineSvg(series, {
@@ -146,7 +146,7 @@
           unitText: '단위: 억 원',
           ariaLabel: '차년도별 추정매출액 추이',
         })}
-        <div class="myeong-chart-source">* 출처: 업로드 Excel 가평가시트 17행(차년도별 일할계산).</div>
+        <div class="myeong-chart-source">* 출처: 업로드 Excel 가평가시트 17행.</div>
       </div>`;
   }
 
@@ -218,17 +218,21 @@
     const meta = window.quickValuationOperatingMarginMeta || null;
     if (series.length < 2) return '';
 
+    const periodText = meta?.comparisonYears?.length
+      ? `${meta.comparisonYears[0]}~${meta.comparisonYears.at(-1)}년 공통기간`
+      : '공통기간';
+
     return `
       <div class="myeong-chart-card myeong-chart-card-sub">
         <div class="myeong-chart-head">
           <div>
             <div class="myeong-chart-title">년도별 영업이익률 비교</div>
-            <div class="myeong-chart-sub">사업화주체와 동업종의 동일기간 수익성 비교.</div>
+            <div class="myeong-chart-sub">사업화주체와 동업종의 ${periodText} 수익성 비교.</div>
           </div>
           <div class="myeong-margin-legend"><span class="is-company">사업화주체</span><span class="is-industry">동업종</span></div>
         </div>
         ${makeOperatingMarginSvg(series)}
-        <div class="myeong-chart-source">* 동업종 기준: ${meta?.industrySource || '업로드 Excel 입력값'}.</div>
+        <div class="myeong-chart-source">* 출처: 업로드 Excel 가평가시트 및 업종평균 시트.</div>
       </div>`;
   }
 
