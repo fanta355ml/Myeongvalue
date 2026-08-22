@@ -68,6 +68,27 @@ function applyReportAgencyBrand() {
     <div><strong>${agency.reportName}</strong><span>${agency.subline}</span></div>`;
 }
 
+function applyReportPolish() {
+  const agency = window.getQuickValuationAgencyConfig();
+
+  document.querySelectorAll('.top-summary > div').forEach(row => {
+    const dt = row.querySelector('dt');
+    const dd = row.querySelector('dd');
+    if (!dt || !dd || dt.textContent.trim() !== '평가기관') return;
+
+    const fixedInstitution = agency.id === 'kodata' ? '한국평가데이터(주)' : '명밸류 파트너스';
+    if (dd.textContent.trim() !== fixedInstitution) dd.textContent = fixedInstitution;
+  });
+
+  const specialContent = document.querySelector('.special-content');
+  if (specialContent) {
+    specialContent.childNodes.forEach(node => {
+      if (node.nodeType !== Node.TEXT_NODE || !node.nodeValue?.includes('■')) return;
+      node.nodeValue = node.nodeValue.replace(/(^|\n)(\s*)■\s*/g, '$1$2▪ ');
+    });
+  }
+}
+
 function applyAgency(agencyId) {
   const agency = QUICK_VALUATION_AGENCIES[agencyId];
   if (!agency) return;
@@ -100,6 +121,7 @@ function applyAgency(agencyId) {
   if (switchButton) switchButton.hidden = false;
 
   applyReportAgencyBrand();
+  applyReportPolish();
   document.dispatchEvent(new CustomEvent('quickvaluation:agencychange', { detail: agency }));
 }
 
@@ -160,10 +182,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const reportArea = document.getElementById('reportArea');
   if (reportArea) {
-    const observer = new MutationObserver(() => applyReportAgencyBrand());
+    const observer = new MutationObserver(() => {
+      applyReportAgencyBrand();
+      applyReportPolish();
+    });
     observer.observe(reportArea, { childList: true, subtree: true });
   }
 
-  document.addEventListener('quickvaluation:agencychange', applyReportAgencyBrand);
+  document.addEventListener('quickvaluation:agencychange', () => {
+    applyReportAgencyBrand();
+    applyReportPolish();
+  });
   setAgencyChoice('myeongvalue');
 });
