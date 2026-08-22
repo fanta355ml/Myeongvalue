@@ -1,4 +1,4 @@
-/* Myeongvalue-only detailed evaluation factor summary
+/* Quick Valuation detailed evaluation factor summary
    Scores are detected from the uploaded workbook by matching factor names and nearby 1~5 scores / rating marks.
 */
 (() => {
@@ -51,8 +51,7 @@
 
   function scoreFromHeader(rows, rowIndex, markCol) {
     for (let r = Math.max(0,rowIndex-4); r < rowIndex; r += 1) {
-      const header = rows[r] || [];
-      const value = String(header[markCol] ?? '').trim();
+      const value = String((rows[r] || [])[markCol] ?? '').trim();
       const n = Number(value);
       if (Number.isFinite(n) && n >= 1 && n <= 5) return n;
       const label = normalize(value);
@@ -83,7 +82,7 @@
         }
         for (let cc = c + 1; cc <= Math.min(row.length - 1, c + 12); cc += 1) {
           if (!isMark(row[cc])) continue;
-          const score = scoreFromHeader(rows, r, cc);
+          const score = scoreFromHeader(rows,r,cc);
           if (score) return score;
         }
       }
@@ -92,7 +91,7 @@
   }
 
   function extractRatings(workbook) {
-    const ratings = FACTORS.map(factor => ({...factor, score:null}));
+    const ratings = FACTORS.map(factor => ({...factor,score:null}));
     workbook.SheetNames.forEach(sheetName => {
       const sheet = workbook.Sheets[sheetName];
       if (!sheet) return;
@@ -106,36 +105,25 @@
     return ratings;
   }
 
-  const markCell = (item, score) => `<td class="myeong-rating-grade ${item.score === score ? 'is-selected' : ''}">${item.score === score ? '●' : ''}</td>`;
+  const markCell = (item,score) => `<td class="myeong-rating-grade ${item.score === score ? 'is-selected' : ''}">${item.score === score ? '●' : ''}</td>`;
 
-  function areaTableHtml(area, items) {
-    return `<div class="myeong-rating-card">
-      <div class="myeong-rating-area-title">${area}</div>
-      <table class="myeong-rating-table">
-        <colgroup><col class="col-name"><col class="col-definition"><col class="col-grade"><col class="col-grade"><col class="col-grade"><col class="col-grade"><col class="col-grade"></colgroup>
-        <thead><tr><th>평가항목</th><th>정의</th><th>매우우수</th><th>우수</th><th>보통</th><th>미흡</th><th>매우미흡</th></tr></thead>
-        <tbody>${items.map(item => `<tr><td class="myeong-rating-name">${item.name}</td><td class="myeong-rating-definition">${item.definition}</td>${markCell(item,5)}${markCell(item,4)}${markCell(item,3)}${markCell(item,2)}${markCell(item,1)}</tr>`).join('')}</tbody>
-      </table>
-    </div>`;
+  function areaTableHtml(area,items) {
+    return `<div class="myeong-rating-card"><div class="myeong-rating-area-title">${area}</div><table class="myeong-rating-table"><colgroup><col class="col-name"><col class="col-definition"><col class="col-grade"><col class="col-grade"><col class="col-grade"><col class="col-grade"><col class="col-grade"></colgroup><thead><tr><th>평가항목</th><th>정의</th><th>매우우수</th><th>우수</th><th>보통</th><th>미흡</th><th>매우미흡</th></tr></thead><tbody>${items.map(item => `<tr><td class="myeong-rating-name">${item.name}</td><td class="myeong-rating-definition">${item.definition}</td>${markCell(item,5)}${markCell(item,4)}${markCell(item,3)}${markCell(item,2)}${markCell(item,1)}</tr>`).join('')}</tbody></table></div>`;
   }
 
   function renderRatings() {
     document.querySelector('.myeong-rating-section')?.remove();
-    if (window.getQuickValuationAgencyConfig?.().id !== 'myeongvalue') return;
     const ratings = window.quickValuationDetailedRatings;
     if (!Array.isArray(ratings) || !ratings.length) return;
     const report = document.querySelector('.report-paper');
     if (!report) return;
 
-    const areas = ['기술성','권리성','시장성','사업성'];
     const section = document.createElement('section');
     section.className = 'report-section myeong-rating-section';
-    section.innerHTML = `<h2>5. 세부 평가등급</h2>
-      <div class="myeong-rating-layout">${areas.map(area => areaTableHtml(area,ratings.filter(item => item.area === area))).join('')}</div>
-      <div class="myeong-rating-note">* 선택된 평가등급은 ●로 표시함. 평가요인 정의는 IP담보평가 평가요인 기준을 적용하며, 등급은 업로드 Excel에서 확인 가능한 값을 표시함.</div>`;
+    section.innerHTML = `<h2>5. 세부 평가등급</h2><div class="myeong-rating-layout">${['기술성','권리성','시장성','사업성'].map(area => areaTableHtml(area,ratings.filter(item => item.area === area))).join('')}</div><div class="myeong-rating-note">* 선택된 평가등급은 ●로 표시함. 평가요인 정의는 IP담보평가 평가요인 기준을 적용하며, 등급은 업로드 Excel에서 확인 가능한 값을 표시함.</div>`;
 
     const disclaimer = report.querySelector('.disclaimer');
-    if (disclaimer && disclaimer.parentElement === report) report.insertBefore(section, disclaimer);
+    if (disclaimer && disclaimer.parentElement === report) report.insertBefore(section,disclaimer);
     else report.appendChild(section);
   }
 
@@ -143,15 +131,12 @@
   const scheduleRender = () => {
     if (renderQueued) return;
     renderQueued = true;
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      renderQueued = false;
-      renderRatings();
-    }));
+    requestAnimationFrame(() => requestAnimationFrame(() => { renderQueued = false; renderRatings(); }));
   };
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded',() => {
     const fileInput = document.getElementById('excelFile');
-    fileInput?.addEventListener('change', async event => {
+    fileInput?.addEventListener('change',async event => {
       const file = event.target.files?.[0];
       if (!file || typeof XLSX === 'undefined') return;
       try {
@@ -164,18 +149,13 @@
       }
       scheduleRender();
     });
-
     document.getElementById('resetBtn')?.addEventListener('click',() => {
       window.quickValuationDetailedRatings = null;
       document.querySelector('.myeong-rating-section')?.remove();
     });
     document.addEventListener('quickvaluation:agencychange',scheduleRender);
     document.addEventListener('quickvaluation:chartdata',scheduleRender);
-
     const reportArea = document.getElementById('reportArea');
-    if (reportArea) {
-      const observer = new MutationObserver(scheduleRender);
-      observer.observe(reportArea,{childList:true,subtree:false});
-    }
+    if (reportArea) new MutationObserver(scheduleRender).observe(reportArea,{childList:true,subtree:false});
   });
 })();
