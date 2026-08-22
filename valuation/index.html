@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="valuation-auth.css">
   <link rel="stylesheet" href="valuation-chart.css">
   <link rel="stylesheet" href="valuation-rating.css">
+  <link rel="stylesheet" href="valuation-seal.css">
 </head>
 <body class="auth-locked">
   <div id="agencyGate" class="agency-gate" aria-hidden="false">
@@ -97,6 +98,10 @@
 
       <div class="action-row">
         <button id="printBtn" class="button button-primary" type="button" disabled>보고서 인쇄 / PDF 저장</button>
+        <label id="sealOption" class="seal-option" for="includeSeal">
+          <input id="includeSeal" type="checkbox" checked>
+          <span>직인 포함</span>
+        </label>
         <button id="resetBtn" class="button" type="button">초기화</button>
       </div>
       <p class="print-guide">※ 인쇄/PDF 저장 시 브라우저 인쇄 설정에서 <strong>배경 그래픽</strong>을 반드시 선택해 주세요.</p>
@@ -120,5 +125,6 @@
   <script src="valuation-chart-data.js"></script>
   <script src="valuation-chart.js"></script>
   <script src="valuation-rating.js"></script>
+  <script src="valuation-seal.js"></script>
 </body>
 </html>
