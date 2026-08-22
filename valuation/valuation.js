@@ -114,8 +114,18 @@ function buildPatentTable(rows) {
 
 function buildExclusionTable(rows) {
   if (!rows.length) return '<tr><td>해당사항 없음</td><td>-</td></tr>';
-  return rows.map((row) => `
-    <tr><td>${escapeHtml(displayOrDash(row.detail))}</td><td>${escapeHtml(displayOrDash(row.reason))}</td></tr>`).join('');
+  return rows.map((row) => {
+    const detail = displayOrDash(row.detail);
+    const reason = displayOrDash(row.reason);
+    const hasExclusion = clean(row.detail) !== '' && clean(row.detail) !== '해당사항 없음';
+    const detailHtml = escapeHtml(detail);
+    const reasonHtml = escapeHtml(reason);
+    return `
+      <tr>
+        <td>${hasExclusion ? `<strong>${detailHtml}</strong>` : detailHtml}</td>
+        <td>${hasExclusion ? `<strong>${reasonHtml}</strong>` : reasonHtml}</td>
+      </tr>`;
+  }).join('');
 }
 
 function highlightReviewLine(line) {
