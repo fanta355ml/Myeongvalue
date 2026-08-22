@@ -44,6 +44,20 @@ function setAgencyChoice(agencyId) {
   if (status) status.textContent = '';
 }
 
+function applyReportAgencyBrand() {
+  const agency = window.getQuickValuationAgencyConfig();
+  const brand = document.querySelector('.report-brand');
+  if (!brand) return;
+  if (brand.dataset.agency === agency.id) return;
+
+  brand.dataset.agency = agency.id;
+  brand.classList.toggle('is-kodata', agency.id === 'kodata');
+  brand.classList.toggle('is-myeongvalue', agency.id === 'myeongvalue');
+  brand.innerHTML = `
+    <img src="${agency.logo}" alt="${agency.name}">
+    <div><strong>${agency.reportName}</strong><span>${agency.subline}</span></div>`;
+}
+
 function applyAgency(agencyId) {
   const agency = QUICK_VALUATION_AGENCIES[agencyId];
   if (!agency) return;
@@ -67,6 +81,7 @@ function applyAgency(agencyId) {
   if (footer) footer.textContent = `© ${agency.name} · IP & Technology Valuation`;
   if (switchButton) switchButton.hidden = false;
 
+  applyReportAgencyBrand();
   document.dispatchEvent(new CustomEvent('quickvaluation:agencychange', { detail: agency }));
 }
 
@@ -125,5 +140,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('agencySwitchBtn')?.addEventListener('click', openAgencyGate);
 
+  const reportArea = document.getElementById('reportArea');
+  if (reportArea) {
+    const observer = new MutationObserver(() => applyReportAgencyBrand());
+    observer.observe(reportArea, { childList: true, subtree: true });
+  }
+
+  document.addEventListener('quickvaluation:agencychange', applyReportAgencyBrand);
   setAgencyChoice('myeongvalue');
 });
