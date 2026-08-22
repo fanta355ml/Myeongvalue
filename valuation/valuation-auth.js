@@ -5,7 +5,7 @@ const QUICK_VALUATION_AGENCIES = {
     reportName: '명밸류 파트너스',
     subline: 'MYEONG VALUE PARTNERS · IP & TECHNOLOGY VALUATION',
     logo: '../assets/logo.png',
-    passwordHash: '477a31e51015f799af7289d7b9e0b1c481656ae0f275efcf2da85cb08d36a56e'
+    passwordHash: '4f89740697702b3b64effcb361b9aa3c647ac0a04b192c3b35f096077d23afe6'
   },
   kodata: {
     id: 'kodata',
@@ -13,7 +13,7 @@ const QUICK_VALUATION_AGENCIES = {
     reportName: '',
     subline: '',
     logo: '../assets/kodata-logo.png',
-    passwordHash: '0cf1091f5c1d9dbc09e9753f162003f2cc0355ccd8c992e3986c1855821512ab'
+    passwordHash: 'd3de1dc6471f5b07488edc0b48360dea9b59ddf677d25cb29c9b676dfdcb4085'
   }
 };
 
