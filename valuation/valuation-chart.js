@@ -161,24 +161,25 @@
       <div class="myeong-chart-card myeong-chart-card-sub">
         <div class="myeong-chart-head"><div><div class="myeong-chart-title">최근 매출액 추이</div><div class="myeong-chart-sub">최근 연도별 매출액 흐름.</div></div>${growthText ? `<div class="myeong-chart-badge">CAGR ${growthText}</div>` : ''}</div>
         ${makeBarLineSvg(series,{height:164,barWidth:68,valueDigits:2,unitText:'단위: 억 원',ariaLabel:'최근 매출액 추이'})}
-        <div class="myeong-chart-source">* 출처: 업로드 Excel 검토의견 기재값.</div>
+        <div class="myeong-chart-source">* 출처: CRETOP 기업정보 검색결과.</div>
       </div>`;
   }
 
   function buildOperatingMarginCard() {
     const series = Array.isArray(window.quickValuationOperatingMarginSeries) ? window.quickValuationOperatingMarginSeries : [];
     const meta = window.quickValuationOperatingMarginMeta || null;
+    const source = meta?.source || 'CRETOP 기업정보 검색결과, 한국과학기술정보연구원(StarValue)';
     if (series.length < 1 || meta?.available === false) {
-      return `<div class="myeong-chart-card myeong-chart-card-sub"><div class="myeong-chart-head"><div><div class="myeong-chart-title">영업이익률 비교</div><div class="myeong-chart-sub">사업화주체와 동업종의 수익성 비교.</div></div></div><div class="myeong-chart-empty">정보없음</div></div>`;
+      return `<div class="myeong-chart-card myeong-chart-card-sub"><div class="myeong-chart-head"><div><div class="myeong-chart-title">영업이익률 비교</div><div class="myeong-chart-sub">사업화주체와 동업종의 수익성 비교.</div></div></div><div class="myeong-chart-empty">정보없음</div><div class="myeong-chart-source">* 출처: ${source}.</div></div>`;
     }
 
     if (Number.isFinite(meta?.companyAverage) && Number.isFinite(meta?.industryAverage)) {
-      const label = meta.periodCount === 3 ? '최근 3개년 평균' : meta.periodCount === 2 ? '최근 2개년 평균' : '최근 1개년';
+      const label = meta.periodLabel || (meta.periodCount === 3 ? '최근 3개년 평균' : meta.periodCount === 2 ? '최근 2개년 평균' : '최근 1개년');
       const avgSeries = [{ label:'사업화주체',value:meta.companyAverage },{ label:'동업종',value:meta.industryAverage }];
-      return `<div class="myeong-chart-card myeong-chart-card-sub"><div class="myeong-chart-head"><div><div class="myeong-chart-title">영업이익률 비교</div><div class="myeong-chart-sub">${label} 영업이익률 비교.</div></div></div>${makeBarLineSvg(avgSeries,{height:164,barWidth:76,valueDigits:1,unitText:'단위: %',ariaLabel:'사업화주체와 동업종 평균 영업이익률 비교'})}<div class="myeong-chart-source">* 출처: 업로드 Excel 업종평균!J22:N25.</div></div>`;
+      return `<div class="myeong-chart-card myeong-chart-card-sub"><div class="myeong-chart-head"><div><div class="myeong-chart-title">영업이익률 비교</div><div class="myeong-chart-sub">${label} 영업이익률 비교.</div></div></div>${makeBarLineSvg(avgSeries,{height:164,barWidth:76,valueDigits:2,unitText:'단위: %',ariaLabel:'사업화주체와 동업종 평균 영업이익률 비교'})}<div class="myeong-chart-source">* 출처: ${source}.</div></div>`;
     }
 
-    return `<div class="myeong-chart-card myeong-chart-card-sub"><div class="myeong-chart-head"><div><div class="myeong-chart-title">영업이익률 비교</div><div class="myeong-chart-sub">사업화주체와 동업종의 수익성 비교.</div></div><div class="myeong-margin-legend"><span class="is-company">사업화주체</span><span class="is-industry">동업종</span></div></div>${makeOperatingMarginSvg(series)}<div class="myeong-chart-source">* 출처: 업로드 Excel 업종평균!J22:N25.</div></div>`;
+    return `<div class="myeong-chart-card myeong-chart-card-sub"><div class="myeong-chart-head"><div><div class="myeong-chart-title">영업이익률 비교</div><div class="myeong-chart-sub">사업화주체와 동업종의 수익성 비교.</div></div><div class="myeong-margin-legend"><span class="is-company">사업화주체</span><span class="is-industry">동업종</span></div></div>${makeOperatingMarginSvg(series)}<div class="myeong-chart-source">* 출처: ${source}.</div></div>`;
   }
 
   function findSectionByTitle(report, pattern) {
