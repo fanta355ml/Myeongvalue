@@ -89,6 +89,7 @@ function applyAgency(agencyId) {
   const agency = QUICK_VALUATION_AGENCIES[agencyId];
   if (!agency) return;
   window.quickValuationAgency = agency;
+  document.body.dataset.agency = agency.id;
 
   const headerBrand = document.getElementById('headerBrand');
   const headerLogo = document.getElementById('headerBrandLogo');
