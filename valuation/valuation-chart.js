@@ -236,6 +236,13 @@
       </div>`;
   }
 
+  function findSectionByTitle(report, pattern) {
+    return [...report.querySelectorAll('.report-section')].find(section => {
+      const h2 = section.querySelector(':scope > h2');
+      return h2 && pattern.test(h2.textContent.trim());
+    }) || null;
+  }
+
   function renderMyeongCharts() {
     document.querySelector('.myeong-chart-section')?.remove();
     if (getAgencyId() !== 'myeongvalue') return;
@@ -243,6 +250,21 @@
     const report = document.querySelector('.report-paper');
     const summaryGrid = report?.querySelector('.summary-grid');
     if (!report || !summaryGrid) return;
+
+    const summarySection = summaryGrid.closest('.report-section');
+    const exclusionSection = findSectionByTitle(report, /평가대상특허 제외 사유$/);
+    const reviewSection = findSectionByTitle(report, /검토의견$/);
+
+    if (exclusionSection && summarySection && exclusionSection !== summarySection.previousElementSibling) {
+      report.insertBefore(exclusionSection, summarySection);
+    }
+
+    const exclusionHeading = exclusionSection?.querySelector(':scope > h2');
+    const summaryHeading = summarySection?.querySelector(':scope > h2');
+    const reviewHeading = reviewSection?.querySelector(':scope > h2');
+    if (exclusionHeading) exclusionHeading.textContent = '1. 평가대상특허 제외 사유';
+    if (summaryHeading) summaryHeading.textContent = '2. 평가요약';
+    if (reviewHeading) reviewHeading.textContent = '4. 검토의견';
 
     const projectedSalesCard = buildProjectedSalesCard();
     const annualCard = buildAnnualValueCard();
@@ -253,22 +275,14 @@
     const section = document.createElement('section');
     section.className = 'report-section myeong-chart-section';
     section.innerHTML = `
-      <h2>2. 핵심 가치지표</h2>
+      <h2>3. 핵심 가치지표</h2>
       <div class="myeong-chart-stack myeong-chart-stack-main">
         ${projectedSalesCard}
         ${annualCard}
       </div>
       ${(salesCard || marginCard) ? `<div class="myeong-chart-grid-two">${salesCard}${marginCard}</div>` : ''}`;
 
-    const summarySection = summaryGrid.closest('.report-section');
-    summarySection?.after(section);
-
-    const headings = report.querySelectorAll('.report-section > h2');
-    headings.forEach(h2 => {
-      const text = h2.textContent.trim();
-      if (text === '2. 평가대상특허 제외 사유') h2.textContent = '3. 평가대상특허 제외 사유';
-      if (text === '3. 검토의견') h2.textContent = '4. 검토의견';
-    });
+    summarySection.after(section);
   }
 
   function scheduleRender() {
