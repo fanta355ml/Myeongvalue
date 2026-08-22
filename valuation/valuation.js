@@ -112,12 +112,15 @@ function buildExclusionTable(rows) {
 function highlightReviewLine(line) {
   let html = escapeHtml(line);
 
-  // 최종 가치금액: 예) 11.5~12억 원
-  html = html.replace(/(\d+(?:\.\d+)?(?:\s*~\s*\d+(?:\.\d+)?)?\s*억\s*원)/g, '<strong>$1</strong>');
-
-  // 평가대상특허 적용제품/사업화제품 핵심구문
+  // 최종 가치금액 문장에서만 금액 강조. 연도별 매출액의 '억 원'은 강조하지 않음.
   html = html.replace(
-    /(평가대상특허\s*(?:관련\s*)?(?:적용제품|사업화제품)은\s*[^.。!?]*(?:이다|임|것임))/g,
+    /(가치금액은\s*)(\d+(?:\.\d+)?(?:\s*~\s*\d+(?:\.\d+)?)?\s*억\s*원)/g,
+    '$1<strong>$2</strong>'
+  );
+
+  // '평가대상특허 제품(솔루션)은 OOOOO' 부분만 강조
+  html = html.replace(
+    /(평가대상특허\s*제품\(솔루션\)은\s*.*?)(?=에\s*관한|에\s*해당|으로서|이며|이고|임\.?|것임\.?|$)/g,
     '<strong>$1</strong>'
   );
 
