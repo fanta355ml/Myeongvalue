@@ -14,8 +14,6 @@ const clean = (value) => {
   return text === '#NAME?' || text === '#VALUE!' || text === '#REF!' ? '' : text;
 };
 
-// Excel 화면에 보이는 서식값(.w)을 우선 사용한다.
-// 퍼센트, 금액, 날짜, 단위 등이 원본 Excel 표시형식과 동일하게 출력된다.
 const cell = (sheet, addr) => {
   const target = sheet[addr];
   if (!target) return '';
@@ -111,6 +109,17 @@ function buildExclusionTable(rows) {
     <tr><td>${escapeHtml(displayOrDash(row.detail))}</td><td>${escapeHtml(displayOrDash(row.reason))}</td></tr>`).join('');
 }
 
+function buildReviewLines(text) {
+  const normalized = clean(text);
+  if (!normalized) return '<div class="review-line">-</div>';
+  return normalized
+    .split(/\r?\n/)
+    .map(line => clean(line))
+    .filter(Boolean)
+    .map(line => `<div class="review-line">${escapeHtml(line)}</div>`)
+    .join('');
+}
+
 function renderReport() {
   if (!currentData) return;
   const notes = notesInput.value;
@@ -166,9 +175,9 @@ function renderReport() {
         <table class="report-table"><thead><tr><th>제외특허 내역</th><th>제외 사유</th></tr></thead><tbody>${buildExclusionTable(currentData.exclusions)}</tbody></table>
       </section>
 
-      <section class="report-section">
+      <section class="report-section review-section">
         <h2>3. 검토의견</h2>
-        <div class="review-copy">${escapeHtml(displayOrDash(currentData.reviewOpinion))}</div>
+        <div class="review-copy">${buildReviewLines(currentData.reviewOpinion)}</div>
       </section>
 
       <div class="disclaimer">${escapeHtml(currentData.disclaimer || '※ 본 간이감정 결과는 본 평가 시 산정변수 및 실사결과 등에 따라 변동될 수 있습니다.')}</div>
