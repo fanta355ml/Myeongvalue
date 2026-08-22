@@ -1,6 +1,8 @@
 const fileInput = document.getElementById('excelFile');
 const fileStatus = document.getElementById('fileStatus');
 const notesInput = document.getElementById('specialNotes');
+const reviewInput = document.getElementById('reviewOpinionEdit');
+const valuationAmountInput = document.getElementById('valuationAmountEdit');
 const guideEl = document.getElementById('specialGuide');
 const reportArea = document.getElementById('reportArea');
 const printBtn = document.getElementById('printBtn');
@@ -147,6 +149,8 @@ function buildReviewLines(text) {
 function renderReport() {
   if (!currentData) return;
   const notes = notesInput.value;
+  const reviewOpinion = reviewInput.value;
+  const valuationAmount = valuationAmountInput.value;
   reportArea.classList.remove('is-empty');
   reportArea.innerHTML = `
     <article class="report-paper">
@@ -161,7 +165,7 @@ function renderReport() {
         <div><dt>사업자번호</dt><dd>${escapeHtml(displayOrDash(currentData.businessNo))}</dd></div>
         <div><dt>평가기관</dt><dd>${escapeHtml(displayOrDash(currentData.institution))}</dd></div>
         <div><dt>문의처</dt><dd>${escapeHtml(displayOrDash(currentData.contact))}</dd></div>
-        <div class="value-box"><dt>가치평가금액</dt><dd>${escapeHtml(displayOrDash(currentData.valuationAmount))}</dd></div>
+        <div class="value-box"><dt>가치평가금액</dt><dd>${escapeHtml(displayOrDash(valuationAmount))}</dd></div>
       </dl>
 
       <section class="report-section">
@@ -201,7 +205,7 @@ function renderReport() {
 
       <section class="report-section review-section">
         <h2>3. 검토의견</h2>
-        <div class="review-copy">${buildReviewLines(currentData.reviewOpinion)}</div>
+        <div class="review-copy">${buildReviewLines(reviewOpinion)}</div>
       </section>
 
       <div class="disclaimer">${escapeHtml(currentData.disclaimer || '※ 본 간이감정 결과는 본 평가 시 산정변수 및 실사결과 등에 따라 변동될 수 있습니다.')}</div>
@@ -218,6 +222,8 @@ fileInput.addEventListener('change', async (event) => {
     const workbook = XLSX.read(buffer, { type: 'array', cellDates: false, cellNF: true });
     currentData = readWorkbookData(workbook);
     notesInput.value = currentData.specialNotes || '';
+    reviewInput.value = currentData.reviewOpinion || '';
+    valuationAmountInput.value = currentData.valuationAmount || '';
     guideEl.textContent = `※ ${currentData.specialGuide}`;
     renderReport();
     printBtn.disabled = false;
@@ -233,8 +239,10 @@ fileInput.addEventListener('change', async (event) => {
   }
 });
 
-notesInput.addEventListener('input', () => {
-  if (currentData) renderReport();
+[notesInput, reviewInput, valuationAmountInput].forEach((input) => {
+  input.addEventListener('input', () => {
+    if (currentData) renderReport();
+  });
 });
 
 printBtn.addEventListener('click', () => window.print());
@@ -242,6 +250,8 @@ printBtn.addEventListener('click', () => window.print());
 resetBtn.addEventListener('click', () => {
   fileInput.value = '';
   notesInput.value = '';
+  reviewInput.value = '';
+  valuationAmountInput.value = '';
   currentData = null;
   printBtn.disabled = true;
   fileStatus.textContent = '파일을 선택하면 자동으로 미리보기를 생성합니다.';
