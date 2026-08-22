@@ -9,11 +9,47 @@
   <link rel="icon" href="../assets/logo.png">
   <link rel="stylesheet" href="valuation.css">
   <link rel="stylesheet" href="valuation-ai-background.css">
+  <link rel="stylesheet" href="valuation-auth.css">
 </head>
-<body>
+<body class="auth-locked">
+  <div id="agencyGate" class="agency-gate" aria-hidden="false">
+    <section class="agency-login-card" aria-labelledby="agencyLoginTitle">
+      <div class="agency-login-head">
+        <img src="../assets/logo.png" alt="명밸류 파트너스">
+        <div><strong>Quick Valuation</strong><span>AUTHORIZED ACCESS</span></div>
+      </div>
+      <h2 id="agencyLoginTitle">평가기관 선택</h2>
+      <p class="agency-login-desc">사용할 평가기관을 선택한 뒤 해당 기관의 암호를 입력해 주세요.</p>
+
+      <div class="agency-choice-grid" role="group" aria-label="평가기관 선택">
+        <button class="agency-choice is-selected" type="button" data-agency="myeongvalue" aria-pressed="true">
+          <img src="../assets/logo.png" alt="">
+          <strong>명밸류 파트너스</strong>
+          <small>MYEONG VALUE PARTNERS</small>
+        </button>
+        <button class="agency-choice" type="button" data-agency="kodata" aria-pressed="false">
+          <img src="../assets/kodata-logo.png" alt="">
+          <strong>한국평가데이터(주)</strong>
+          <small>KoDATA</small>
+        </button>
+      </div>
+
+      <label class="agency-password-label" for="agencyPassword">기관 암호</label>
+      <div class="agency-password-wrap">
+        <input id="agencyPassword" type="password" autocomplete="current-password" placeholder="암호 입력">
+        <button id="agencyEnterBtn" class="agency-enter" type="button">입장</button>
+      </div>
+      <div id="agencyLoginStatus" class="agency-login-status" aria-live="polite"></div>
+      <p class="agency-login-note">※ 현재 단계의 암호 기능은 시연·내부 사용을 위한 간편 진입 제한 방식입니다.</p>
+    </section>
+  </div>
+
   <header class="valuation-header">
-    <a class="brand" href="../"><img src="../assets/logo.png" alt="명밸류 파트너스"><span>명밸류 파트너스</span></a>
-    <a class="back-link" href="../">홈으로</a>
+    <a id="headerBrand" class="brand is-myeongvalue" href="../"><img id="headerBrandLogo" src="../assets/logo.png" alt="명밸류 파트너스"><span id="headerBrandName">명밸류 파트너스</span></a>
+    <div class="header-actions">
+      <button id="agencySwitchBtn" class="back-link agency-switch-link" type="button" hidden>기관 변경</button>
+      <a class="back-link" href="../">홈으로</a>
+    </div>
   </header>
 
   <main class="valuation-shell">
@@ -66,6 +102,7 @@
 
   <footer class="valuation-footer">© 명밸류 파트너스 · IP &amp; Technology Valuation</footer>
 
+  <script src="valuation-auth.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="valuation.js"></script>
 </body>
