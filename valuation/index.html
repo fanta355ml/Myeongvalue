@@ -31,9 +31,21 @@
       </div>
 
       <div class="edit-card">
+        <label for="valuationAmountEdit">가치평가금액 <span>직접 수정 가능</span></label>
+        <p class="field-guide">Excel의 가치평가금액을 불러오며, 발급 전 최종 표시금액을 수정할 수 있습니다.</p>
+        <input id="valuationAmountEdit" class="edit-input" type="text" placeholder="예: 11.5~12억 원">
+      </div>
+
+      <div class="edit-card">
         <label for="specialNotes">특이사항 <span>직접 수정 가능</span></label>
         <p id="specialGuide" class="field-guide">※ 예비평가/IP지원신청 통과 관련 예상 이슈 및 필요조치 기재</p>
         <textarea id="specialNotes" rows="7" placeholder="예: ■ 연차료 납부 필요&#10;■ 대표자 명의이전 필요"></textarea>
+      </div>
+
+      <div class="edit-card">
+        <label for="reviewOpinionEdit">검토의견 <span>직접 수정 가능</span></label>
+        <p class="field-guide">Excel의 검토의견을 자동으로 불러옵니다. 발급 전 문구를 자유롭게 수정할 수 있으며 기존 강조 규칙은 유지됩니다.</p>
+        <textarea id="reviewOpinionEdit" rows="13" placeholder="Excel 업로드 후 검토의견이 자동으로 표시됩니다."></textarea>
       </div>
 
       <div class="action-row">
