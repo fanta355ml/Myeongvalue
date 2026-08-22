@@ -1,10 +1,13 @@
 /* Quick Valuation chart data reader
    가평가시트
-   - D17:R17: 현금흐름 추정기간의 차년도별 일할계산 후 매출액
+   - D17:R17: 현금흐름 추정기간의 차년도별 매출액
    - D24:R24: 세후 로열티수입 할인 후 현재가치
    - D26: 지식재산유효성
+   - H32:H36: 사업화주체 결산일자
+   - J32:J36: 사업화주체 영업이익률
    업종평균
-   - 사업화주체/동업종 연도별 영업이익률 비교자료
+   - D4:H4: 동업종 연도
+   - D17:H17: 동업종 영업이익률
 */
 (() => {
   window.quickValuationProjectedSalesSeries = [];
@@ -34,14 +37,33 @@
     return Math.abs(value) <= 1 ? value * 100 : value;
   };
 
-  const excelYear = (value) => {
-    if (!Number.isFinite(value)) return null;
-    if (value >= 1900 && value <= 2200) return Math.round(value);
-    if (value > 30000 && value < 70000) {
-      const date = new Date(Date.UTC(1899, 11, 30) + value * 86400000);
-      return date.getUTCFullYear();
+  const yearFromCell = (sheet, address) => {
+    const target = sheet?.[address];
+    if (!target) return null;
+
+    const display = String(target.w ?? '').trim();
+    const displayMatch = display.match(/(?:19|20)\d{2}/);
+    if (displayMatch) return Number(displayMatch[0]);
+
+    const raw = target.v;
+    if (raw instanceof Date && !Number.isNaN(raw.getTime())) return raw.getFullYear();
+
+    if (typeof raw === 'number' && Number.isFinite(raw)) {
+      if (raw >= 1900 && raw <= 2200) return Math.round(raw);
+      if (raw > 30000 && raw < 70000) {
+        try {
+          const parsed = XLSX?.SSF?.parse_date_code?.(raw);
+          if (parsed?.y) return Number(parsed.y);
+        } catch (error) {
+          // fallback below
+        }
+        const date = new Date(Date.UTC(1899, 11, 30) + raw * 86400000);
+        if (!Number.isNaN(date.getTime())) return date.getUTCFullYear();
+      }
     }
-    return null;
+
+    const rawMatch = String(raw ?? '').match(/(?:19|20)\d{2}/);
+    return rawMatch ? Number(rawMatch[0]) : null;
   };
 
   function extractProjectedSales(sheet) {
@@ -100,35 +122,33 @@
   }
 
   function extractOperatingMargins(workbook) {
-    const sheet = workbook?.Sheets?.['업종평균'];
-    if (!sheet) return { series: [], meta: null };
+    const companySheet = workbook?.Sheets?.['가평가시트'];
+    const industrySheet = workbook?.Sheets?.['업종평균'];
+    if (!companySheet || !industrySheet) return { series: [], meta: null };
 
     const company = new Map();
-    for (const colCode of ['C', 'D', 'E']) {
-      const year = excelYear(numericCell(sheet, `${colCode}22`));
-      const cost = percentValue(numericCell(sheet, `${colCode}23`));
-      const sga = percentValue(numericCell(sheet, `${colCode}25`));
-      if (!year || !Number.isFinite(cost) || !Number.isFinite(sga)) continue;
-      company.set(year, 100 - cost - sga);
+    for (let row = 32; row <= 36; row += 1) {
+      const year = yearFromCell(companySheet, `H${row}`);
+      const margin = percentValue(numericCell(companySheet, `J${row}`));
+      if (!year || !Number.isFinite(margin)) continue;
+      company.set(year, margin);
     }
 
-    const industryDirect = new Map();
-    for (const colCode of ['C', 'D', 'E']) {
-      const year = excelYear(numericCell(sheet, `${colCode}30`));
-      const margin = percentValue(numericCell(sheet, `${colCode}33`));
-      if (year && Number.isFinite(margin)) industryDirect.set(year, margin);
-    }
+    const industry = new Map();
+    const columns = ['D', 'E', 'F', 'G', 'H'];
+    columns.forEach(colCode => {
+      const year = yearFromCell(industrySheet, `${colCode}4`);
+      const margin = percentValue(numericCell(industrySheet, `${colCode}17`));
+      if (!year || !Number.isFinite(margin)) return;
+      industry.set(year, margin);
+    });
 
-    const industryFallback = new Map();
-    for (const colCode of ['C', 'D', 'E', 'F', 'G']) {
-      const year = excelYear(numericCell(sheet, `${colCode}4`));
-      const margin = percentValue(numericCell(sheet, `${colCode}17`));
-      if (year && Number.isFinite(margin)) industryFallback.set(year, margin);
-    }
+    const commonYears = [...company.keys()]
+      .filter(year => industry.has(year))
+      .sort((a, b) => a - b);
 
-    const industry = industryDirect.size ? industryDirect : industryFallback;
-    const commonYears = [...company.keys()].filter(year => industry.has(year)).sort((a, b) => a - b);
-    const series = commonYears.map(year => ({
+    const comparisonYears = commonYears.slice(-3);
+    const series = comparisonYears.map(year => ({
       year,
       company: company.get(year),
       industry: industry.get(year),
@@ -139,7 +159,9 @@
       meta: {
         companyLabel: '사업화주체',
         industryLabel: '동업종',
-        industrySource: industryDirect.size ? '크레탑 동업종 입력값' : 'KISTI StarValue 업종평균',
+        industrySource: '업로드 Excel 업종평균 시트',
+        commonYearCount: commonYears.length,
+        comparisonYears,
       },
     };
   }
