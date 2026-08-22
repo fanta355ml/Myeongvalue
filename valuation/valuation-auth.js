@@ -11,7 +11,7 @@ const QUICK_VALUATION_AGENCIES = {
     id: 'kodata',
     name: '한국평가데이터(주)',
     reportName: '',
-    subline: 'KOREA RATING & DATA',
+    subline: '',
     logo: '../assets/kodata-logo.png',
     passwordHash: '0cf1091f5c1d9dbc09e9753f162003f2cc0355ccd8c992e3986c1855821512ab'
   }
@@ -55,11 +55,7 @@ function applyReportAgencyBrand() {
   brand.classList.toggle('is-myeongvalue', agency.id === 'myeongvalue');
 
   if (agency.id === 'kodata') {
-    brand.innerHTML = `
-      <div class="kodata-report-lockup">
-        <img src="${agency.logo}" alt="${agency.name}">
-        <span>${agency.subline}</span>
-      </div>`;
+    brand.innerHTML = `<img src="${agency.logo}" alt="${agency.name}">`;
     return;
   }
 
