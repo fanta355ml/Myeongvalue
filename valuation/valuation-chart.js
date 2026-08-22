@@ -1,14 +1,10 @@
-/* Myeongvalue-only value indicator charts
+/* Quick Valuation value indicator charts
    - Main 1: projected sales over the valuation cash-flow period
    - Main 2: annual IP value contribution (discounted after-tax royalty × IP validity)
    - Sub left: recent yearly sales
    - Sub right: operating margin comparison (company vs industry)
 */
 (() => {
-  function getAgencyId() {
-    return window.getQuickValuationAgencyConfig?.().id || 'myeongvalue';
-  }
-
   function parseSalesSeries(text) {
     const source = String(text || '').replace(/,/g, '');
     const matches = [...source.matchAll(/(20\d{2})년\s*(\d+(?:\.\d+)?)\s*억\s*원/g)];
@@ -99,7 +95,7 @@
     const industryPoints = series.map((d, i) => `${pad.left + step * i},${yFor(d.industry)}`).join(' ');
     const labels = series.map((d, i) => {
       const x = pad.left + step * i;
-      return `<text class="myeong-chart-year" x="${x}" y="${height - 12}">${d.year}</text>`;
+      return `<text class="myeong-chart-year" x="${x}" y="${height - 12}">${d.year ?? ''}</text>`;
     }).join('');
     const companyDots = series.map((d, i) => {
       const x = pad.left + step * i;
@@ -132,55 +128,26 @@
     const series = sourceSeries.map(item => ({ label: item.period, value: item.salesEok }));
     return `
       <div class="myeong-chart-card myeong-chart-card-main">
-        <div class="myeong-chart-head">
-          <div>
-            <div class="myeong-chart-title">차년도별 추정매출액</div>
-            <div class="myeong-chart-sub">현금흐름 추정기간 동안 가치산정에 적용되는 차년도별 매출액임.</div>
-          </div>
-        </div>
-        ${makeBarLineSvg(series, {
-          main: true,
-          height: 218,
-          barWidth: 52,
-          valueDigits: 1,
-          unitText: '단위: 억 원',
-          ariaLabel: '차년도별 추정매출액 추이',
-        })}
+        <div class="myeong-chart-head"><div><div class="myeong-chart-title">차년도별 추정매출액</div><div class="myeong-chart-sub">현금흐름 추정기간 동안 가치산정에 적용되는 차년도별 매출액임.</div></div></div>
+        ${makeBarLineSvg(series,{main:true,height:218,barWidth:52,valueDigits:1,unitText:'단위: 억 원',ariaLabel:'차년도별 추정매출액 추이'})}
         <div class="myeong-chart-source">* 출처: 업로드 Excel 가평가시트 17행.</div>
       </div>`;
   }
 
   function buildAnnualValueCard() {
-    const sourceSeries = Array.isArray(window.quickValuationAnnualValueSeries)
-      ? window.quickValuationAnnualValueSeries
-      : [];
+    const sourceSeries = Array.isArray(window.quickValuationAnnualValueSeries) ? window.quickValuationAnnualValueSeries : [];
     const meta = window.quickValuationAnnualValueMeta || null;
     if (!sourceSeries.length) return '';
-
-    const series = sourceSeries.map(item => ({ label: item.period, value: item.valueEok }));
-    const total = Number.isFinite(meta?.totalEok) ? meta.totalEok : series.reduce((s, d) => s + d.value, 0);
-    const badge = Number.isFinite(total) ? `<div class="myeong-chart-badge is-main">합계 ${formatNumber(total, 2)}억 원</div>` : '';
+    const series = sourceSeries.map(item => ({ label:item.period,value:item.valueEok }));
+    const total = Number.isFinite(meta?.totalEok) ? meta.totalEok : series.reduce((s,d) => s + d.value,0);
+    const badge = Number.isFinite(total) ? `<div class="myeong-chart-badge is-main">합계 ${formatNumber(total,2)}억 원</div>` : '';
     const validityNote = meta?.validityApplied && Number.isFinite(meta.validity)
-      ? `세후 로열티수입의 현재가치에 IP유효성 ${formatNumber(meta.validity * 100, 1)}%를 반영한 차년도별 가치기여액임.`
+      ? `세후 로열티수입의 현재가치에 IP유효성 ${formatNumber(meta.validity * 100,1)}%를 반영한 차년도별 가치기여액임.`
       : '세후 로열티수입의 차년도별 현재가치를 기준으로 산출함.';
-
     return `
       <div class="myeong-chart-card myeong-chart-card-secondary">
-        <div class="myeong-chart-head">
-          <div>
-            <div class="myeong-chart-title">차년도별 가치기여액</div>
-            <div class="myeong-chart-sub">${validityNote}</div>
-          </div>
-          ${badge}
-        </div>
-        ${makeBarLineSvg(series, {
-          secondary: true,
-          height: 196,
-          barWidth: 48,
-          valueDigits: 2,
-          unitText: '단위: 억 원',
-          ariaLabel: '차년도별 가치기여액 추이',
-        })}
+        <div class="myeong-chart-head"><div><div class="myeong-chart-title">차년도별 가치기여액</div><div class="myeong-chart-sub">${validityNote}</div></div>${badge}</div>
+        ${makeBarLineSvg(series,{secondary:true,height:196,barWidth:48,valueDigits:2,unitText:'단위: 억 원',ariaLabel:'차년도별 가치기여액 추이'})}
         <div class="myeong-chart-source">* 출처: 업로드 Excel 세후 로열티수입·현가계수·IP유효성 산정값.</div>
       </div>`;
   }
@@ -189,51 +156,29 @@
     const reviewText = document.getElementById('reviewOpinionEdit')?.value || '';
     const series = parseSalesSeries(reviewText);
     if (series.length < 2) return '';
-
     const growthText = report.querySelector('.summary-grid div:nth-child(7) dd')?.textContent?.trim() || '';
     return `
       <div class="myeong-chart-card myeong-chart-card-sub">
-        <div class="myeong-chart-head">
-          <div>
-            <div class="myeong-chart-title">최근 매출액 추이</div>
-            <div class="myeong-chart-sub">최근 연도별 매출액 흐름.</div>
-          </div>
-          ${growthText ? `<div class="myeong-chart-badge">CAGR ${growthText}</div>` : ''}
-        </div>
-        ${makeBarLineSvg(series, {
-          height: 164,
-          barWidth: 68,
-          valueDigits: 2,
-          unitText: '단위: 억 원',
-          ariaLabel: '최근 매출액 추이',
-        })}
+        <div class="myeong-chart-head"><div><div class="myeong-chart-title">최근 매출액 추이</div><div class="myeong-chart-sub">최근 연도별 매출액 흐름.</div></div>${growthText ? `<div class="myeong-chart-badge">CAGR ${growthText}</div>` : ''}</div>
+        ${makeBarLineSvg(series,{height:164,barWidth:68,valueDigits:2,unitText:'단위: 억 원',ariaLabel:'최근 매출액 추이'})}
         <div class="myeong-chart-source">* 출처: 업로드 Excel 검토의견 기재값.</div>
       </div>`;
   }
 
   function buildOperatingMarginCard() {
-    const series = Array.isArray(window.quickValuationOperatingMarginSeries)
-      ? window.quickValuationOperatingMarginSeries
-      : [];
+    const series = Array.isArray(window.quickValuationOperatingMarginSeries) ? window.quickValuationOperatingMarginSeries : [];
     const meta = window.quickValuationOperatingMarginMeta || null;
-    if (series.length < 2) return '';
+    if (series.length < 1 || meta?.available === false) {
+      return `<div class="myeong-chart-card myeong-chart-card-sub"><div class="myeong-chart-head"><div><div class="myeong-chart-title">영업이익률 비교</div><div class="myeong-chart-sub">사업화주체와 동업종의 수익성 비교.</div></div></div><div class="myeong-chart-empty">정보없음</div></div>`;
+    }
 
-    const periodText = meta?.comparisonYears?.length
-      ? `${meta.comparisonYears[0]}~${meta.comparisonYears.at(-1)}년 공통기간`
-      : '공통기간';
+    if (Number.isFinite(meta?.companyAverage) && Number.isFinite(meta?.industryAverage)) {
+      const label = meta.periodCount === 3 ? '최근 3개년 평균' : meta.periodCount === 2 ? '최근 2개년 평균' : '최근 1개년';
+      const avgSeries = [{ label:'사업화주체',value:meta.companyAverage },{ label:'동업종',value:meta.industryAverage }];
+      return `<div class="myeong-chart-card myeong-chart-card-sub"><div class="myeong-chart-head"><div><div class="myeong-chart-title">영업이익률 비교</div><div class="myeong-chart-sub">${label} 영업이익률 비교.</div></div></div>${makeBarLineSvg(avgSeries,{height:164,barWidth:76,valueDigits:1,unitText:'단위: %',ariaLabel:'사업화주체와 동업종 평균 영업이익률 비교'})}<div class="myeong-chart-source">* 출처: 업로드 Excel 업종평균!J22:N25.</div></div>`;
+    }
 
-    return `
-      <div class="myeong-chart-card myeong-chart-card-sub">
-        <div class="myeong-chart-head">
-          <div>
-            <div class="myeong-chart-title">년도별 영업이익률 비교</div>
-            <div class="myeong-chart-sub">사업화주체와 동업종의 ${periodText} 수익성 비교.</div>
-          </div>
-          <div class="myeong-margin-legend"><span class="is-company">사업화주체</span><span class="is-industry">동업종</span></div>
-        </div>
-        ${makeOperatingMarginSvg(series)}
-        <div class="myeong-chart-source">* 출처: 업로드 Excel 가평가시트 및 업종평균 시트.</div>
-      </div>`;
+    return `<div class="myeong-chart-card myeong-chart-card-sub"><div class="myeong-chart-head"><div><div class="myeong-chart-title">영업이익률 비교</div><div class="myeong-chart-sub">사업화주체와 동업종의 수익성 비교.</div></div><div class="myeong-margin-legend"><span class="is-company">사업화주체</span><span class="is-industry">동업종</span></div></div>${makeOperatingMarginSvg(series)}<div class="myeong-chart-source">* 출처: 업로드 Excel 업종평균!J22:N25.</div></div>`;
   }
 
   function findSectionByTitle(report, pattern) {
@@ -243,21 +188,16 @@
     }) || null;
   }
 
-  function renderMyeongCharts() {
+  function renderCharts() {
     document.querySelector('.myeong-chart-section')?.remove();
-    if (getAgencyId() !== 'myeongvalue') return;
-
     const report = document.querySelector('.report-paper');
     const summaryGrid = report?.querySelector('.summary-grid');
     if (!report || !summaryGrid) return;
 
     const summarySection = summaryGrid.closest('.report-section');
-    const exclusionSection = findSectionByTitle(report, /평가대상특허 제외 사유$/);
-    const reviewSection = findSectionByTitle(report, /검토의견$/);
-
-    if (exclusionSection && summarySection && exclusionSection !== summarySection.previousElementSibling) {
-      report.insertBefore(exclusionSection, summarySection);
-    }
+    const exclusionSection = findSectionByTitle(report,/평가대상특허 제외 사유$/);
+    const reviewSection = findSectionByTitle(report,/검토의견$/);
+    if (exclusionSection && summarySection && exclusionSection !== summarySection.previousElementSibling) report.insertBefore(exclusionSection,summarySection);
 
     const exclusionHeading = exclusionSection?.querySelector(':scope > h2');
     const summaryHeading = summarySection?.querySelector(':scope > h2');
@@ -274,30 +214,23 @@
 
     const section = document.createElement('section');
     section.className = 'report-section myeong-chart-section';
-    section.innerHTML = `
-      <h2>3. 핵심 가치지표</h2>
-      <div class="myeong-chart-stack myeong-chart-stack-main">
-        ${projectedSalesCard}
-        ${annualCard}
-      </div>
-      ${(salesCard || marginCard) ? `<div class="myeong-chart-grid-two">${salesCard}${marginCard}</div>` : ''}`;
-
+    section.innerHTML = `<h2>3. 핵심 가치지표</h2><div class="myeong-chart-stack myeong-chart-stack-main">${projectedSalesCard}${annualCard}</div>${(salesCard || marginCard) ? `<div class="myeong-chart-grid-two">${salesCard}${marginCard}</div>` : ''}`;
     summarySection.after(section);
   }
 
+  let renderQueued = false;
   function scheduleRender() {
-    requestAnimationFrame(() => requestAnimationFrame(renderMyeongCharts));
+    if (renderQueued) return;
+    renderQueued = true;
+    requestAnimationFrame(() => requestAnimationFrame(() => { renderQueued = false; renderCharts(); }));
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded',() => {
     const reportArea = document.getElementById('reportArea');
-    if (reportArea) {
-      const observer = new MutationObserver(scheduleRender);
-      observer.observe(reportArea, { childList: true, subtree: true });
-    }
-    document.getElementById('reviewOpinionEdit')?.addEventListener('input', scheduleRender);
-    document.addEventListener('quickvaluation:agencychange', scheduleRender);
-    document.addEventListener('quickvaluation:chartdata', scheduleRender);
+    if (reportArea) new MutationObserver(scheduleRender).observe(reportArea,{childList:true,subtree:false});
+    document.getElementById('reviewOpinionEdit')?.addEventListener('input',scheduleRender);
+    document.addEventListener('quickvaluation:agencychange',scheduleRender);
+    document.addEventListener('quickvaluation:chartdata',scheduleRender);
     scheduleRender();
   });
 })();
