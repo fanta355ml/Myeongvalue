@@ -15,6 +15,13 @@
     return checkbox ? checkbox.checked : true;
   }
 
+  function formatIssueDate(date = new Date()) {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}. ${mm}. ${dd}.`;
+  }
+
   function updateSealOptionVisibility() {
     const option = document.getElementById('sealOption');
     if (!option) return;
@@ -34,11 +41,14 @@
     const disclaimer = report.querySelector('.disclaimer');
     const block = document.createElement('div');
     block.className = 'report-seal-block';
-    block.setAttribute('aria-label', '명밸류 파트너스 직인');
+    block.setAttribute('aria-label', '명밸류 파트너스 발급일 및 직인');
     block.innerHTML = `
       <div class="report-seal-lockup">
-        <span class="report-seal-name">명밸류 파트너스</span>
-        <img class="report-seal-image" src="${sealAsset}" alt="명밸류 파트너스 직인">
+        <div class="report-seal-date">${formatIssueDate()}</div>
+        <div class="report-seal-signature">
+          <span class="report-seal-name">명밸류 파트너스</span>
+          <img class="report-seal-image" src="${sealAsset}" alt="명밸류 파트너스 직인">
+        </div>
       </div>`;
 
     if (disclaimer) disclaimer.after(block);
