@@ -10,5 +10,12 @@ body.auth-locked{overflow:hidden}
 .agency-switch-link{border:0;background:transparent;font:inherit;cursor:pointer;padding:0}.header-actions{display:flex;align-items:center;gap:14px}.active-agency-name{font-size:13px;font-weight:700;color:#dce6f5;padding-right:14px;border-right:1px solid rgba(255,255,255,.13)}
 .brand.is-kodata img{width:102px;height:auto;border-radius:0;object-fit:contain}.brand.is-kodata span{display:none!important}.report-brand.is-kodata{display:block;margin-bottom:14px}.report-brand.is-kodata>img{width:128px!important;height:auto!important;max-height:46px;border-radius:0!important;object-fit:contain!important;display:block}.report-brand.is-myeongvalue img{width:42px;height:42px;border-radius:50%}
 #contactSelect{appearance:auto;cursor:pointer}#contactSelect:disabled{cursor:not-allowed;color:#8796aa}
-@media(max-width:640px){.agency-login-card{padding:22px 18px}.agency-choice-grid{grid-template-columns:1fr}.agency-password-wrap{flex-direction:column}.agency-enter{width:100%}.active-agency-name{display:none!important}}
+body[data-agency="kodata"] .top-summary{grid-template-columns:.92fr 1.08fr}
+body[data-agency="kodata"] .top-summary div{grid-template-columns:92px 1fr}
+body[data-agency="kodata"] .top-summary dt,body[data-agency="kodata"] .top-summary dd{padding:7px 9px}
+body[data-agency="kodata"] .top-summary dt{font-size:11.7px}
+body[data-agency="kodata"] .top-summary dd{font-size:11.8px;line-height:1.4}
+body[data-agency="kodata"] .top-summary>div:nth-child(4) dd{font-size:11.1px;line-height:1.34;white-space:nowrap;padding-left:7px;padding-right:7px}
+body[data-agency="kodata"] .value-box{grid-template-columns:92px 1fr!important}
+@media(max-width:640px){.agency-login-card{padding:22px 18px}.agency-choice-grid{grid-template-columns:1fr}.agency-password-wrap{flex-direction:column}.agency-enter{width:100%}.active-agency-name{display:none!important}body[data-agency="kodata"] .top-summary>div:nth-child(4) dd{white-space:normal}}
 @media print{.agency-gate{display:none!important}.agency-switch-link,.active-agency-name{display:none!important}}
