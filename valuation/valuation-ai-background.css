@@ -1,0 +1,206 @@
+/* =========================================================
+   Quick Valuation - AI Background Concept A
+   테스트용 오버라이드 CSS
+   ---------------------------------------------------------
+   사용법:
+   valuation/index.html의 기존 valuation.css 다음 줄에 아래를 추가:
+   <link rel="stylesheet" href="valuation-ai-background-test.css">
+
+   기존 valuation.css는 수정하지 않고, 이 파일을 나중에 불러와
+   배경과 카드 분위기만 덮어쓰는 방식입니다.
+   ========================================================= */
+
+:root {
+  --ai-pattern-opacity: 0.18;
+  --ai-glow-opacity: 0.18;
+  --ai-line-opacity: 0.12;
+}
+
+/* 기본 배경: 현재 밝아진 네이비 톤 유지 + 깊이감만 추가 */
+body {
+  position: relative;
+  isolation: isolate;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(217, 179, 95, 0.22), transparent 30%),
+    radial-gradient(circle at 84% 16%, rgba(94, 139, 205, 0.20), transparent 34%),
+    radial-gradient(circle at 30% 78%, rgba(59, 107, 176, 0.11), transparent 28%),
+    linear-gradient(180deg, #14315f 0%, #0d2449 54%, #071831 100%);
+}
+
+/* ---------------------------------------------------------
+   네트워크 패턴
+   - 이미지 파일 없이 CSS gradient만 사용
+   - 점 + 아주 얇은 선이 좌측/상단 위주로 보이도록 구성
+   --------------------------------------------------------- */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 76px 0 0 0;
+  pointer-events: none;
+  z-index: -2;
+  opacity: var(--ai-pattern-opacity);
+
+  background-image:
+    /* glow nodes */
+    radial-gradient(circle at 12% 12%, rgba(243, 213, 138, 0.95) 0 2px, transparent 3px),
+    radial-gradient(circle at 20% 19%, rgba(160, 196, 245, 0.92) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 31% 11%, rgba(160, 196, 245, 0.75) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 40% 25%, rgba(243, 213, 138, 0.80) 0 2px, transparent 3px),
+    radial-gradient(circle at 7% 36%, rgba(160, 196, 245, 0.70) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 27% 42%, rgba(160, 196, 245, 0.82) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 43% 49%, rgba(243, 213, 138, 0.68) 0 1.5px, transparent 2.5px),
+
+    /* network lines */
+    linear-gradient(28deg,
+      transparent 0 18%,
+      rgba(157, 192, 239, var(--ai-line-opacity)) 18.2% 18.35%,
+      transparent 18.55% 100%),
+    linear-gradient(153deg,
+      transparent 0 28%,
+      rgba(157, 192, 239, var(--ai-line-opacity)) 28.15% 28.28%,
+      transparent 28.5% 100%),
+    linear-gradient(74deg,
+      transparent 0 37%,
+      rgba(217, 179, 95, 0.07) 37.12% 37.24%,
+      transparent 37.44% 100%),
+
+    /* very subtle tech-grid */
+    linear-gradient(rgba(150, 184, 230, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(150, 184, 230, 0.028) 1px, transparent 1px);
+
+  background-size:
+    auto, auto, auto, auto, auto, auto, auto,
+    760px 540px,
+    840px 620px,
+    920px 680px,
+    54px 54px,
+    54px 54px;
+
+  background-position:
+    0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0,
+    left top,
+    left 8% top 5%,
+    left 3% top 18%,
+    left top,
+    left top;
+
+  background-repeat:
+    no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat,
+    no-repeat, no-repeat, no-repeat,
+    repeat, repeat;
+
+  /* 보고서 오른쪽 영역까지 패턴이 너무 강하게 가지 않게 */
+  mask-image: linear-gradient(
+    90deg,
+    rgba(0,0,0,1) 0%,
+    rgba(0,0,0,0.95) 34%,
+    rgba(0,0,0,0.38) 57%,
+    rgba(0,0,0,0.08) 78%,
+    transparent 100%
+  );
+}
+
+/* ---------------------------------------------------------
+   하단 wave / ambient glow
+   - 1안의 부드러운 흐름만 차용
+   --------------------------------------------------------- */
+body::after {
+  content: "";
+  position: fixed;
+  left: -14vw;
+  bottom: -22vh;
+  width: 82vw;
+  height: 70vh;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.72;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(77, 129, 202, var(--ai-glow-opacity)) 0%,
+      rgba(52, 96, 163, 0.10) 32%,
+      transparent 66%
+    );
+
+  border-radius: 50%;
+  box-shadow:
+    0 -1px 0 rgba(243, 213, 138, 0.08),
+    0 -26px 0 -25px rgba(149, 185, 236, 0.09),
+    0 -54px 0 -53px rgba(149, 185, 236, 0.06),
+    0 -82px 0 -81px rgba(217, 179, 95, 0.045);
+  transform: rotate(-7deg);
+}
+
+/* 실제 UI는 패턴 위에 또렷하게 */
+.valuation-header,
+.valuation-shell,
+.valuation-footer {
+  position: relative;
+}
+
+.valuation-shell,
+.valuation-footer {
+  z-index: 1;
+}
+
+/* 카드: 너무 유리처럼 보이지 않도록 아주 조금만 밝게 */
+.upload-card,
+.edit-card {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.105),
+      rgba(255, 255, 255, 0.050)
+    );
+  border-color: rgba(217, 179, 95, 0.34);
+  box-shadow:
+    0 20px 58px rgba(2, 10, 26, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+/* 입력창도 약간 투명하게 해서 배경 분위기와 연결 */
+.edit-input,
+textarea {
+  background: rgba(5, 23, 51, 0.60);
+  box-shadow: inset 0 1px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* 비어 있는 미리보기 영역은 패턴이 너무 비치지 않게 */
+.empty-report {
+  background: rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(1.5px);
+}
+
+/* 보고서 자체는 기존 흰색 유지 */
+.report-paper {
+  position: relative;
+  z-index: 2;
+}
+
+/* 모바일은 패턴 강도 축소 */
+@media (max-width: 1050px) {
+  body::before {
+    opacity: 0.11;
+    mask-image: linear-gradient(
+      180deg,
+      rgba(0,0,0,0.85) 0%,
+      rgba(0,0,0,0.45) 48%,
+      transparent 88%
+    );
+  }
+
+  body::after {
+    opacity: 0.45;
+    width: 120vw;
+  }
+}
+
+/* 인쇄 시 화면용 AI 배경 완전 제거 */
+@media print {
+  body::before,
+  body::after {
+    display: none !important;
+  }
+}
