@@ -1,6 +1,8 @@
 /* Myeongvalue-only value indicator charts
-   - Main: annual IP value contribution (discounted value × IP validity)
-   - Sub: recent yearly sales parsed from review opinion
+   - Main 1: projected sales after daily proration
+   - Main 2: annual IP value contribution (discounted after-tax royalty × IP validity)
+   - Sub left: recent yearly sales
+   - Sub right: operating margin comparison (company vs industry)
 */
 (() => {
   function getAgencyId() {
@@ -38,7 +40,7 @@
     const innerW = width - pad.left - pad.right;
     const innerH = height - pad.top - pad.bottom;
     const maxValue = Math.max(...series.map(d => d.value), 1);
-    const step = innerW / series.length;
+    const step = innerW / Math.max(series.length, 1);
     const barW = Math.min(options.barWidth || 58, step * 0.58);
 
     const grid = [0.25, 0.5, 0.75, 1].map(ratio => {
@@ -54,14 +56,14 @@
       const y = pad.top + innerH - h;
       points.push(`${cx},${y}`);
       return `
-        <rect class="myeong-chart-bar ${options.main ? 'is-main' : ''}" x="${x}" y="${y}" width="${barW}" height="${h}" rx="5"/>
+        <rect class="myeong-chart-bar ${options.main ? 'is-main' : ''} ${options.secondary ? 'is-secondary' : ''}" x="${x}" y="${y}" width="${barW}" height="${h}" rx="5"/>
         <text class="myeong-chart-value" x="${cx}" y="${Math.max(15, y - 7)}">${formatNumber(d.value, options.valueDigits ?? 2)}</text>
         <text class="myeong-chart-year" x="${cx}" y="${height - 14}">${d.label}</text>`;
     }).join('');
 
     const dots = series.map((_, i) => {
       const [x, y] = points[i].split(',');
-      return `<circle class="myeong-chart-dot ${options.main ? 'is-main' : ''}" cx="${x}" cy="${y}" r="3.5"/>`;
+      return `<circle class="myeong-chart-dot ${options.main ? 'is-main' : ''} ${options.secondary ? 'is-secondary' : ''}" cx="${x}" cy="${y}" r="3.5"/>`;
     }).join('');
 
     return `
@@ -70,9 +72,82 @@
         <line class="myeong-chart-axis" x1="${pad.left}" y1="${pad.top + innerH}" x2="${width - pad.right}" y2="${pad.top + innerH}"/>
         <text class="myeong-chart-unit" x="${pad.left}" y="15">${options.unitText || '단위: 억 원'}</text>
         ${bars}
-        <polyline class="myeong-chart-line ${options.main ? 'is-main' : ''}" points="${points.join(' ')}"/>
+        <polyline class="myeong-chart-line ${options.main ? 'is-main' : ''} ${options.secondary ? 'is-secondary' : ''}" points="${points.join(' ')}"/>
         ${dots}
       </svg>`;
+  }
+
+  function makeOperatingMarginSvg(series) {
+    const width = 680;
+    const height = 164;
+    const pad = { top: 28, right: 30, bottom: 36, left: 46 };
+    const innerW = width - pad.left - pad.right;
+    const innerH = height - pad.top - pad.bottom;
+    const allValues = series.flatMap(d => [d.company, d.industry]).filter(Number.isFinite);
+    const minValue = Math.min(0, ...allValues);
+    const maxValue = Math.max(5, ...allValues);
+    const range = Math.max(maxValue - minValue, 1);
+    const step = innerW / Math.max(series.length - 1, 1);
+    const yFor = value => pad.top + innerH * (1 - ((value - minValue) / range));
+
+    const grid = [0, 0.5, 1].map(ratio => {
+      const y = pad.top + innerH * ratio;
+      return `<line class="myeong-chart-grid" x1="${pad.left}" y1="${y}" x2="${width - pad.right}" y2="${y}"/>`;
+    }).join('');
+
+    const companyPoints = series.map((d, i) => `${pad.left + step * i},${yFor(d.company)}`).join(' ');
+    const industryPoints = series.map((d, i) => `${pad.left + step * i},${yFor(d.industry)}`).join(' ');
+    const labels = series.map((d, i) => {
+      const x = pad.left + step * i;
+      return `<text class="myeong-chart-year" x="${x}" y="${height - 12}">${d.year}</text>`;
+    }).join('');
+    const companyDots = series.map((d, i) => {
+      const x = pad.left + step * i;
+      const y = yFor(d.company);
+      return `<circle class="myeong-margin-dot is-company" cx="${x}" cy="${y}" r="3.5"/><text class="myeong-margin-value" x="${x}" y="${Math.max(12, y - 7)}">${formatNumber(d.company,1)}%</text>`;
+    }).join('');
+    const industryDots = series.map((d, i) => {
+      const x = pad.left + step * i;
+      const y = yFor(d.industry);
+      return `<circle class="myeong-margin-dot is-industry" cx="${x}" cy="${y}" r="3.5"/><text class="myeong-margin-value is-industry" x="${x}" y="${Math.min(height - 24, y + 15)}">${formatNumber(d.industry,1)}%</text>`;
+    }).join('');
+
+    return `
+      <svg class="myeong-chart-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="사업화주체와 동업종 영업이익률 비교">
+        ${grid}
+        <line class="myeong-chart-axis" x1="${pad.left}" y1="${yFor(0)}" x2="${width - pad.right}" y2="${yFor(0)}"/>
+        <text class="myeong-chart-unit" x="${pad.left}" y="14">단위: %</text>
+        <polyline class="myeong-margin-line is-company" points="${companyPoints}"/>
+        <polyline class="myeong-margin-line is-industry" points="${industryPoints}"/>
+        ${companyDots}${industryDots}${labels}
+      </svg>`;
+  }
+
+  function buildProjectedSalesCard() {
+    const sourceSeries = Array.isArray(window.quickValuationProjectedSalesSeries)
+      ? window.quickValuationProjectedSalesSeries
+      : [];
+    if (!sourceSeries.length) return '';
+
+    const series = sourceSeries.map(item => ({ label: item.period, value: item.salesEok }));
+    return `
+      <div class="myeong-chart-card myeong-chart-card-main">
+        <div class="myeong-chart-head">
+          <div>
+            <div class="myeong-chart-title">차년도별 추정매출액(일할조정 후)</div>
+            <div class="myeong-chart-sub">현금흐름 추정기간 동안 가치산정에 적용되는 차년도별 일할계산 후 매출액임.</div>
+          </div>
+        </div>
+        ${makeBarLineSvg(series, {
+          main: true,
+          height: 218,
+          barWidth: 52,
+          valueDigits: 1,
+          unitText: '단위: 억 원',
+          ariaLabel: '차년도별 추정매출액 추이',
+        })}
+        <div class="myeong-chart-source">* 출처: 업로드 Excel 가평가시트 17행(차년도별 일할계산).</div>
+      </div>`;
   }
 
   function buildAnnualValueCard() {
@@ -82,19 +157,15 @@
     const meta = window.quickValuationAnnualValueMeta || null;
     if (!sourceSeries.length) return '';
 
-    const series = sourceSeries.map(item => ({
-      label: item.period,
-      value: item.valueEok,
-    }));
-
+    const series = sourceSeries.map(item => ({ label: item.period, value: item.valueEok }));
     const total = Number.isFinite(meta?.totalEok) ? meta.totalEok : series.reduce((s, d) => s + d.value, 0);
     const badge = Number.isFinite(total) ? `<div class="myeong-chart-badge is-main">합계 ${formatNumber(total, 2)}억 원</div>` : '';
     const validityNote = meta?.validityApplied && Number.isFinite(meta.validity)
-      ? `현재가치에 IP유효성 ${formatNumber(meta.validity * 100, 1)}%를 반영한 연도별 가치기여액임.`
-      : '차년도별 현재가치를 기준으로 산출함.';
+      ? `세후 로열티수입의 현재가치에 IP유효성 ${formatNumber(meta.validity * 100, 1)}%를 반영한 차년도별 가치기여액임.`
+      : '세후 로열티수입의 차년도별 현재가치를 기준으로 산출함.';
 
     return `
-      <div class="myeong-chart-card myeong-chart-card-main">
+      <div class="myeong-chart-card myeong-chart-card-secondary">
         <div class="myeong-chart-head">
           <div>
             <div class="myeong-chart-title">차년도별 가치기여액</div>
@@ -103,14 +174,14 @@
           ${badge}
         </div>
         ${makeBarLineSvg(series, {
-          main: true,
-          height: 218,
-          barWidth: 52,
+          secondary: true,
+          height: 196,
+          barWidth: 48,
           valueDigits: 2,
           unitText: '단위: 억 원',
           ariaLabel: '차년도별 가치기여액 추이',
         })}
-        <div class="myeong-chart-source">* 출처: 업로드 Excel의 차년도별 현재가치 및 IP유효성 산정값.</div>
+        <div class="myeong-chart-source">* 출처: 업로드 Excel 세후 로열티수입·현가계수·IP유효성 산정값.</div>
       </div>`;
   }
 
@@ -125,7 +196,7 @@
         <div class="myeong-chart-head">
           <div>
             <div class="myeong-chart-title">최근 매출액 추이</div>
-            <div class="myeong-chart-sub">검토의견에 기재된 최근 연도별 매출액을 시각화함.</div>
+            <div class="myeong-chart-sub">최근 연도별 매출액 흐름.</div>
           </div>
           ${growthText ? `<div class="myeong-chart-badge">CAGR ${growthText}</div>` : ''}
         </div>
@@ -140,6 +211,27 @@
       </div>`;
   }
 
+  function buildOperatingMarginCard() {
+    const series = Array.isArray(window.quickValuationOperatingMarginSeries)
+      ? window.quickValuationOperatingMarginSeries
+      : [];
+    const meta = window.quickValuationOperatingMarginMeta || null;
+    if (series.length < 2) return '';
+
+    return `
+      <div class="myeong-chart-card myeong-chart-card-sub">
+        <div class="myeong-chart-head">
+          <div>
+            <div class="myeong-chart-title">년도별 영업이익률 비교</div>
+            <div class="myeong-chart-sub">사업화주체와 동업종의 동일기간 수익성 비교.</div>
+          </div>
+          <div class="myeong-margin-legend"><span class="is-company">사업화주체</span><span class="is-industry">동업종</span></div>
+        </div>
+        ${makeOperatingMarginSvg(series)}
+        <div class="myeong-chart-source">* 동업종 기준: ${meta?.industrySource || '업로드 Excel 입력값'}.</div>
+      </div>`;
+  }
+
   function renderMyeongCharts() {
     document.querySelector('.myeong-chart-section')?.remove();
     if (getAgencyId() !== 'myeongvalue') return;
@@ -148,18 +240,21 @@
     const summaryGrid = report?.querySelector('.summary-grid');
     if (!report || !summaryGrid) return;
 
+    const projectedSalesCard = buildProjectedSalesCard();
     const annualCard = buildAnnualValueCard();
     const salesCard = buildSalesCard(report);
-    if (!annualCard && !salesCard) return;
+    const marginCard = buildOperatingMarginCard();
+    if (!projectedSalesCard && !annualCard && !salesCard && !marginCard) return;
 
     const section = document.createElement('section');
     section.className = 'report-section myeong-chart-section';
     section.innerHTML = `
       <h2>2. 핵심 가치지표</h2>
-      <div class="myeong-chart-stack">
+      <div class="myeong-chart-stack myeong-chart-stack-main">
+        ${projectedSalesCard}
         ${annualCard}
-        ${salesCard}
-      </div>`;
+      </div>
+      ${(salesCard || marginCard) ? `<div class="myeong-chart-grid-two">${salesCard}${marginCard}</div>` : ''}`;
 
     const summarySection = summaryGrid.closest('.report-section');
     summarySection?.after(section);
