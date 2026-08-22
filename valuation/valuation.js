@@ -10,6 +10,13 @@ const resetBtn = document.getElementById('resetBtn');
 
 let currentData = null;
 
+const valuationWarning = document.createElement('div');
+valuationWarning.id = 'valuationConsistencyWarning';
+valuationWarning.hidden = true;
+valuationWarning.setAttribute('role', 'alert');
+valuationWarning.style.cssText = 'margin-top:12px;border:1px solid rgba(255,190,92,.48);background:rgba(255,190,92,.10);color:#ffdda0;border-radius:14px;padding:11px 12px;font-size:12px;line-height:1.55;font-weight:600;';
+valuationAmountInput.closest('.edit-card')?.appendChild(valuationWarning);
+
 const clean = (value) => {
   if (value === null || value === undefined) return '';
   const text = String(value).trim();
@@ -146,6 +153,65 @@ function buildReviewLines(text) {
     .join('');
 }
 
+function parseAmountText(text, requireValueKeyword = false) {
+  const source = clean(text).replace(/[–—−～]/g, '~');
+  if (!source) return null;
+
+  const amountExpression = '(\\d+(?:\\.\\d+)?(?:\\s*[~-]\\s*\\d+(?:\\.\\d+)?)?\\s*억\\s*원)';
+  const pattern = requireValueKeyword
+    ? new RegExp(`(?:가치평가금액|가치금액|평가금액)\\s*(?:은|은\\s*약|:)?\\s*(?:약\\s*)?${amountExpression}`)
+    : new RegExp(amountExpression);
+
+  const match = source.match(pattern);
+  if (!match) return null;
+
+  const label = match[1].replace(/\s+/g, ' ').trim();
+  const numbers = label.match(/\d+(?:\.\d+)?/g)?.map(Number) || [];
+  if (!numbers.length) return null;
+
+  return {
+    min: numbers[0],
+    max: numbers.length > 1 ? numbers[1] : numbers[0],
+    label,
+  };
+}
+
+function updateValuationConsistency() {
+  if (!currentData) {
+    valuationWarning.hidden = true;
+    valuationWarning.textContent = '';
+    return { status: 'none' };
+  }
+
+  const topAmount = parseAmountText(valuationAmountInput.value, false);
+  const reviewAmount = parseAmountText(reviewInput.value, true);
+
+  if (!topAmount) {
+    valuationWarning.hidden = false;
+    valuationWarning.textContent = '⚠ 상단 가치평가금액에서 비교 가능한 억 원 단위 금액을 찾지 못했습니다.';
+    return { status: 'unreadable-top' };
+  }
+
+  if (!reviewAmount) {
+    valuationWarning.hidden = false;
+    valuationWarning.textContent = `⚠ 검토의견에서 최종 가치금액을 찾지 못했습니다. 상단 가치평가금액: ${topAmount.label}`;
+    return { status: 'unreadable-review', topAmount };
+  }
+
+  const sameMin = Math.abs(topAmount.min - reviewAmount.min) < 0.000001;
+  const sameMax = Math.abs(topAmount.max - reviewAmount.max) < 0.000001;
+
+  if (!sameMin || !sameMax) {
+    valuationWarning.hidden = false;
+    valuationWarning.innerHTML = `⚠ 가치평가금액과 검토의견의 최종 가액이 일치하지 않습니다.<br>상단: <strong>${escapeHtml(topAmount.label)}</strong> / 검토의견: <strong>${escapeHtml(reviewAmount.label)}</strong>`;
+    return { status: 'mismatch', topAmount, reviewAmount };
+  }
+
+  valuationWarning.hidden = true;
+  valuationWarning.textContent = '';
+  return { status: 'ok', topAmount, reviewAmount };
+}
+
 function renderReport() {
   if (!currentData) return;
   const notes = notesInput.value;
@@ -210,6 +276,8 @@ function renderReport() {
 
       <div class="disclaimer">${escapeHtml(currentData.disclaimer || '※ 본 간이감정 결과는 본 평가 시 산정변수 및 실사결과 등에 따라 변동될 수 있습니다.')}</div>
     </article>`;
+
+  updateValuationConsistency();
 }
 
 fileInput.addEventListener('change', async (event) => {
@@ -232,6 +300,8 @@ fileInput.addEventListener('change', async (event) => {
   } catch (error) {
     currentData = null;
     printBtn.disabled = true;
+    valuationWarning.hidden = true;
+    valuationWarning.textContent = '';
     reportArea.classList.add('is-empty');
     reportArea.innerHTML = '<div class="empty-report"><strong>파일을 읽지 못했습니다.</strong><p>통합_가평가 시트가 있는 가평가 Excel인지 확인해 주세요.</p></div>';
     fileStatus.textContent = `오류: ${error.message}`;
@@ -245,13 +315,22 @@ fileInput.addEventListener('change', async (event) => {
   });
 });
 
-printBtn.addEventListener('click', () => window.print());
+printBtn.addEventListener('click', () => {
+  const consistency = updateValuationConsistency();
+  if (consistency.status !== 'ok') {
+    const proceed = window.confirm('가치평가금액과 검토의견의 최종 가액 정합성을 확인해 주세요. 그래도 인쇄/PDF 저장을 진행하시겠습니까?');
+    if (!proceed) return;
+  }
+  window.print();
+});
 
 resetBtn.addEventListener('click', () => {
   fileInput.value = '';
   notesInput.value = '';
   reviewInput.value = '';
   valuationAmountInput.value = '';
+  valuationWarning.hidden = true;
+  valuationWarning.textContent = '';
   currentData = null;
   printBtn.disabled = true;
   fileStatus.textContent = '파일을 선택하면 자동으로 미리보기를 생성합니다.';
