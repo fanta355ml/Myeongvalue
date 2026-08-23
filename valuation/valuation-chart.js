@@ -209,7 +209,7 @@
   document.addEventListener('DOMContentLoaded',() => {
     const reportArea = document.getElementById('reportArea');
     if (reportArea) new MutationObserver(scheduleRender).observe(reportArea,{childList:true,subtree:false});
-    document.getElementById('reviewOpinionEdit')?.addEventListener('input',scheduleRender);
+    document.getElementById('reviewOpinionEdit')?.addEventListener('change',scheduleRender);
     document.addEventListener('quickvaluation:agencychange',scheduleRender);
     document.addEventListener('quickvaluation:chartdata',scheduleRender);
     scheduleRender();
