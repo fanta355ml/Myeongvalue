@@ -34,25 +34,39 @@
     const pad = { top: 34, right: 22, bottom: 38, left: 38 };
     const innerW = width - pad.left - pad.right;
     const innerH = height - pad.top - pad.bottom;
-    const maxValue = Math.max(...series.map(d => d.value), 1);
+    const values = series.map(d => Number(d.value)).filter(Number.isFinite);
+    const rawMin = Math.min(0, ...values);
+    const rawMax = Math.max(0, ...values);
+    const hasNegative = rawMin < 0;
+    const span = Math.max(rawMax - rawMin, Math.abs(rawMin), Math.abs(rawMax), 1);
+    const domainPadding = hasNegative ? span * 0.16 : 0;
+    const minValue = hasNegative ? rawMin - domainPadding : 0;
+    const maxValue = hasNegative ? rawMax + domainPadding : Math.max(rawMax, 1);
+    const range = Math.max(maxValue - minValue, 1);
     const step = innerW / Math.max(series.length, 1);
     const barW = Math.min(options.barWidth || 58, step * 0.58);
+    const valueY = value => pad.top + ((maxValue - value) / range) * innerH;
+    const zeroY = valueY(0);
 
-    const grid = [0.25, 0.5, 0.75, 1].map(ratio => {
+    const gridRatios = hasNegative ? [0, 0.25, 0.5, 0.75, 1] : [0.25, 0.5, 0.75, 1];
+    const grid = gridRatios.map(ratio => {
       const y = pad.top + innerH * (1 - ratio);
       return `<line class="myeong-chart-grid" x1="${pad.left}" y1="${y}" x2="${width - pad.right}" y2="${y}"/>`;
     }).join('');
 
     const points = [];
     const bars = series.map((d, i) => {
+      const value = Number(d.value);
       const cx = pad.left + step * (i + 0.5);
-      const h = innerH * (d.value / maxValue);
       const x = cx - barW / 2;
-      const y = pad.top + innerH - h;
+      const y = valueY(value);
+      const barY = Math.min(y, zeroY);
+      const barH = Math.max(Math.abs(zeroY - y), 0.5);
+      const labelY = value < 0 ? Math.min(height - 22, y + 15) : Math.max(15, y - 7);
       points.push(`${cx},${y}`);
       return `
-        <rect class="myeong-chart-bar ${options.main ? 'is-main' : ''} ${options.secondary ? 'is-secondary' : ''}" x="${x}" y="${y}" width="${barW}" height="${h}" rx="5"/>
-        <text class="myeong-chart-value" x="${cx}" y="${Math.max(15, y - 7)}">${formatNumber(d.value, options.valueDigits ?? 2)}</text>
+        <rect class="myeong-chart-bar ${options.main ? 'is-main' : ''} ${options.secondary ? 'is-secondary' : ''}" x="${x}" y="${barY}" width="${barW}" height="${barH}" rx="5"/>
+        <text class="myeong-chart-value" x="${cx}" y="${labelY}">${formatNumber(value, options.valueDigits ?? 2)}</text>
         <text class="myeong-chart-year" x="${cx}" y="${height - 14}">${d.label}</text>`;
     }).join('');
 
@@ -64,7 +78,7 @@
     return `
       <svg class="myeong-chart-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="${options.ariaLabel || '추이 그래프'}">
         ${grid}
-        <line class="myeong-chart-axis" x1="${pad.left}" y1="${pad.top + innerH}" x2="${width - pad.right}" y2="${pad.top + innerH}"/>
+        <line class="myeong-chart-axis" x1="${pad.left}" y1="${zeroY}" x2="${width - pad.right}" y2="${zeroY}"/>
         <text class="myeong-chart-unit" x="${pad.left}" y="15">${options.unitText || '단위: 억 원'}</text>
         ${bars}
         <polyline class="myeong-chart-line ${options.main ? 'is-main' : ''} ${options.secondary ? 'is-secondary' : ''}" points="${points.join(' ')}"/>
