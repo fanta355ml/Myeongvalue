@@ -1,10 +1,16 @@
 const path = require('node:path');
+const fs = require('node:fs');
 const { app, BrowserWindow } = require('electron');
 
 let mainWindow;
 
+const appRoot = path.join(__dirname, 'app');
+const configPath = path.join(appRoot, 'desktop-config.json');
+const desktopConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+
+app.setAppUserModelId(desktopConfig.appId);
+
 function createWindow() {
-  const appRoot = path.join(__dirname, 'app');
   const startPage = path.join(appRoot, 'valuation', 'index.html');
 
   mainWindow = new BrowserWindow({
@@ -13,9 +19,10 @@ function createWindow() {
     minWidth: 1100,
     minHeight: 720,
     show: false,
+    title: desktopConfig.windowTitle,
     autoHideMenuBar: true,
     backgroundColor: '#f3f6fb',
-    icon: path.join(appRoot, 'assets', 'logo.png'),
+    icon: path.join(appRoot, 'assets', desktopConfig.icon),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,

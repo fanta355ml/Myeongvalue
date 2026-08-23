@@ -28,9 +28,21 @@ permissions:
 
 jobs:
   build-windows:
-    name: Build Windows x64 installer
+    name: Build ${{ matrix.label }} installer
     runs-on: windows-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - agency: myeongvalue
+            label: Myeongvalue
+            artifact_name: Myeongvalue-Quick-Valuation-Windows-x64
+            artifact_path: desktop/dist/myeongvalue/*.exe
+          - agency: kodata
+            label: KoDATA
+            artifact_name: KoDATA-Quick-Valuation-Windows-x64
+            artifact_path: desktop/dist/kodata/*.exe
     defaults:
       run:
         working-directory: desktop
@@ -50,12 +62,12 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: Build unsigned NSIS installer
-        run: npm run build:win
+        run: npm run build:${{ matrix.agency }}
 
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Myeongvalue-Quick-Valuation-Windows-x64
-          path: desktop/dist/*.exe
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_path }}
           if-no-files-found: error
           retention-days: 30

@@ -1,0 +1,32 @@
+{
+  "appId": "kr.co.myeongvalue.quickvaluation.kodata",
+  "productName": "KoDATA IP 간이감정",
+  "artifactName": "KoDATA-Quick-Valuation-Setup-${version}.${ext}",
+  "asar": true,
+  "files": [
+    "main.js",
+    "app/**/*"
+  ],
+  "directories": {
+    "output": "dist/kodata"
+  },
+  "win": {
+    "icon": "app/icon.svg",
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      }
+    ]
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowElevation": true,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": "always",
+    "createStartMenuShortcut": true,
+    "shortcutName": "KoDATA IP 간이감정",
+    "uninstallDisplayName": "KoDATA IP 간이감정"
+  }
+}

@@ -1,50 +1,19 @@
 {
   "name": "myeongvalue-quick-valuation-desktop",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
-  "description": "명밸류 IP 간이감정 내부 사용용 Windows 데스크톱 앱",
+  "description": "기관별 IP 간이감정 내부 사용용 Windows 데스크톱 앱",
+  "author": "명밸류 파트너스",
   "main": "main.js",
   "scripts": {
-    "prepare:app": "node prepare.mjs",
-    "start": "npm run prepare:app && electron .",
-    "build:win": "npm run prepare:app && electron-builder --win nsis --x64 --publish never"
+    "start:myeongvalue": "node prepare.mjs myeongvalue && electron .",
+    "start:kodata": "node prepare.mjs kodata && electron .",
+    "build:myeongvalue": "node prepare.mjs myeongvalue && electron-builder --config electron-builder.myeongvalue.json --win nsis --x64 --publish never",
+    "build:kodata": "node prepare.mjs kodata && electron-builder --config electron-builder.kodata.json --win nsis --x64 --publish never"
   },
   "devDependencies": {
     "electron": "43.4.1",
     "electron-builder": "26.15.3",
     "xlsx": "0.18.5"
-  },
-  "build": {
-    "appId": "kr.co.myeongvalue.quickvaluation",
-    "productName": "명밸류 IP 간이감정",
-    "artifactName": "Myeongvalue-Quick-Valuation-Setup-${version}.${ext}",
-    "asar": true,
-    "files": [
-      "main.js",
-      "app/**/*"
-    ],
-    "directories": {
-      "output": "dist"
-    },
-    "win": {
-      "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        }
-      ]
-    },
-    "nsis": {
-      "oneClick": false,
-      "perMachine": false,
-      "allowElevation": true,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": "always",
-      "createStartMenuShortcut": true,
-      "shortcutName": "명밸류 IP 간이감정",
-      "uninstallDisplayName": "명밸류 IP 간이감정"
-    }
   }
 }
