@@ -11,6 +11,16 @@ on:
       - assets/kodata-logo.png
       - assets/myeongvalue-seal.png
       - .github/workflows/build-windows-installer.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - desktop/**
+      - valuation/**
+      - assets/logo.png
+      - assets/kodata-logo.png
+      - assets/myeongvalue-seal.png
+      - .github/workflows/build-windows-installer.yml
   workflow_dispatch:
 
 permissions:
