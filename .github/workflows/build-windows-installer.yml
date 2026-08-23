@@ -1,0 +1,51 @@
+name: Build unsigned Windows installer
+
+on:
+  push:
+    branches:
+      - feature/windows-desktop-installer
+    paths:
+      - desktop/**
+      - valuation/**
+      - assets/logo.png
+      - assets/kodata-logo.png
+      - assets/myeongvalue-seal.png
+      - .github/workflows/build-windows-installer.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    name: Build Windows x64 installer
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: desktop
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install build dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build unsigned NSIS installer
+        run: npm run build:win
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Myeongvalue-Quick-Valuation-Windows-x64
+          path: desktop/dist/*.exe
+          if-no-files-found: error
+          retention-days: 30
