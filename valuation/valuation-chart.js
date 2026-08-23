@@ -1,6 +1,5 @@
 /* Quick Valuation value indicator charts
    - Main 1: projected sales over the valuation cash-flow period
-   - Main 2: annual IP value contribution (discounted after-tax royalty × IP validity)
    - Sub left: recent yearly sales
    - Sub right: operating margin comparison (company vs industry)
 */
@@ -134,24 +133,6 @@
       </div>`;
   }
 
-  function buildAnnualValueCard() {
-    const sourceSeries = Array.isArray(window.quickValuationAnnualValueSeries) ? window.quickValuationAnnualValueSeries : [];
-    const meta = window.quickValuationAnnualValueMeta || null;
-    if (!sourceSeries.length) return '';
-    const series = sourceSeries.map(item => ({ label:item.period,value:item.valueEok }));
-    const total = Number.isFinite(meta?.totalEok) ? meta.totalEok : series.reduce((s,d) => s + d.value,0);
-    const badge = Number.isFinite(total) ? `<div class="myeong-chart-badge is-main">합계 ${formatNumber(total,2)}억 원</div>` : '';
-    const validityNote = meta?.validityApplied && Number.isFinite(meta.validity)
-      ? `세후 로열티수입의 현재가치에 IP유효성 ${formatNumber(meta.validity * 100,1)}%를 반영한 차년도별 가치기여액임.`
-      : '세후 로열티수입의 차년도별 현재가치를 기준으로 산출함.';
-    return `
-      <div class="myeong-chart-card myeong-chart-card-secondary">
-        <div class="myeong-chart-head"><div><div class="myeong-chart-title">차년도별 가치기여액</div><div class="myeong-chart-sub">${validityNote}</div></div>${badge}</div>
-        ${makeBarLineSvg(series,{secondary:true,height:196,barWidth:48,valueDigits:2,unitText:'단위: 억 원',ariaLabel:'차년도별 가치기여액 추이'})}
-        <div class="myeong-chart-source">* 출처: 업로드 Excel 세후 로열티수입·현가계수·IP유효성 산정값.</div>
-      </div>`;
-  }
-
   function buildSalesCard(report) {
     const reviewText = document.getElementById('reviewOpinionEdit')?.value || '';
     const series = parseSalesSeries(reviewText);
@@ -208,14 +189,13 @@
     if (reviewHeading) reviewHeading.textContent = '4. 검토의견';
 
     const projectedSalesCard = buildProjectedSalesCard();
-    const annualCard = buildAnnualValueCard();
     const salesCard = buildSalesCard(report);
     const marginCard = buildOperatingMarginCard();
-    if (!projectedSalesCard && !annualCard && !salesCard && !marginCard) return;
+    if (!projectedSalesCard && !salesCard && !marginCard) return;
 
     const section = document.createElement('section');
     section.className = 'report-section myeong-chart-section';
-    section.innerHTML = `<h2>3. 핵심 가치지표</h2><div class="myeong-chart-stack myeong-chart-stack-main">${projectedSalesCard}${annualCard}</div>${(salesCard || marginCard) ? `<div class="myeong-chart-grid-two">${salesCard}${marginCard}</div>` : ''}`;
+    section.innerHTML = `<h2>3. 핵심 가치지표</h2><div class="myeong-chart-stack myeong-chart-stack-main">${projectedSalesCard}</div>${(salesCard || marginCard) ? `<div class="myeong-chart-grid-two">${salesCard}${marginCard}</div>` : ''}`;
     summarySection.after(section);
   }
 
