@@ -409,7 +409,7 @@ function renderReport() {
       </section>
 
       <section class="report-section">
-        <div class="special-box"><div class="special-label">특이사항</div><div class="special-content"><div class="special-guide">※ ${escapeHtml(currentData.specialGuide)}</div>${escapeHtml(notes)}</div></div>
+        <div class="special-box"><div class="special-label">특이사항</div><div class="special-content"><div class="special-guide">※ ${escapeHtml(currentData.specialGuide)}</div><div class="special-notes-copy">${escapeHtml(notes)}</div></div></div>
       </section>
 
       <section class="report-section">
@@ -442,6 +442,23 @@ function renderReport() {
 
       <div class="disclaimer">${escapeHtml(currentData.disclaimer || '※ 본 간이감정 결과는 본 평가 시 산정변수 및 실사결과 등에 따라 변동될 수 있습니다.')}</div>
     </article>`;
+
+  updateValuationConsistency();
+}
+
+function updateEditablePreview(input) {
+  if (!currentData) return;
+
+  if (input === notesInput) {
+    const notesCopy = reportArea.querySelector('.special-notes-copy');
+    if (notesCopy) notesCopy.textContent = notesInput.value;
+  } else if (input === reviewInput) {
+    const reviewCopy = reportArea.querySelector('.review-copy');
+    if (reviewCopy) reviewCopy.innerHTML = buildReviewLines(reviewInput.value);
+  } else if (input === valuationAmountInput) {
+    const amountCopy = reportArea.querySelector('.value-box dd');
+    if (amountCopy) amountCopy.textContent = displayOrDash(valuationAmountInput.value);
+  }
 
   updateValuationConsistency();
 }
@@ -483,9 +500,7 @@ fileInput.addEventListener('change', async (event) => {
 });
 
 [notesInput, reviewInput, valuationAmountInput].forEach((input) => {
-  input.addEventListener('input', () => {
-    if (currentData) renderReport();
-  });
+  input.addEventListener('input', () => updateEditablePreview(input));
 });
 
 contactSelect?.addEventListener('change', () => {
