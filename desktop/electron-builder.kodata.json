@@ -2,6 +2,9 @@
   "appId": "kr.co.myeongvalue.quickvaluation.kodata",
   "productName": "KoDATA IP 간이감정",
   "artifactName": "KoDATA-Quick-Valuation-Setup-${version}.${ext}",
+  "extraMetadata": {
+    "version": "1.1.1"
+  },
   "asar": true,
   "files": [
     "main.js",

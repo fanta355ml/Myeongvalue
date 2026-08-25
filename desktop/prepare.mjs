@@ -76,6 +76,11 @@ indexHtml = indexHtml.replace(
   `<title>${agency.title}</title>`
 );
 indexHtml = indexHtml.replaceAll('href="../"', 'href="#" aria-disabled="true"');
+
+if (agencyId === 'kodata') {
+  indexHtml = indexHtml.replace('<a class="back-link" href="#" aria-disabled="true">홈으로</a>', '');
+}
+
 await writeFile(indexPath, indexHtml, 'utf8');
 
 await writeFile(
@@ -98,6 +103,13 @@ await writeFile(
 const cssPath = path.join(appDir, 'valuation', 'valuation.css');
 let css = await readFile(cssPath, 'utf8');
 css = css.replace(/^@import url\([^\n]+\);\s*/u, '');
+
+if (agencyId === 'kodata') {
+  css += '\n/* KoDATA desktop-only header */\n' +
+    'body[data-agency="kodata"] .valuation-header{background:#fff;border-bottom:1px solid #e5e7eb;backdrop-filter:none}\n' +
+    'body[data-agency="kodata"] .active-agency-name{color:#374151;border-right:0;padding-right:0}\n';
+}
+
 await writeFile(cssPath, css, 'utf8');
 
 console.log(`${agency.name} desktop app resources prepared for offline use.`);
