@@ -106,7 +106,7 @@ css = css.replace(/^@import url\([^\n]+\);\s*/u, '');
 
 if (agencyId === 'kodata') {
   css += '\n/* KoDATA desktop-only header */\n' +
-    'body[data-agency="kodata"] .valuation-header{background:#fff;border-bottom:1px solid #e5e7eb;backdrop-filter:none}\n' +
+    'body[data-agency="kodata"] .valuation-header{background:#fff;border-bottom:1px solid #d9b35f;backdrop-filter:none}\n' +
     'body[data-agency="kodata"] .active-agency-name{color:#374151;border-right:0;padding-right:0}\n';
 }
 
