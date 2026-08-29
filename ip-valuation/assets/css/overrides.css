@@ -46,7 +46,14 @@
 
 .cretop-pdf-status[data-tone="loading"] { color: #1d5f9d; }
 .cretop-pdf-status[data-tone="success"] { color: #14735a; }
+.cretop-pdf-status[data-tone="warning"] { color: #9a6700; font-weight: 700; }
 .cretop-pdf-status[data-tone="error"] { color: #b42318; font-weight: 700; }
+
+.cretop-pdf-warning[data-tone="warning"] {
+  border-color: #e2b93b;
+  background: #fff9e8;
+  color: #744f00;
+}
 
 .cretop-pdf-dialog {
   position: fixed;

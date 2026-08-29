@@ -7,6 +7,15 @@
   var pendingResult = null;
   var fileInput = null;
   var dialog = null;
+  var FINANCIAL_FIELDS = ["totalAssets", "paidInCapital", "totalEquity", "revenue", "operatingProfit", "netIncome"];
+  var FINANCIAL_LABELS = {
+    totalAssets: "총자산",
+    paidInCapital: "납입자본금",
+    totalEquity: "자본총계",
+    revenue: "매출액",
+    operatingProfit: "영업이익",
+    netIncome: "순이익",
+  };
 
   function compact(value) {
     return String(value || "").replace(/\s+/g, " ").trim();
@@ -292,18 +301,70 @@
       .filter(function (row) { return row && /^\d{4}-\d{2}-\d{2}$/.test(row.closingDate); });
   }
 
-  function mergeFinancialRows(existing, imported) {
+  function sameFinancialValue(left, right) {
+    return Math.abs(left - right) <= 0.01;
+  }
+
+  function reconcileFinancialRows(existing, imported) {
     var byDate = new Map();
+    var conflicts = [];
+    var matchedYears = [];
+    var addedYears = [];
+    var filledFields = [];
     existing.forEach(function (row) { byDate.set(row.closingDate, row); });
     imported.forEach(function (row) {
-      var previous = byDate.get(row.closingDate) || {};
-      var next = Object.assign({}, previous, row);
-      ["totalAssets", "paidInCapital", "totalEquity", "revenue", "operatingProfit", "netIncome"].forEach(function (key) {
-        if (row[key] == null && previous[key] != null) next[key] = previous[key];
+      var previous = byDate.get(row.closingDate);
+      if (!previous) {
+        byDate.set(row.closingDate, row);
+        addedYears.push(row.closingDate);
+        return;
+      }
+      var next = Object.assign({}, previous);
+      var yearMatched = false;
+      FINANCIAL_FIELDS.forEach(function (key) {
+        var pastedValue = previous[key];
+        var pdfValue = row[key];
+        if (pdfValue == null) return;
+        if (pastedValue == null) {
+          next[key] = pdfValue;
+          filledFields.push({ closingDate: row.closingDate, key: key, value: pdfValue });
+          return;
+        }
+        if (sameFinancialValue(pastedValue, pdfValue)) {
+          yearMatched = true;
+          return;
+        }
+        conflicts.push({
+          closingDate: row.closingDate,
+          key: key,
+          label: FINANCIAL_LABELS[key],
+          pastedValue: pastedValue,
+          pdfValue: pdfValue,
+        });
       });
+      if (yearMatched && !matchedYears.includes(row.closingDate)) matchedYears.push(row.closingDate);
       byDate.set(row.closingDate, next);
     });
-    return Array.from(byDate.values()).sort(function (left, right) { return right.closingDate.localeCompare(left.closingDate); }).slice(0, 5);
+    return {
+      rows: Array.from(byDate.values()).sort(function (left, right) { return right.closingDate.localeCompare(left.closingDate); }).slice(0, 5),
+      conflicts: conflicts,
+      matchedYears: matchedYears,
+      addedYears: addedYears,
+      filledFields: filledFields,
+    };
+  }
+
+  function financialConflictMessage(reconciliation) {
+    if (!reconciliation.conflicts.length) {
+      return reconciliation.matchedYears.length
+        ? "붙여넣기 자료와 PDF의 중복 " + reconciliation.matchedYears.length + "개년을 교차검증했으며 값이 일치합니다. 붙여넣기의 추가 연도는 그대로 유지합니다."
+        : "기존 붙여넣기 자료와 PDF 자료를 결산일 기준으로 병합하며, 붙여넣기의 추가 연도는 그대로 유지합니다.";
+    }
+    var details = reconciliation.conflicts.slice(0, 6).map(function (item) {
+      return item.closingDate.slice(0, 4) + "년 " + item.label + "(붙여넣기 " + item.pastedValue.toLocaleString("ko-KR") + " / PDF " + item.pdfValue.toLocaleString("ko-KR") + ")";
+    }).join(", ");
+    var remainder = reconciliation.conflicts.length > 6 ? " 외 " + (reconciliation.conflicts.length - 6) + "건" : "";
+    return "주의: " + details + remainder + "이 서로 다릅니다. 기존 붙여넣기 값을 유지했으니 원자료를 확인해 주세요.";
   }
 
   function currentRatioRows() {
@@ -347,7 +408,9 @@
     var replaceSample = currentFinancialsLookLikeSample();
     var existingRatios = currentRatioRows();
     document.documentElement.dataset.cretopPdfMerge = replaceSample ? "replace" : "merge";
-    var appliedFinancials = replaceSample ? result.financials : mergeFinancialRows(currentDetailedFinancialRows(), result.financials);
+    var reconciliation = replaceSample ? { rows: result.financials, conflicts: [], matchedYears: [], addedYears: [], filledFields: [] }
+      : reconcileFinancialRows(currentDetailedFinancialRows(), result.financials);
+    var appliedFinancials = reconciliation.rows;
     var appliedRatios = ratiosLookLikeSample(existingRatios) ? result.ratios : mergeRatioRows(existingRatios, result.ratios);
     window.CRETOP_PDF_IMPORT_STATE = result;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(result));
@@ -375,7 +438,9 @@
     updateAvailabilityControls({ financials: appliedFinancials });
     delete document.documentElement.dataset.cretopPdfApplying;
     delete document.documentElement.dataset.cretopPdfMerge;
-    showInlineStatus(result.financials.length + "개년 재무정보와 주요 판매처 " + result.majorCustomers.length + "곳을 반영했습니다. 가치산정 결과는 다시 확인해 주세요.", "success");
+    var statusMessage = appliedFinancials.length + "개년 재무정보와 주요 판매처 " + result.majorCustomers.length + "곳을 반영했습니다. "
+      + financialConflictMessage(reconciliation);
+    showInlineStatus(statusMessage, reconciliation.conflicts.length ? "warning" : "success");
   }
 
   function consecutivePositiveYears(rows) {
@@ -529,6 +594,14 @@
       empty.textContent = "주요 판매처 미확인 · 기존 자동의견 유지";
       customerList.appendChild(empty);
     }
+    var mergeWarning = dialog.querySelector("[data-pdf-merge-warning]");
+    var previewReconciliation = currentFinancialsLookLikeSample()
+      ? { conflicts: [], matchedYears: [], addedYears: [], filledFields: [] }
+      : reconcileFinancialRows(currentDetailedFinancialRows(), result.financials);
+    mergeWarning.textContent = currentFinancialsLookLikeSample()
+      ? "초기 예시 재무자료는 PDF 자료로 교체합니다."
+      : financialConflictMessage(previewReconciliation);
+    mergeWarning.parentElement.dataset.tone = previewReconciliation.conflicts.length ? "warning" : "info";
     dialog.hidden = false;
     dialog.querySelector("[data-pdf-apply]").focus();
   }
@@ -537,7 +610,7 @@
     dialog = document.createElement("div");
     dialog.className = "cretop-pdf-dialog";
     dialog.hidden = true;
-    dialog.innerHTML = '<div class="cretop-pdf-backdrop" data-pdf-close></div><section role="dialog" aria-modal="true" aria-labelledby="cretopPdfTitle"><div class="cretop-pdf-dialog-head"><div><span>CRET0P PDF IMPORT</span><h2 id="cretopPdfTitle">기업종합보고서 인식 결과</h2><p data-pdf-file></p></div><button type="button" data-pdf-close aria-label="닫기">×</button></div><div class="cretop-pdf-facts" data-pdf-facts></div><div class="cretop-pdf-preview-grid"><article><h3>요약 재무정보 <small>단위: 백만원</small></h3><div class="cretop-pdf-table-wrap"><table><thead><tr><th>결산일</th><th>총자산</th><th>자본총계</th><th>매출액</th><th>영업이익</th><th>순이익</th></tr></thead><tbody data-pdf-financials></tbody></table></div></article><article><h3>자동의견 보강용 주요 판매처</h3><ul data-pdf-customers></ul><p>판매처만 보조 근거로 사용하며 구매처·기타는 제외합니다.</p></article></div><div class="cretop-pdf-warning"><strong>적용 전 확인</strong><span>기존 실데이터가 있으면 결산일 기준으로 병합하고, 초기 예시값이면 PDF 자료로 교체합니다. 공란은 기존 확정값을 지우지 않습니다.</span></div><div class="cretop-pdf-dialog-actions"><button type="button" data-pdf-close>취소</button><button type="button" class="primary" data-pdf-apply>확인한 정보 적용</button></div></section>';
+    dialog.innerHTML = '<div class="cretop-pdf-backdrop" data-pdf-close></div><section role="dialog" aria-modal="true" aria-labelledby="cretopPdfTitle"><div class="cretop-pdf-dialog-head"><div><span>CRET0P PDF IMPORT</span><h2 id="cretopPdfTitle">기업종합보고서 인식 결과</h2><p data-pdf-file></p></div><button type="button" data-pdf-close aria-label="닫기">×</button></div><div class="cretop-pdf-facts" data-pdf-facts></div><div class="cretop-pdf-preview-grid"><article><h3>요약 재무정보 <small>단위: 백만원</small></h3><div class="cretop-pdf-table-wrap"><table><thead><tr><th>결산일</th><th>총자산</th><th>자본총계</th><th>매출액</th><th>영업이익</th><th>순이익</th></tr></thead><tbody data-pdf-financials></tbody></table></div></article><article><h3>자동의견 보강용 주요 판매처</h3><ul data-pdf-customers></ul><p>판매처만 보조 근거로 사용하며 구매처·기타는 제외합니다.</p></article></div><div class="cretop-pdf-warning"><strong>적용 전 확인</strong><span data-pdf-merge-warning>기존 붙여넣기 자료와 결산일 기준으로 교차검증합니다.</span></div><div class="cretop-pdf-dialog-actions"><button type="button" data-pdf-close>취소</button><button type="button" class="primary" data-pdf-apply>확인한 정보 적용</button></div></section>';
     dialog.addEventListener("click", function (event) {
       if (event.target.closest("[data-pdf-close]")) dialog.hidden = true;
       if (event.target.closest("[data-pdf-apply]") && pendingResult) {
@@ -643,7 +716,10 @@
   }
 
   installReviewOpinionEnhancer();
-  window.CretopPdfImportParser = { parseExtractedPages: parseExtractedPages };
+  window.CretopPdfImportParser = {
+    parseExtractedPages: parseExtractedPages,
+    reconcileFinancialRows: reconcileFinancialRows,
+  };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot, { once: true });
   else boot();
 })();

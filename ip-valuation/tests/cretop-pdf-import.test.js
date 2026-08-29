@@ -113,3 +113,62 @@ test("주요 판매처 근거는 같은 기업의 자동의견에만 추가한�
   assert.match(matching, /아이앤씨.*최초 매출액 추정의 보조 근거/);
   assert.doesNotMatch(different, /아이앤씨/);
 });
+
+test("PDF 3개년과 붙여넣기 5개년을 교차검증하여 추가 연도를 유지한다", () => {
+  const parser = loadParser();
+  const existing = [2021, 2022, 2023, 2024, 2025].map((year) => ({
+    closingDate: `${year}-12-31`,
+    totalAssets: year * 10,
+    paidInCapital: 100,
+    totalEquity: year === 2021 ? -1097 : year * 2,
+    revenue: year * 20,
+    operatingProfit: year,
+    netIncome: year - 1,
+  }));
+  const imported = existing.slice(-3).map((row) => ({ ...row }));
+  const result = parser.reconcileFinancialRows(existing, imported);
+
+  assert.equal(result.rows.length, 5);
+  assert.equal(result.conflicts.length, 0);
+  assert.equal(result.matchedYears.length, 3);
+  assert.equal(result.rows.find((row) => row.closingDate === "2021-12-31").totalEquity, -1097);
+});
+
+test("중복 연도 값이 다르면 붙여넣기 값을 유지하고 충돌을 반환한다", () => {
+  const parser = loadParser();
+  const existing = [{
+    closingDate: "2025-12-31",
+    totalAssets: 1000,
+    paidInCapital: 100,
+    totalEquity: 300,
+    revenue: 700,
+    operatingProfit: 50,
+    netIncome: 40,
+  }];
+  const imported = [{ ...existing[0], revenue: 750, netIncome: 45 }];
+  const result = parser.reconcileFinancialRows(existing, imported);
+
+  assert.equal(result.rows[0].revenue, 700);
+  assert.equal(result.rows[0].netIncome, 40);
+  assert.equal(result.conflicts.length, 2);
+  assert.equal(result.conflicts[0].closingDate, "2025-12-31");
+});
+
+test("붙여넣기 공란은 같은 연도의 PDF 값으로 보충한다", () => {
+  const parser = loadParser();
+  const existing = [{
+    closingDate: "2025-12-31",
+    totalAssets: 1000,
+    paidInCapital: null,
+    totalEquity: 300,
+    revenue: 700,
+    operatingProfit: 50,
+    netIncome: 40,
+  }];
+  const imported = [{ ...existing[0], paidInCapital: 120 }];
+  const result = parser.reconcileFinancialRows(existing, imported);
+
+  assert.equal(result.rows[0].paidInCapital, 120);
+  assert.equal(result.filledFields.length, 1);
+  assert.equal(result.conflicts.length, 0);
+});

@@ -938,6 +938,10 @@ function availableConsecutiveYears(e, t, n = 1 / 0) {
     return Math.min(5, i);
 }
 
+function hasUsableEquityData(e) {
+    return Number.isFinite(e?.totalAssets) && e.totalAssets > 0 && Number.isFinite(e.totalEquity);
+}
+
 function Cg(e, t) {
     let n = Math.max(0, e), r = (t === `corporation` ? [ {
         cap: 200,
@@ -1187,7 +1191,7 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
     let zt = Qp(a, c), Bt = c.historicalSalesInputMode ?? `ratio`, Vt = c.historicalSalesShareByYear ?? {}, Ht = Zp(i, a), Ut = Bt === `ratio` ? Ht.map(e => ({
         ...e,
         productRevenue: e.totalRevenue * (Vt[e.year] ?? zt) / 100
-    })) : Ht, Wt = [ ...Ut ].sort((e, t) => e.year - t.year).at(-1), Gt = Wt ? Vt[Wt.year] ?? zt : zt, Kt = Wt?.productRevenue ?? 0, ii = availableConsecutiveYears(Ut, T === `productRevenue` ? `productRevenue` : `totalRevenue`), ai = availableConsecutiveYears(o, `revenue`, M), oi = [ ...i ].filter(e => e.totalAssets > 0 && e.totalEquity >= 0).sort((e, t) => t.closingDate.localeCompare(e.closingDate)), si = Math.min(5, oi.length);
+    })) : Ht, Wt = [ ...Ut ].sort((e, t) => e.year - t.year).at(-1), Gt = Wt ? Vt[Wt.year] ?? zt : zt, Kt = Wt?.productRevenue ?? 0, ii = availableConsecutiveYears(Ut, T === `productRevenue` ? `productRevenue` : `totalRevenue`), ai = availableConsecutiveYears(o, `revenue`, M), oi = [ ...i ].filter(hasUsableEquityData).sort((e, t) => t.closingDate.localeCompare(e.closingDate)), si = Math.min(5, oi.length);
     (0, C.useEffect)(() => {
         ii >= 2 && D > ii && O(ii);
     }, [ ii, D ]), (0, C.useEffect)(() => {
