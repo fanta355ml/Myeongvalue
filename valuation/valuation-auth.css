@@ -263,6 +263,22 @@ body.auth-locked {
   line-height: 1.55;
 }
 
+.agency-support-contact {
+  margin: 12px 0 0;
+  color: #c4cfdf;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.agency-support-contact a {
+  color: #f3d58a;
+  text-decoration: none;
+}
+
+.agency-support-contact a:hover {
+  text-decoration: underline;
+}
+
 .agency-switch-link {
   border: 0;
   background: transparent;
