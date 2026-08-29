@@ -1,0 +1,58 @@
+/* 2026-08-29 local-index print compatibility */
+      @media print {
+        html,
+        body {
+          background: #fff !important;
+        }
+
+        .quick-report-paper {
+          background: #fff !important;
+        }
+      }
+
+/* 2026-08-29 second-pass interface refinements */
+      .stage-heading h1 {
+        font-weight: 800;
+      }
+
+      .evaluation-type-card > select {
+        margin-left: 10px;
+      }
+
+      .brand-mark img {
+        content: url("../../../assets/myeong-symbol-gold.png");
+        object-fit: contain;
+        border-radius: 0;
+        width: 29px;
+        height: 29px;
+      }
+
+      .brand span {
+        color: #d8bd78;
+        letter-spacing: 0.08em;
+        font-size: 6.6px;
+      }
+
+/* 2026-08-29 let the rating section use remaining print space. */
+      @media print {
+        .myeong-rating-section {
+          break-before: auto !important;
+          page-break-before: auto !important;
+        }
+
+        .myeong-rating-section > h2,
+        .myeong-rating-note {
+          break-after: avoid-page !important;
+          page-break-after: avoid !important;
+        }
+
+        .myeong-rating-layout {
+          break-before: avoid-page;
+          page-break-before: avoid;
+        }
+
+        .myeong-rating-card {
+          break-inside: avoid-page !important;
+          page-break-inside: avoid !important;
+        }
+      }
