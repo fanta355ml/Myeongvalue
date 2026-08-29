@@ -193,3 +193,98 @@
           page-break-inside: avoid !important;
         }
       }
+
+/* 2026-08-29 valuation workspace follow-up */
+.sticky-summary {
+  grid-template-columns: 190px 145px 82px 92px 82px 70px 120px 60px 75px 240px 92px;
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.sticky-summary .cash-flow-summary strong {
+  color: #174d68;
+  font-size: 9.5px;
+}
+
+.average-profit-chart {
+  background-image: none;
+}
+
+.average-profit-chart::before,
+.average-profit-chart::after {
+  content: none;
+}
+
+.competitor-import-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.competitor-import-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 12px;
+  border: 1px solid #d8e2ec;
+  border-radius: 9px;
+  background: #f8fbfe;
+}
+
+.competitor-import-item strong,
+.competitor-import-item small {
+  display: block;
+}
+
+.competitor-import-item strong { color: #1c3853; font-size: 11px; }
+.competitor-import-item small { margin-top: 3px; color: #718094; font-size: 9px; }
+
+.competitor-pdf-button {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border: 1px solid #224d73;
+  border-radius: 7px;
+  background: #fff;
+  color: #224d73;
+  font-size: 9px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.competitor-pdf-button:hover { background: #eef5fb; }
+.competitor-pdf-button input { display: none; }
+
+.competitor-horizontal-table { min-width: 860px; }
+.competitor-horizontal-table .competitor-name-cell { width: 132px; }
+.competitor-horizontal-table .competitor-source-cell {
+  width: 145px;
+  color: #607186;
+  font-size: 8.5px;
+  line-height: 1.4;
+}
+
+.competitor-horizontal-table .competitor-name-cell input[readonly] {
+  border-color: #dce4ec;
+  background: #f2f5f8;
+  color: #435267;
+}
+
+.quickvalue-rating-sections {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 10px 12px;
+  margin-top: 10px;
+}
+
+.quickvalue-rating-section:nth-child(3) { grid-column: 2; grid-row: 2; }
+.quickvalue-rating-section:nth-child(4) { grid-column: 1; grid-row: 2; }
+.rating-input-card .rating-footnote { margin-top: 8px; }
+
+@media (max-width: 900px) {
+  .competitor-import-grid,
+  .quickvalue-rating-sections { grid-template-columns: 1fr; }
+  .quickvalue-rating-section:nth-child(3),
+  .quickvalue-rating-section:nth-child(4) { grid-column: auto; grid-row: auto; }
+}

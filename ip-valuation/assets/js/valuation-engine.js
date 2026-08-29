@@ -942,6 +942,12 @@ function hasUsableEquityData(e) {
     return Number.isFinite(e?.totalAssets) && e.totalAssets > 0 && Number.isFinite(e.totalEquity);
 }
 
+function formatStickyCashFlowPeriod(e) {
+    let t = Array.isArray(e?.cashFlows) ? e.cashFlows : [], n = t[0]?.period?.split(`~`)[0], r = t.at(-1)?.period?.split(`~`)[1];
+    if (!n || !r) return `산출 전`;
+    return `${e.economicLifeLabel || `0년 0개월`} : ${n.replaceAll(`-`, `.`)}.~${r.replaceAll(`-`, `.`)}.`;
+}
+
 function Cg(e, t) {
     let n = Math.max(0, e), r = (t === `corporation` ? [ {
         cap: 200,

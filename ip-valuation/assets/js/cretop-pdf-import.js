@@ -217,6 +217,20 @@
     };
   }
 
+  function normalizeCompetitorRatios(result) {
+    var ratios = Array.isArray(result && result.ratios) ? result.ratios
+      .filter(function (row) { return row && /^\d{4}-\d{2}-\d{2}$/.test(row.date); })
+      .sort(function (left, right) { return left.date.localeCompare(right.date); })
+      .slice(-3) : [];
+    return {
+      companyName: compact(result && result.profile && result.profile.companyName) || "경쟁기업",
+      years: ratios.map(function (row) { return Number(row.date.slice(0, 4)); }),
+      cost: ratios.map(function (row) { return row.cost == null ? 0 : row.cost; }),
+      sga: ratios.map(function (row) { return row.sga == null ? 0 : row.sga; }),
+      fileName: compact(result && result.fileName),
+    };
+  }
+
   function companyPasteText(result) {
     var profile = result.profile;
     var lines = [];
@@ -631,7 +645,7 @@
     status.dataset.tone = tone || "info";
   }
 
-  async function extractPdf(file) {
+  async function extractPdf(file, onProgress) {
     if (!window.pdfjsLib) throw new Error("PDF 처리 모듈을 불러오지 못했습니다. 페이지를 새로고침해 주세요.");
     if (file.size > MAX_FILE_SIZE) throw new Error("PDF는 30MB 이하 파일만 업로드할 수 있습니다.");
     window.pdfjsLib.GlobalWorkerOptions.workerSrc = "./assets/vendor/pdfjs/pdf.worker.min.js";
@@ -641,7 +655,9 @@
     if (pdf.numPages > MAX_PAGES) throw new Error("80쪽 이하의 크레탑 기업종합보고서만 처리할 수 있습니다.");
     var pages = [];
     for (var pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
-      showInlineStatus("PDF " + pageNumber + "/" + pdf.numPages + "쪽을 확인하고 있습니다.", "loading");
+      var progressMessage = "PDF " + pageNumber + "/" + pdf.numPages + "쪽을 확인하고 있습니다.";
+      if (typeof onProgress === "function") onProgress(progressMessage);
+      else showInlineStatus(progressMessage, "loading");
       var page = await pdf.getPage(pageNumber);
       var content = await page.getTextContent({ normalizeWhitespace: true });
       var grouped = new Map();
@@ -719,6 +735,8 @@
   window.CretopPdfImportParser = {
     parseExtractedPages: parseExtractedPages,
     reconcileFinancialRows: reconcileFinancialRows,
+    normalizeCompetitorRatios: normalizeCompetitorRatios,
+    extractPdf: extractPdf,
   };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot, { once: true });
   else boot();

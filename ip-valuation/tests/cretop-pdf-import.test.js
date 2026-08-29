@@ -172,3 +172,22 @@ test("붙여넣기 공란은 같은 연도의 PDF 값으로 보충한다", () =>
   assert.equal(result.filledFields.length, 1);
   assert.equal(result.conflicts.length, 0);
 });
+
+test("경쟁기업 PDF 비율은 최근 3개년 직접입력 구조로 정규화한다", () => {
+  const parser = loadParser();
+  const normalized = parser.normalizeCompetitorRatios({
+    fileName: "경쟁기업.pdf",
+    profile: { companyName: "(주)경쟁테크" },
+    ratios: [
+      { date: "2022-12-31", cost: 80, sga: 10 },
+      { date: "2023-12-31", cost: 81, sga: 9 },
+      { date: "2024-12-31", cost: 82, sga: 8 },
+      { date: "2025-12-31", cost: 83, sga: 7 },
+    ],
+  });
+
+  assert.equal(normalized.companyName, "(주)경쟁테크");
+  assert.deepEqual(Array.from(normalized.years), [2023, 2024, 2025]);
+  assert.deepEqual(Array.from(normalized.cost), [81, 82, 83]);
+  assert.deepEqual(Array.from(normalized.sga), [9, 8, 7]);
+});

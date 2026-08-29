@@ -76,15 +76,18 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
     } ]), [B, V] = (0, C.useState)([ 2023, 2024, 2025 ]), [ne, H] = (0, C.useState)([ {
         name: `사업화주체`,
         cost: [ 92.97, 106.14, 122.14 ],
-        sga: [ 8.22, 12.06, 22.13 ]
+        sga: [ 8.22, 12.06, 22.13 ],
+        source: `사업화주체 비율표 연계`
     }, {
         name: `경쟁기업 A`,
         cost: [ 98.33, 96.49, 85.32 ],
-        sga: [ 12.46, 9.19, 8.72 ]
+        sga: [ 12.46, 9.19, 8.72 ],
+        source: `직접입력`
     }, {
         name: `경쟁기업 B`,
         cost: [ 116.69, 93.96, 92.24 ],
-        sga: [ 5.43, 8.26, 4.89 ]
+        sga: [ 5.43, 8.26, 4.89 ],
+        source: `직접입력`
     } ]);
     Sm(pm, {
         source: g,
@@ -329,6 +332,32 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
         c.forEach(e => {
             e.totalRevenue ||= e.productRevenue + e.constructionRevenue + e.otherRevenue + e.rentalRevenue + e.wholesaleRetailRevenue;
         }), i(c.sort((e, t) => e.year - t.year)), A(e), h(`${c.length}개년 매출구성 ${l}개 항목을 인식했습니다. 천 원 원문을 백만 원으로 변환하고 최우측 수치를 ${s.at(-1)}년으로 배정했습니다.`);
+    };
+    let competitionRatioByYear = new Map(R.map(e => [ Number(e.date.slice(0, 4)), e ])), competitionRows = ne.map((e, t) => t ? {
+        ...e,
+        source: e.source || `직접입력`
+    } : {
+        ...e,
+        cost: B.map((t, n) => competitionRatioByYear.get(t)?.cost ?? e.cost[n] ?? 0),
+        sga: B.map((t, n) => competitionRatioByYear.get(t)?.sga ?? e.sga[n] ?? 0),
+        source: `사업화주체 비율표 연계`
+    }), importCompetitorPdf = async (e, t) => {
+        if (!t) return;
+        try {
+            let n = window.CretopPdfImportParser;
+            if (!n?.extractPdf || !n?.normalizeCompetitorRatios) throw new Error(`PDF 인식 모듈을 불러오지 못했습니다.`);
+            let r = await n.extractPdf(t, t => h(`${ne[e]?.name || `경쟁기업`} · ${t}`)), i = n.normalizeCompetitorRatios(r);
+            if (!i.years.length) throw new Error(`기업종합보고서에서 원가율·판관비율을 찾지 못했습니다.`);
+            V(i.years), H(t => t.map((t, n) => n === e ? {
+                ...t,
+                name: i.companyName || t.name,
+                cost: i.cost,
+                sga: i.sga,
+                source: `CRET0P PDF · ${i.fileName || `업로드 완료`}`
+            } : t)), h(`${i.companyName}의 ${i.years.length}개년 원가율·판관비율을 PDF에서 인식했습니다. 아래 표에서 직접 수정할 수 있습니다.`);
+        } catch (e) {
+            h(e instanceof Error ? e.message : `경쟁기업 PDF를 읽지 못했습니다.`);
+        }
     };
     return (0, W.jsxs)(`section`, {
         className: `benchmark-workspace`,
@@ -868,8 +897,32 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
                         }) ]
                     }), (0, W.jsx)(`span`, {
                         className: `source-chip`,
-                        children: `최근 3개년 평균 자동계산`
+                        children: `PDF 업로드 또는 직접입력`
                     }) ]
+                }), (0, W.jsx)(`div`, {
+                    className: `competitor-import-grid`,
+                    children: competitionRows.slice(1).map((e, t) => (0, W.jsxs)(`div`, {
+                        className: `competitor-import-item`,
+                        children: [ (0, W.jsxs)(`div`, {
+                            children: [ (0, W.jsx)(`strong`, {
+                                children: e.name
+                            }), (0, W.jsx)(`small`, {
+                                children: e.source || `직접입력`
+                            }) ]
+                        }), (0, W.jsxs)(`label`, {
+                            className: `competitor-pdf-button`,
+                            children: [ `크레탑 PDF 업로드`, (0, W.jsx)(`input`, {
+                                type: `file`,
+                                accept: `.pdf,application/pdf`,
+                                "aria-label": `${e.name} 크레탑 기업종합보고서 PDF 업로드`,
+                                onChange: async e => {
+                                    let n = e.target.files?.[0];
+                                    e.target.value = ``;
+                                    await importCompetitorPdf(t + 1, n);
+                                }
+                            }) ]
+                        }) ]
+                    }, `${e.name}-${t}`))
                 }), (0, W.jsx)(`div`, {
                     className: `competitor-table-wrap`,
                     children: (0, W.jsxs)(`table`, {
@@ -877,9 +930,11 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
                         children: [ (0, W.jsx)(`thead`, {
                             children: (0, W.jsxs)(`tr`, {
                                 children: [ (0, W.jsx)(`th`, {
-                                    children: `구분`
-                                }), (0, W.jsx)(`th`, {
                                     children: `기업`
+                                }), (0, W.jsx)(`th`, {
+                                    children: `입력근거`
+                                }), (0, W.jsx)(`th`, {
+                                    children: `구분`
                                 }), B.map((e, t) => (0, W.jsxs)(`th`, {
                                     children: [ (0, W.jsx)(`input`, {
                                         type: `number`,
@@ -892,37 +947,47 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
                                 }) ]
                             })
                         }), (0, W.jsx)(`tbody`, {
-                            children: [ `cost`, `sga` ].flatMap(e => ne.map((t, n) => (0, W.jsxs)(`tr`, {
-                                children: [ (0, W.jsx)(`th`, {
-                                    children: n === 0 ? e === `cost` ? `원가비율` : `판관비율` : ``
-                                }), (0, W.jsx)(`td`, {
+                            children: competitionRows.flatMap((e, t) => [ `cost`, `sga` ].map((n, r) => (0, W.jsxs)(`tr`, {
+                                children: [ r === 0 && (0, W.jsx)(`th`, {
+                                    rowSpan: 2,
+                                    className: `competitor-name-cell`,
                                     children: (0, W.jsx)(`input`, {
-                                        value: t.name,
-                                        "aria-label": `${e === `cost` ? `원가비율` : `판관비율`} ${n + 1}번째 기업명`,
-                                        onChange: e => H(t => t.map((t, r) => r === n ? {
-                                            ...t,
+                                        value: e.name,
+                                        readOnly: t === 0,
+                                        "aria-label": `${t + 1}번째 기업명`,
+                                        onChange: e => H(n => n.map((n, r) => r === t ? {
+                                            ...n,
                                             name: e.target.value
-                                        } : t))
+                                        } : n))
                                     })
-                                }), t[e].map((t, r) => (0, W.jsx)(`td`, {
-                                    children: (0, W.jsx)(B_, {
-                                        value: t,
-                                        onChange: t => H(i => i.map((i, a) => a === n ? {
+                                }), r === 0 && (0, W.jsx)(`td`, {
+                                    rowSpan: 2,
+                                    className: `competitor-source-cell`,
+                                    children: e.source || `직접입력`
+                                }), (0, W.jsx)(`th`, {
+                                    children: n === `cost` ? `원가비율` : `판관비율`
+                                }), e[n].map((e, r) => (0, W.jsx)(`td`, {
+                                    children: t === 0 ? (0, W.jsxs)(`strong`, {
+                                        children: [ Number(e || 0).toFixed(2), `%` ]
+                                    }) : (0, W.jsx)(B_, {
+                                        value: e,
+                                        onChange: e => H(i => i.map((i, a) => a === t ? {
                                             ...i,
-                                            [e]: i[e].map((e, n) => n === r ? t : e)
+                                            source: `직접입력`,
+                                            [n]: i[n].map((t, n) => n === r ? e : t)
                                         } : i))
                                     })
                                 }, r)), (0, W.jsx)(`td`, {
                                     children: (0, W.jsxs)(`strong`, {
-                                        children: [ M_(t[e]).toFixed(2), `%` ]
+                                        children: [ M_(e[n]).toFixed(2), `%` ]
                                     })
                                 }) ]
-                            }, `${e}-${n}`)))
+                            }, `${t}-${n}`)))
                         }) ]
                     })
                 }), (0, W.jsx)(`p`, {
                     className: `card-help`,
-                    children: `평가자(PM)가 비교연도, 사업화주체·경쟁기업명, 원가비율과 판관비율을 항목별로 직접 입력합니다. 최근 3개년 평균은 입력 즉시 자동 계산됩니다.`
+                    children: `사업화주체는 위 비율표와 자동 연계됩니다. 경쟁기업은 크레탑 기업종합보고서 PDF에서 최근 비율을 인식하거나 표에서 직접 입력할 수 있으며, 평균은 입력 즉시 자동 계산됩니다.`
                 }) ]
             }), (0, W.jsxs)(`article`, {
                 className: `stage-card span-2 market-card`,
@@ -1389,6 +1454,7 @@ function U_({metrics: e, years: t}) {
         className: `average-profitability`,
         children: [ (0, W.jsxs)(`div`, {
             className: `average-profit-chart`,
+            "aria-label": `사업화주체와 동업종의 원가비율·판관비율·영업이익률 막대그래프`,
             children: [ (0, W.jsx)(`div`, {
                 className: `average-zero-axis`,
                 children: (0, W.jsx)(`span`, {
