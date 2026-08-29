@@ -13,7 +13,7 @@ const QUICK_VALUATION_AGENCIES = {
   'myeongvalue-admin': {
     id: 'myeongvalue-admin',
     kind: 'myeongvalue',
-    name: '명밸류 파트너스 관리자',
+    name: '관리자',
     institutionName: '명밸류 파트너스',
     reportName: '명밸류 파트너스',
     subline: 'MYEONG VALUE PARTNERS · IP & TECHNOLOGY VALUATION',
