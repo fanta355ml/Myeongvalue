@@ -1,10 +1,13 @@
 (function () {
   const STORAGE_KEY = 'myeongvalue-access-deadlines-v1';
   const ADMIN_SESSION_KEY = 'myeongvalue-admin-session-v1';
+  const DEFAULT_DEADLINES = { kodata: '2026-12-31' };
 
   function readDeadlines() {
     try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored === null) return { ...DEFAULT_DEADLINES };
+      const saved = JSON.parse(stored);
       return saved && typeof saved === 'object' ? saved : {};
     } catch (error) {
       return {};
