@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>기관별 접속기한 관리 | 명밸류 파트너스</title>
+  <link rel="icon" href="../assets/logo.png">
+  <link rel="stylesheet" href="access-admin.css">
+</head>
+<body class="admin-loading">
+  <header class="admin-header">
+    <a class="admin-brand" href="../">
+      <img src="../assets/logo.png" alt="명밸류 파트너스">
+      <div><strong>명밸류 파트너스</strong><span>ACCESS ADMINISTRATION</span></div>
+    </a>
+    <button id="adminLogout" class="logout-button" type="button">관리자 로그아웃</button>
+  </header>
+
+  <main class="admin-shell">
+    <section class="admin-hero">
+      <p class="eyebrow">INSTITUTION ACCESS CONTROL</p>
+      <h1>기관별 접속기한 관리</h1>
+      <p>각 기관의 접속 종료일을 지정합니다. 날짜를 비워 두면 해당 기관은 무기한 접속할 수 있습니다.</p>
+      <nav class="portal-links" aria-label="시스템 바로가기">
+        <a href="../">홈페이지로 가기</a>
+        <a href="../valuation/">퀵밸류로 가기</a>
+        <a href="../ip-valuation/">IP 가치평가 플랫폼으로 가기</a>
+      </nav>
+    </section>
+
+    <section class="deadline-panel" aria-labelledby="deadlineTitle">
+      <div class="panel-title">
+        <div>
+          <p class="eyebrow">ACCESS DEADLINE</p>
+          <h2 id="deadlineTitle">접속기한 설정</h2>
+        </div>
+        <span class="browser-badge">현재 브라우저 기준</span>
+      </div>
+
+      <div class="agency-deadline-list">
+        <article class="agency-deadline-card" data-agency="myeongvalue">
+          <div class="agency-identity">
+            <img src="../assets/logo.png" alt="명밸류 파트너스">
+            <div><strong>명밸류 파트너스</strong><span>MYEONG VALUE PARTNERS</span></div>
+          </div>
+          <div class="deadline-control">
+            <label for="deadline-myeongvalue">접속 종료일</label>
+            <div><input id="deadline-myeongvalue" type="date"><button type="button" data-clear>무기한</button></div>
+            <p class="deadline-status" data-status aria-live="polite"></p>
+          </div>
+        </article>
+
+        <article class="agency-deadline-card" data-agency="kodata">
+          <div class="agency-identity is-logo-wide">
+            <img src="../assets/kodata-logo.png" alt="KODATA">
+            <div><strong>한국평가데이터(주)</strong><span>KOREA RATING &amp; DATA</span></div>
+          </div>
+          <div class="deadline-control">
+            <label for="deadline-kodata">접속 종료일</label>
+            <div><input id="deadline-kodata" type="date"><button type="button" data-clear>무기한</button></div>
+            <p class="deadline-status" data-status aria-live="polite"></p>
+          </div>
+        </article>
+
+        <article class="agency-deadline-card" data-agency="juhae">
+          <div class="agency-identity is-logo-wide">
+            <img src="../assets/juhae-logo.png" alt="JUHAE">
+            <div><strong>주해</strong><span>JUHAE IP &amp; TECHNOLOGY</span></div>
+          </div>
+          <div class="deadline-control">
+            <label for="deadline-juhae">접속 종료일</label>
+            <div><input id="deadline-juhae" type="date"><button type="button" data-clear>무기한</button></div>
+            <p class="deadline-status" data-status aria-live="polite"></p>
+          </div>
+        </article>
+      </div>
+
+      <div class="panel-actions">
+        <p>※ 지정일의 23시 59분까지 접속할 수 있으며 관리자 계정에는 접속기한이 적용되지 않습니다.</p>
+        <button id="saveDeadlines" class="save-button" type="button">접속기한 저장</button>
+      </div>
+      <div id="saveMessage" class="save-message" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <noscript>관리자 페이지를 사용하려면 브라우저에서 JavaScript를 활성화해 주세요.</noscript>
+  <script src="../access-control.js"></script>
+  <script src="access-admin.js"></script>
+</body>
+</html>

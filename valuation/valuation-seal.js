@@ -25,7 +25,8 @@
   function updateSealOptionVisibility() {
     const option = document.getElementById('sealOption');
     if (!option) return;
-    option.hidden = getAgencyId() !== 'myeongvalue';
+    const agency = window.getQuickValuationAgencyConfig?.();
+    option.hidden = agency?.kind !== 'myeongvalue' && getAgencyId() !== 'myeongvalue';
   }
 
   function applySeal() {
@@ -36,7 +37,9 @@
 
     report.querySelector('.report-seal-block')?.remove();
 
-    if (getAgencyId() !== 'myeongvalue' || !sealEnabled()) return;
+    const agency = window.getQuickValuationAgencyConfig?.();
+    const isMyeongvalue = agency?.kind === 'myeongvalue' || getAgencyId() === 'myeongvalue';
+    if (!isMyeongvalue || !sealEnabled()) return;
 
     const disclaimer = report.querySelector('.disclaimer');
     const block = document.createElement('div');

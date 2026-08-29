@@ -1,21 +1,414 @@
-/* Quick Valuation agency gate */
-body.auth-locked{overflow:hidden}
-.agency-gate{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at 18% 14%,rgba(217,179,95,.18),transparent 28%),radial-gradient(circle at 82% 20%,rgba(97,147,216,.18),transparent 30%),rgba(5,19,42,.94);backdrop-filter:blur(12px)}
-.agency-gate.is-hidden{display:none}
-.agency-login-card{width:min(560px,100%);border:1px solid rgba(217,179,95,.34);border-radius:28px;background:linear-gradient(180deg,rgba(24,59,112,.96),rgba(9,31,64,.97));box-shadow:0 34px 90px rgba(0,0,0,.36);padding:30px}
-.agency-login-head{display:flex;align-items:center;gap:13px;margin-bottom:18px}.agency-login-head img{width:46px;height:46px;border-radius:50%;object-fit:cover}.agency-login-head strong{display:block;font-size:20px;color:#f8f3e7}.agency-login-head span{display:block;margin-top:3px;font-size:11px;letter-spacing:.12em;color:#f3d58a}
-.agency-login-card h2{margin:0 0 8px;font-size:28px;letter-spacing:-.035em}.agency-login-desc{margin:0 0 22px;color:#c4cfdf;font-size:14px;line-height:1.65}
-.agency-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}.agency-choice{min-height:104px;border:1px solid rgba(255,255,255,.13);border-radius:18px;background:rgba(3,17,40,.42);color:#f8f3e7;padding:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:.18s ease}.agency-choice:hover{border-color:rgba(217,179,95,.48);transform:translateY(-1px)}.agency-choice.is-selected{border-color:#d9b35f;background:rgba(217,179,95,.10);box-shadow:0 0 0 1px rgba(217,179,95,.12) inset}.agency-choice img{display:block}.agency-choice[data-agency="myeongvalue"] img{width:48px;height:48px;border-radius:50%;object-fit:cover}.agency-choice[data-agency="kodata"] img{width:138px;height:auto}.agency-choice strong{font-size:14px}.agency-choice small{font-size:11px;color:#aebbd0}
-.agency-password-label{display:block;font-size:13px;font-weight:800;margin-bottom:8px}.agency-password-wrap{display:flex;gap:10px}.agency-password-wrap input{flex:1;min-width:0;height:48px;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:rgba(2,13,31,.58);color:#f8f3e7;padding:0 14px;font:inherit;outline:none}.agency-password-wrap input:focus{border-color:rgba(217,179,95,.72)}.agency-enter{height:48px;border:0;border-radius:14px;padding:0 22px;background:linear-gradient(135deg,#d9b35f,#f3d58a);color:#07142e;font-weight:800;cursor:pointer}.agency-login-status{min-height:21px;margin-top:10px;color:#ffbcbc;font-size:12px}.agency-login-note{margin:12px 0 0;color:#94a6c0;font-size:11px;line-height:1.55}
-.agency-switch-link{border:0;background:transparent;font:inherit;cursor:pointer;padding:0}.header-actions{display:flex;align-items:center;gap:14px}.active-agency-name{font-size:13px;font-weight:700;color:#dce6f5;padding-right:14px;border-right:1px solid rgba(255,255,255,.13)}
-.brand.is-kodata img{width:102px;height:auto;border-radius:0;object-fit:contain}.brand.is-kodata span{display:none!important}.report-brand.is-kodata{display:block;margin-bottom:14px}.report-brand.is-kodata>img{width:128px!important;height:auto!important;max-height:46px;border-radius:0!important;object-fit:contain!important;display:block}.report-brand.is-myeongvalue img{width:42px;height:42px;border-radius:50%}
-#contactSelect{appearance:auto;cursor:pointer}#contactSelect:disabled{cursor:not-allowed;color:#8796aa}
-body[data-agency="kodata"] .top-summary{grid-template-columns:.92fr 1.08fr}
-body[data-agency="kodata"] .top-summary div{grid-template-columns:92px 1fr}
-body[data-agency="kodata"] .top-summary dt,body[data-agency="kodata"] .top-summary dd{padding:7px 9px}
-body[data-agency="kodata"] .top-summary dt{font-size:11.7px}
-body[data-agency="kodata"] .top-summary dd{font-size:11.8px;line-height:1.4}
-body[data-agency="kodata"] .top-summary>div:nth-child(4) dd{font-size:11.1px;line-height:1.34;white-space:nowrap;padding-left:7px;padding-right:7px}
-body[data-agency="kodata"] .value-box{grid-template-columns:92px 1fr!important}
-@media(max-width:640px){.agency-login-card{padding:22px 18px}.agency-choice-grid{grid-template-columns:1fr}.agency-password-wrap{flex-direction:column}.agency-enter{width:100%}.active-agency-name{display:none!important}body[data-agency="kodata"] .top-summary>div:nth-child(4) dd{white-space:normal}}
-@media print{.agency-gate{display:none!important}.agency-switch-link,.active-agency-name{display:none!important}}
+/* Shared access gate and Quick Valuation institution branding */
+body.auth-locked {
+  overflow: hidden;
+}
+
+.agency-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 18% 14%, rgba(217, 179, 95, 0.18), transparent 28%),
+    radial-gradient(circle at 82% 20%, rgba(97, 147, 216, 0.18), transparent 30%),
+    rgba(5, 19, 42, 0.94);
+  backdrop-filter: blur(12px);
+}
+
+.agency-gate.is-hidden {
+  display: none;
+}
+
+.agency-login-card {
+  width: min(560px, 100%);
+  margin: auto;
+  border: 1px solid rgba(217, 179, 95, 0.34);
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(24, 59, 112, 0.96), rgba(9, 31, 64, 0.97));
+  box-shadow: 0 34px 90px rgba(0, 0, 0, 0.36);
+  padding: 30px;
+  color: #f8f3e7;
+  font-family: Pretendard, "Noto Sans KR", Arial, sans-serif;
+}
+
+.agency-login-head {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 18px;
+}
+
+.agency-login-head img {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.agency-login-head strong {
+  display: block;
+  font-size: 20px;
+  color: #f8f3e7;
+}
+
+.agency-login-head span {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: #f3d58a;
+}
+
+.agency-login-card h2 {
+  margin: 0 0 8px;
+  font-size: 28px;
+  letter-spacing: -0.035em;
+  color: #fff;
+}
+
+.agency-login-desc {
+  margin: 0 0 20px;
+  color: #c4cfdf;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.agency-select-label,
+.agency-password-label {
+  display: block;
+  margin-bottom: 8px;
+  color: #f8f3e7;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.agency-select {
+  width: 100%;
+  height: 48px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  background: #0a2347;
+  color: #f8f3e7;
+  padding: 0 14px;
+  font: inherit;
+  outline: none;
+  cursor: pointer;
+}
+
+.agency-select:focus,
+.agency-password-wrap input:focus {
+  border-color: rgba(217, 179, 95, 0.72);
+}
+
+.agency-preview-card {
+  min-height: 112px;
+  margin-bottom: 18px;
+  border: 1px solid #d9b35f;
+  border-radius: 18px;
+  background: rgba(217, 179, 95, 0.1);
+  box-shadow: 0 0 0 1px rgba(217, 179, 95, 0.12) inset;
+  padding: 17px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 17px;
+  text-align: left;
+}
+
+.agency-preview-card img {
+  flex: 0 0 auto;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.agency-preview-card strong {
+  display: block;
+  color: #fff;
+  font-size: 16px;
+}
+
+.agency-preview-card small {
+  display: block;
+  margin-top: 5px;
+  color: #aebbd0;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.agency-preview-card[data-agency="kodata"] img {
+  width: min(190px, 46vw);
+  height: 58px;
+  border-radius: 0;
+  object-fit: contain;
+}
+
+.agency-preview-card[data-agency="juhae"] img {
+  width: min(190px, 46vw);
+  height: 72px;
+  border-radius: 0;
+  object-fit: contain;
+}
+
+.agency-preview-card[data-agency="kodata"] > div,
+.agency-preview-card[data-agency="juhae"] > div {
+  display: block;
+  text-align: center;
+}
+
+.agency-preview-card[data-agency="kodata"],
+.agency-preview-card[data-agency="juhae"] {
+  flex-direction: column;
+  gap: 7px;
+  padding-top: 13px;
+  padding-bottom: 13px;
+}
+
+.agency-preview-card[data-agency="kodata"] small,
+.agency-preview-card[data-agency="juhae"] small {
+  display: none;
+}
+
+.agency-preview-card[data-agency="kodata"] strong,
+.agency-preview-card[data-agency="juhae"] strong {
+  font-size: 14px;
+}
+
+.agency-password-wrap {
+  display: flex;
+  gap: 10px;
+}
+
+.agency-password-wrap input {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  background: rgba(2, 13, 31, 0.58);
+  color: #f8f3e7;
+  padding: 0 14px;
+  font: inherit;
+  outline: none;
+}
+
+.agency-enter {
+  height: 48px;
+  border: 0;
+  border-radius: 14px;
+  padding: 0 22px;
+  background: linear-gradient(135deg, #d9b35f, #f3d58a);
+  color: #07142e;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.agency-login-status {
+  min-height: 21px;
+  margin-top: 10px;
+  color: #ffbcbc;
+  font-size: 12px;
+}
+
+.agency-home-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  color: #f3d58a;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.agency-home-link:hover {
+  text-decoration: underline;
+}
+
+.agency-login-note {
+  margin: 10px 0 0;
+  color: #94a6c0;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.agency-switch-link {
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.active-agency-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #dce6f5;
+  padding-right: 14px;
+  border-right: 1px solid rgba(255, 255, 255, 0.13);
+}
+
+.brand.is-kodata img,
+.brand.is-juhae img {
+  width: 102px;
+  height: 46px;
+  border-radius: 0;
+  object-fit: contain;
+}
+
+.brand.is-kodata span,
+.brand.is-juhae span {
+  display: none !important;
+}
+
+.report-brand.is-kodata,
+.report-brand.is-juhae {
+  display: block;
+  margin-bottom: 14px;
+}
+
+.report-brand.is-kodata > img,
+.report-brand.is-juhae > img {
+  width: 128px !important;
+  height: auto !important;
+  max-height: 46px;
+  border-radius: 0 !important;
+  object-fit: contain !important;
+  display: block;
+}
+
+.report-brand.is-myeongvalue img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+}
+
+#contactSelect {
+  appearance: auto;
+  cursor: pointer;
+}
+
+#contactSelect:disabled {
+  cursor: not-allowed;
+  color: #8796aa;
+}
+
+body.quick-valuation[data-agency="kodata"] .top-summary {
+  grid-template-columns: 0.92fr 1.08fr;
+}
+
+body.quick-valuation[data-agency="kodata"] .top-summary div {
+  grid-template-columns: 92px 1fr;
+}
+
+body.quick-valuation[data-agency="kodata"] .top-summary dt,
+body.quick-valuation[data-agency="kodata"] .top-summary dd {
+  padding: 7px 9px;
+}
+
+body.quick-valuation[data-agency="kodata"] .top-summary dt {
+  font-size: 11.7px;
+}
+
+body.quick-valuation[data-agency="kodata"] .top-summary dd {
+  font-size: 11.8px;
+  line-height: 1.4;
+}
+
+body.quick-valuation[data-agency="kodata"] .top-summary > div:nth-child(4) dd {
+  font-size: 11.1px;
+  line-height: 1.34;
+  white-space: nowrap;
+  padding-left: 7px;
+  padding-right: 7px;
+}
+
+body.quick-valuation[data-agency="kodata"] .value-box {
+  grid-template-columns: 92px 1fr !important;
+}
+
+/* IP Valuation sidebar return card */
+.portal-nav-card {
+  margin-top: auto;
+  margin-bottom: 12px;
+  border: 1px solid rgba(216, 189, 120, 0.32);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 10px;
+  display: grid;
+  gap: 7px;
+}
+
+.portal-nav-card > span {
+  color: rgba(255, 255, 255, 0.54);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.portal-nav-card a,
+.portal-nav-card button {
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f8f3e7;
+  padding: 0 11px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.portal-nav-card a:hover,
+.portal-nav-card button:hover {
+  border-color: rgba(216, 189, 120, 0.55);
+  background: rgba(216, 189, 120, 0.11);
+}
+
+@media (max-width: 640px) {
+  .agency-login-card {
+    padding: 22px 18px;
+  }
+
+  .agency-password-wrap {
+    flex-direction: column;
+  }
+
+  .agency-enter {
+    width: 100%;
+  }
+
+  .active-agency-name {
+    display: none !important;
+  }
+
+  body.quick-valuation[data-agency="kodata"] .top-summary > div:nth-child(4) dd {
+    white-space: normal;
+  }
+}
+
+@media print {
+  .agency-gate,
+  .agency-switch-link,
+  .active-agency-name,
+  .portal-nav-card {
+    display: none !important;
+  }
+}
