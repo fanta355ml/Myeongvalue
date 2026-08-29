@@ -270,13 +270,8 @@ body.auth-locked {
   font-weight: 700;
 }
 
-.agency-support-contact a {
+.agency-support-contact strong {
   color: #f3d58a;
-  text-decoration: none;
-}
-
-.agency-support-contact a:hover {
-  text-decoration: underline;
 }
 
 .agency-switch-link {
