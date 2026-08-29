@@ -380,7 +380,7 @@ function renderReport() {
   const reviewOpinion = reviewInput.value;
   const valuationAmount = valuationAmountInput.value;
   const agency = window.getQuickValuationAgencyConfig ? window.getQuickValuationAgencyConfig() : null;
-  const reportInstitution = agency?.name || currentData.institution;
+  const reportInstitution = agency?.institutionName || agency?.name || currentData.institution;
   const reportContact = selectedContact || currentData.contact;
 
   reportArea.classList.remove('is-empty');

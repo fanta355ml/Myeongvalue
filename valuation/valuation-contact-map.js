@@ -55,7 +55,7 @@
     const excelContacts = Array.isArray(data?.contactOptions) ? data.contactOptions : [];
     const baseContact = cleanValue(data?.contact);
 
-    if (agency.id === 'myeongvalue') {
+    if (agency.kind === 'myeongvalue' || agency.id === 'myeongvalue') {
       const fixedOption = document.createElement('option');
       fixedOption.value = MYEONGVALUE_DEFAULT_CONTACT;
       fixedOption.textContent = `명밸류 기본 문의처 · ${MYEONGVALUE_DEFAULT_CONTACT}`;

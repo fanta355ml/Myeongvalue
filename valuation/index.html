@@ -14,26 +14,30 @@
   <link rel="stylesheet" href="valuation-rating.css">
   <link rel="stylesheet" href="valuation-seal.css">
 </head>
-<body class="auth-locked">
+<body class="quick-valuation auth-locked">
   <div id="agencyGate" class="agency-gate" aria-hidden="false">
     <section class="agency-login-card" aria-labelledby="agencyLoginTitle">
       <div class="agency-login-head">
         <img src="../assets/logo.png" alt="명밸류 파트너스">
         <div><strong>Quick Valuation</strong><span>AUTHORIZED ACCESS</span></div>
       </div>
-      <h2 id="agencyLoginTitle">평가기관 선택</h2>
-      <p class="agency-login-desc">사용할 평가기관을 선택한 뒤 해당 기관의 암호를 입력해 주세요.</p>
+      <h2 id="agencyLoginTitle">접속기관 선택</h2>
+      <p class="agency-login-desc">접속기관을 선택한 뒤 해당 기관의 암호를 입력해 주세요.</p>
 
-      <div class="agency-choice-grid" role="group" aria-label="평가기관 선택">
-        <button class="agency-choice is-selected" type="button" data-agency="myeongvalue" aria-pressed="true">
-          <img src="../assets/logo.png" alt="">
-          <strong>명밸류 파트너스</strong>
-          <small>MYEONG VALUE PARTNERS</small>
-        </button>
-        <button class="agency-choice" type="button" data-agency="kodata" aria-pressed="false">
-          <img src="../assets/kodata-logo.png" alt="">
-          <strong>한국평가데이터(주)</strong>
-        </button>
+      <label class="agency-select-label" for="agencySelect">접속기관</label>
+      <select id="agencySelect" class="agency-select">
+        <option value="myeongvalue">명밸류 파트너스</option>
+        <option value="myeongvalue-admin">명밸류 파트너스 관리자</option>
+        <option value="kodata">한국평가데이터(주)</option>
+        <option value="juhae">주해</option>
+      </select>
+
+      <div id="agencyPreview" class="agency-preview-card" data-agency="myeongvalue" aria-live="polite">
+        <img id="agencyPreviewLogo" src="../assets/logo.png" alt="명밸류 파트너스">
+        <div>
+          <strong id="agencyPreviewName">명밸류 파트너스</strong>
+          <small id="agencyPreviewSubline">MYEONG VALUE PARTNERS</small>
+        </div>
       </div>
 
       <label class="agency-password-label" for="agencyPassword">기관 암호</label>
@@ -42,6 +46,7 @@
         <button id="agencyEnterBtn" class="agency-enter" type="button">입장</button>
       </div>
       <div id="agencyLoginStatus" class="agency-login-status" aria-live="polite"></div>
+      <a class="agency-home-link" href="../">홈페이지로 돌아가기</a>
       <p class="agency-login-note">※ 현재 단계의 암호 기능은 시연·내부 사용을 위한 간편 진입 제한 방식입니다.</p>
     </section>
   </div>
