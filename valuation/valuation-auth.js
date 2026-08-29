@@ -45,7 +45,14 @@ const QUICK_VALUATION_AGENCIES = {
   }
 };
 
-let selectedAgencyId = 'myeongvalue';
+const QUICK_VALUATION_AGENCY_CODES = Object.freeze({
+  myeong: 'myeongvalue',
+  kodata: 'kodata',
+  juhae: 'juhae',
+  admin: 'myeongvalue-admin'
+});
+
+let selectedAgencyId = '';
 window.quickValuationAgency = null;
 window.getQuickValuationAgencyConfig = () => (
   window.quickValuationAgency || QUICK_VALUATION_AGENCIES.myeongvalue
@@ -74,21 +81,50 @@ function renderAgencyPreview(agency) {
   if (subline) subline.textContent = agency.previewSubline;
 }
 
-function setAgencyChoice(agencyId) {
-  const agency = QUICK_VALUATION_AGENCIES[agencyId] || QUICK_VALUATION_AGENCIES.myeongvalue;
-  selectedAgencyId = agency.id;
+function resetAgencyGate() {
+  selectedAgencyId = '';
 
-  const select = document.getElementById('agencySelect');
-  if (select && select.value !== agency.id) select.value = agency.id;
-  renderAgencyPreview(agency);
-
+  const codeInput = document.getElementById('agencyCode');
+  const codeStatus = document.getElementById('agencyCodeStatus');
+  const authPanel = document.getElementById('agencyAuthPanel');
   const passwordInput = document.getElementById('agencyPassword');
-  const status = document.getElementById('agencyLoginStatus');
+  const loginStatus = document.getElementById('agencyLoginStatus');
+
+  if (codeInput) codeInput.value = '';
+  if (codeStatus) codeStatus.textContent = '';
+  if (authPanel) authPanel.hidden = true;
+  if (passwordInput) passwordInput.value = '';
+  if (loginStatus) loginStatus.textContent = '';
+  window.setTimeout(() => codeInput?.focus(), 0);
+}
+
+function submitAgencyCode() {
+  const codeInput = document.getElementById('agencyCode');
+  const codeStatus = document.getElementById('agencyCodeStatus');
+  const authPanel = document.getElementById('agencyAuthPanel');
+  const passwordInput = document.getElementById('agencyPassword');
+  const code = String(codeInput?.value || '').trim().toLowerCase();
+  const agencyId = QUICK_VALUATION_AGENCY_CODES[code];
+
+  if (!agencyId) {
+    selectedAgencyId = '';
+    if (authPanel) authPanel.hidden = true;
+    if (passwordInput) passwordInput.value = '';
+    if (codeStatus) codeStatus.textContent = '기관코드를 확인해 주세요.';
+    codeInput?.select();
+    codeInput?.focus();
+    return;
+  }
+
+  const agency = QUICK_VALUATION_AGENCIES[agencyId];
+  selectedAgencyId = agency.id;
+  renderAgencyPreview(agency);
+  if (codeStatus) codeStatus.textContent = '';
+  if (authPanel) authPanel.hidden = false;
   if (passwordInput) {
     passwordInput.value = '';
     passwordInput.focus();
   }
-  if (status) status.textContent = '';
 }
 
 function applyReportAgencyBrand() {
@@ -176,7 +212,7 @@ function openAgencyGate() {
   document.body.classList.add('auth-locked');
   gate.classList.remove('is-hidden');
   gate.setAttribute('aria-hidden', 'false');
-  setAgencyChoice(window.quickValuationAgency?.id || selectedAgencyId);
+  resetAgencyGate();
 }
 
 function closeAgencyGate() {
@@ -189,6 +225,13 @@ function closeAgencyGate() {
 
 async function submitAgencyLogin() {
   const agency = QUICK_VALUATION_AGENCIES[selectedAgencyId];
+  if (!agency) {
+    const codeStatus = document.getElementById('agencyCodeStatus');
+    if (codeStatus) codeStatus.textContent = '기관코드를 먼저 입력해 주세요.';
+    document.getElementById('agencyCode')?.focus();
+    return;
+  }
+
   const passwordInput = document.getElementById('agencyPassword');
   const status = document.getElementById('agencyLoginStatus');
   const password = passwordInput?.value || '';
@@ -229,8 +272,9 @@ async function submitAgencyLogin() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('agencySelect')?.addEventListener('change', event => {
-    setAgencyChoice(event.target.value);
+  document.getElementById('agencyCodeBtn')?.addEventListener('click', submitAgencyCode);
+  document.getElementById('agencyCode')?.addEventListener('keydown', event => {
+    if (event.key === 'Enter') submitAgencyCode();
   });
   document.getElementById('agencyEnterBtn')?.addEventListener('click', submitAgencyLogin);
   document.getElementById('agencyPassword')?.addEventListener('keydown', event => {
@@ -251,6 +295,5 @@ document.addEventListener('DOMContentLoaded', () => {
     applyReportAgencyBrand();
     applyReportPolish();
   });
-  const requestedAgency = new URLSearchParams(window.location.search).get('agency');
-  setAgencyChoice(QUICK_VALUATION_AGENCIES[requestedAgency] ? requestedAgency : 'myeongvalue');
+  resetAgencyGate();
 });
