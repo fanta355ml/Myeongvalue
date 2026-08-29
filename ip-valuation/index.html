@@ -17,33 +17,35 @@
           <img src="../assets/logo.png" alt="명밸류 파트너스" />
           <div><strong>IP 가치평가 플랫폼</strong><span>AUTHORIZED ACCESS</span></div>
         </div>
-        <h2 id="ipAgencyLoginTitle">접속기관 선택</h2>
-        <p class="agency-login-desc">접속기관을 선택한 뒤 해당 기관의 암호를 입력해 주세요.</p>
+        <h2 id="ipAgencyLoginTitle">기관코드 입력</h2>
+        <p class="agency-login-desc">발급받은 기관코드를 입력한 뒤 기관 암호를 입력해 주세요.</p>
 
-        <label class="agency-select-label" for="ipAgencySelect">접속기관</label>
-        <select id="ipAgencySelect" class="agency-select">
-          <option value="myeongvalue">명밸류 파트너스</option>
-          <option value="myeongvalue-admin">명밸류 파트너스 관리자</option>
-          <option value="kodata">한국평가데이터(주)</option>
-          <option value="juhae">주해</option>
-        </select>
+        <label class="agency-code-label" for="ipAgencyCode">기관코드</label>
+        <div class="agency-code-wrap">
+          <input id="ipAgencyCode" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="기관코드 입력" />
+          <button id="ipAgencyCodeBtn" class="agency-code-submit" type="button">확인</button>
+        </div>
+        <div id="ipAgencyCodeStatus" class="agency-code-status" aria-live="polite"></div>
 
-        <div id="ipAgencyPreview" class="agency-preview-card" data-agency="myeongvalue" aria-live="polite">
-          <img id="ipAgencyPreviewLogo" src="../assets/logo.png" alt="명밸류 파트너스" />
-          <div>
-            <strong id="ipAgencyPreviewName">명밸류 파트너스</strong>
-            <small id="ipAgencyPreviewSubline">MYEONG VALUE PARTNERS</small>
+        <div id="ipAgencyAuthPanel" class="agency-auth-panel" hidden>
+          <div id="ipAgencyPreview" class="agency-preview-card" aria-live="polite">
+            <img id="ipAgencyPreviewLogo" src="../assets/logo.png" alt="" />
+            <div>
+              <strong id="ipAgencyPreviewName"></strong>
+              <small id="ipAgencyPreviewSubline"></small>
+            </div>
           </div>
-        </div>
 
-        <label class="agency-password-label" for="ipAgencyPassword">기관 암호</label>
-        <div class="agency-password-wrap">
-          <input id="ipAgencyPassword" type="password" autocomplete="current-password" placeholder="암호 입력" />
-          <button id="ipAgencyEnterBtn" class="agency-enter" type="button">입장</button>
+          <label class="agency-password-label" for="ipAgencyPassword">기관 암호</label>
+          <div class="agency-password-wrap">
+            <input id="ipAgencyPassword" type="password" autocomplete="current-password" placeholder="암호 입력" />
+            <button id="ipAgencyEnterBtn" class="agency-enter" type="button">입장</button>
+          </div>
+          <div id="ipAgencyLoginStatus" class="agency-login-status" aria-live="polite"></div>
         </div>
-        <div id="ipAgencyLoginStatus" class="agency-login-status" aria-live="polite"></div>
         <a class="agency-home-link" href="../">홈페이지로 돌아가기</a>
         <p class="agency-login-note">※ 현재 단계의 암호 기능은 시연·내부 사용을 위한 간편 진입 제한 방식입니다.</p>
+        <p class="agency-support-contact">접속장애 문의 : <strong>010-4568-5944</strong></p>
       </section>
     </div>
     <div id="root"></div>
@@ -248,195 +250,244 @@ Error generating stack: `+e.message+`
     </style>
     <script src="../access-control.js"></script>
     <script id="myeongvalue-workbench-access-gate">
-      (() => {
-        const agencies = {
-          myeongvalue: {
-            id: "myeongvalue",
-            kind: "myeongvalue",
-            name: "명밸류 파트너스",
-            subline: "MYEONG VALUE PARTNERS",
-            logo: "../assets/logo.png",
-            passwordHash:
-              "4f89740697702b3b64effcb361b9aa3c647ac0a04b192c3b35f096077d23afe6",
-          },
-          "myeongvalue-admin": {
-            id: "myeongvalue-admin",
-            kind: "myeongvalue",
-            name: "명밸류 파트너스 관리자",
-            subline: "ADMINISTRATOR ACCESS",
-            logo: "../assets/logo.png",
-            passwordHash:
-              "075609a76608f34d1c77a89a58506fe04809a71ec4d6270a10992fc263a5dfbb",
-          },
-          kodata: {
-            id: "kodata",
-            kind: "kodata",
-            name: "한국평가데이터(주)",
-            subline: "KOREA RATING & DATA",
-            logo: "../assets/kodata-logo.png",
-            passwordHash:
-              "d3de1dc6471f5b07488edc0b48360dea9b59ddf677d25cb29c9b676dfdcb4085",
-          },
-          juhae: {
-            id: "juhae",
-            kind: "juhae",
-            name: "주해",
-            subline: "JUHAE IP & TECHNOLOGY",
-            logo: "../assets/juhae-logo.png",
-            passwordHash:
-              "2c0b6ddc6b8f8b4688c68b6cc877b65fdf64ad4abbbb0e4689a0d5ce6eca92cf",
-          },
-        };
+      (function accessGateReplacement() {
+  const agencies = {
+    myeongvalue: {
+      id: "myeongvalue",
+      kind: "myeongvalue",
+      name: "명밸류 파트너스",
+      subline: "MYEONG VALUE PARTNERS",
+      logo: "../assets/logo.png",
+      passwordHash:
+        "4f89740697702b3b64effcb361b9aa3c647ac0a04b192c3b35f096077d23afe6",
+    },
+    "myeongvalue-admin": {
+      id: "myeongvalue-admin",
+      kind: "myeongvalue",
+      name: "관리자",
+      subline: "ADMINISTRATOR ACCESS",
+      logo: "../assets/logo.png",
+      passwordHash:
+        "075609a76608f34d1c77a89a58506fe04809a71ec4d6270a10992fc263a5dfbb",
+    },
+    kodata: {
+      id: "kodata",
+      kind: "kodata",
+      name: "한국평가데이터(주)",
+      subline: "KOREA RATING & DATA",
+      logo: "../assets/kodata-logo.png",
+      passwordHash:
+        "d3de1dc6471f5b07488edc0b48360dea9b59ddf677d25cb29c9b676dfdcb4085",
+    },
+    juhae: {
+      id: "juhae",
+      kind: "juhae",
+      name: "주해",
+      subline: "JUHAE IP & TECHNOLOGY",
+      logo: "../assets/juhae-logo.png",
+      passwordHash:
+        "2c0b6ddc6b8f8b4688c68b6cc877b65fdf64ad4abbbb0e4689a0d5ce6eca92cf",
+    },
+  };
 
-        const getSelectedAgency = () => {
-          const select = document.getElementById("ipAgencySelect");
-          return agencies[select?.value] || agencies.myeongvalue;
-        };
+  const agencyCodes = Object.freeze({
+    myeong: "myeongvalue",
+    kodata: "kodata",
+    juhae: "juhae",
+    admin: "myeongvalue-admin",
+  });
 
-        const sha256 = async (text) => {
-          const data = new TextEncoder().encode(text);
-          const digest = await crypto.subtle.digest("SHA-256", data);
-          return Array.from(new Uint8Array(digest))
-            .map((byte) => byte.toString(16).padStart(2, "0"))
-            .join("");
-        };
+  let selectedAgencyId = "";
 
-        const renderPreview = () => {
-          const agency = getSelectedAgency();
-          const preview = document.getElementById("ipAgencyPreview");
-          const logo = document.getElementById("ipAgencyPreviewLogo");
-          const name = document.getElementById("ipAgencyPreviewName");
-          const subline = document.getElementById("ipAgencyPreviewSubline");
-          const password = document.getElementById("ipAgencyPassword");
-          const status = document.getElementById("ipAgencyLoginStatus");
+  const getSelectedAgency = () => agencies[selectedAgencyId] || null;
 
-          if (preview) preview.dataset.agency = agency.kind;
-          if (logo) {
-            logo.src = agency.logo;
-            logo.alt = agency.name;
-          }
-          if (name) name.textContent = agency.name;
-          if (subline) subline.textContent = agency.subline;
-          if (password) password.value = "";
-          if (status) status.textContent = "";
-          password?.focus();
-        };
+  const sha256 = async (text) => {
+    const data = new TextEncoder().encode(text);
+    const digest = await crypto.subtle.digest("SHA-256", data);
+    return Array.from(new Uint8Array(digest))
+      .map((byte) => byte.toString(16).padStart(2, "0"))
+      .join("");
+  };
 
-        const openGate = () => {
-          const gate = document.getElementById("ipAgencyGate");
-          if (!gate) return;
-          document.body.classList.add("auth-locked");
-          gate.classList.remove("is-hidden");
-          gate.setAttribute("aria-hidden", "false");
-          const password = document.getElementById("ipAgencyPassword");
-          const status = document.getElementById("ipAgencyLoginStatus");
-          if (password) password.value = "";
-          if (status) status.textContent = "";
-          password?.focus();
-        };
+  const renderPreview = (agency) => {
+    const preview = document.getElementById("ipAgencyPreview");
+    const logo = document.getElementById("ipAgencyPreviewLogo");
+    const name = document.getElementById("ipAgencyPreviewName");
+    const subline = document.getElementById("ipAgencyPreviewSubline");
+    const password = document.getElementById("ipAgencyPassword");
+    const status = document.getElementById("ipAgencyLoginStatus");
 
-        const closeGate = (agency) => {
-          const gate = document.getElementById("ipAgencyGate");
-          if (!gate) return;
-          window.ipValuationAgency = agency;
-          document.body.dataset.agency = agency.kind;
-          gate.classList.add("is-hidden");
-          gate.setAttribute("aria-hidden", "true");
-          document.body.classList.remove("auth-locked");
-        };
+    if (preview) preview.dataset.agency = agency.kind;
+    if (logo) {
+      logo.src = agency.logo;
+      logo.alt = agency.name;
+    }
+    if (name) name.textContent = agency.name;
+    if (subline) subline.textContent = agency.subline;
+    if (password) password.value = "";
+    if (status) status.textContent = "";
+  };
 
-        const submitLogin = async () => {
-          const agency = getSelectedAgency();
-          const password = document.getElementById("ipAgencyPassword");
-          const status = document.getElementById("ipAgencyLoginStatus");
-          const value = password?.value || "";
+  const resetGate = () => {
+    selectedAgencyId = "";
+    const codeInput = document.getElementById("ipAgencyCode");
+    const codeStatus = document.getElementById("ipAgencyCodeStatus");
+    const authPanel = document.getElementById("ipAgencyAuthPanel");
+    const password = document.getElementById("ipAgencyPassword");
+    const loginStatus = document.getElementById("ipAgencyLoginStatus");
 
-          if (!value) {
-            if (status) status.textContent = "암호를 입력해 주세요.";
-            password?.focus();
-            return;
-          }
+    if (codeInput) codeInput.value = "";
+    if (codeStatus) codeStatus.textContent = "";
+    if (authPanel) authPanel.hidden = true;
+    if (password) password.value = "";
+    if (loginStatus) loginStatus.textContent = "";
+    window.setTimeout(() => codeInput?.focus(), 0);
+  };
 
-          if ((await sha256(value)) !== agency.passwordHash) {
-            if (status) {
-              status.textContent = `${agency.name} 암호가 일치하지 않습니다.`;
-            }
-            password?.select();
-            password?.focus();
-            return;
-          }
+  const submitCode = () => {
+    const codeInput = document.getElementById("ipAgencyCode");
+    const codeStatus = document.getElementById("ipAgencyCodeStatus");
+    const authPanel = document.getElementById("ipAgencyAuthPanel");
+    const password = document.getElementById("ipAgencyPassword");
+    const code = String(codeInput?.value || "").trim().toLowerCase();
+    const agencyId = agencyCodes[code];
 
-          const accessControl = window.MyeongvalueAccessControl;
-          if (agency.id === "myeongvalue-admin") {
-            accessControl?.startAdminSession();
-            window.location.href = "../access-admin/";
-            return;
-          }
+    if (!agencyId) {
+      selectedAgencyId = "";
+      if (authPanel) authPanel.hidden = true;
+      if (password) password.value = "";
+      if (codeStatus) codeStatus.textContent = "기관코드를 확인해 주세요.";
+      codeInput?.select();
+      codeInput?.focus();
+      return;
+    }
 
-          const accessStatus = accessControl?.getAccessStatus(agency.id);
-          if (accessStatus && !accessStatus.allowed) {
-            if (status) {
-              status.textContent = `${agency.name}의 접속기한이 ${accessStatus.deadline}에 만료되었습니다. 관리자에게 문의해 주세요.`;
-            }
-            if (password) password.value = "";
-            return;
-          }
+    const agency = agencies[agencyId];
+    selectedAgencyId = agency.id;
+    renderPreview(agency);
+    if (codeStatus) codeStatus.textContent = "";
+    if (authPanel) authPanel.hidden = false;
+    password?.focus();
+  };
 
-          if (status) status.textContent = "";
-          closeGate(agency);
-        };
+  const openGate = () => {
+    const gate = document.getElementById("ipAgencyGate");
+    if (!gate) return;
+    document.body.classList.add("auth-locked");
+    gate.classList.remove("is-hidden");
+    gate.setAttribute("aria-hidden", "false");
+    resetGate();
+  };
 
-        const insertPortalNavigation = () => {
-          const sidebar = document.querySelector(".sidebar");
-          if (!sidebar || sidebar.querySelector(".portal-nav-card")) return;
+  const closeGate = (agency) => {
+    const gate = document.getElementById("ipAgencyGate");
+    if (!gate) return;
+    window.ipValuationAgency = agency;
+    document.body.dataset.agency = agency.kind;
+    gate.classList.add("is-hidden");
+    gate.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("auth-locked");
+  };
 
-          const card = document.createElement("div");
-          card.className = "portal-nav-card";
-          card.setAttribute("aria-label", "사이트 이동");
-          card.innerHTML = `
-            <span>SITE NAVIGATION</span>
-            <a href="../"><span aria-hidden="true">⌂</span> 홈페이지로</a>
-            <button type="button" data-access-exit><span aria-hidden="true">↩</span> 접속 화면으로</button>
-          `;
-          card
-            .querySelector("[data-access-exit]")
-            ?.addEventListener("click", openGate);
+  const submitLogin = async () => {
+    const agency = getSelectedAgency();
+    if (!agency) {
+      const codeStatus = document.getElementById("ipAgencyCodeStatus");
+      if (codeStatus) codeStatus.textContent = "기관코드를 먼저 입력해 주세요.";
+      document.getElementById("ipAgencyCode")?.focus();
+      return;
+    }
 
-          const footer = sidebar.querySelector(".sidebar-footer");
-          sidebar.insertBefore(card, footer || null);
-        };
+    const password = document.getElementById("ipAgencyPassword");
+    const status = document.getElementById("ipAgencyLoginStatus");
+    const value = password?.value || "";
 
-        document.addEventListener("DOMContentLoaded", () => {
-          const requestedAgency = new URLSearchParams(window.location.search).get("agency");
-          const agencySelect = document.getElementById("ipAgencySelect");
-          if (agencySelect && agencies[requestedAgency]) {
-            agencySelect.value = requestedAgency;
-          }
-          document
-            .getElementById("ipAgencySelect")
-            ?.addEventListener("change", renderPreview);
-          document
-            .getElementById("ipAgencyEnterBtn")
-            ?.addEventListener("click", submitLogin);
-          document
-            .getElementById("ipAgencyPassword")
-            ?.addEventListener("keydown", (event) => {
-              if (event.key === "Enter") submitLogin();
-            });
+    if (!value) {
+      if (status) status.textContent = "암호를 입력해 주세요.";
+      password?.focus();
+      return;
+    }
 
-          renderPreview();
-          insertPortalNavigation();
-          const root = document.getElementById("root");
-          if (root) {
-            new MutationObserver(insertPortalNavigation).observe(root, {
-              childList: true,
-              subtree: true,
-            });
-          }
-        });
+    if ((await sha256(value)) !== agency.passwordHash) {
+      if (status) {
+        status.textContent = `${agency.name} 암호가 일치하지 않습니다.`;
+      }
+      password?.select();
+      password?.focus();
+      return;
+    }
 
-        window.ipValuationAccess = { open: openGate };
-      })();
+    const accessControl = window.MyeongvalueAccessControl;
+    if (agency.id === "myeongvalue-admin") {
+      accessControl?.startAdminSession();
+      window.location.href = "../access-admin/";
+      return;
+    }
+
+    const accessStatus = accessControl?.getAccessStatus(agency.id);
+    if (accessStatus && !accessStatus.allowed) {
+      if (status) {
+        status.textContent = `${agency.name}의 접속기한이 ${accessStatus.deadline}에 만료되었습니다. 관리자에게 문의해 주세요.`;
+      }
+      if (password) password.value = "";
+      return;
+    }
+
+    if (status) status.textContent = "";
+    closeGate(agency);
+  };
+
+  const insertPortalNavigation = () => {
+    const sidebar = document.querySelector(".sidebar");
+    if (!sidebar || sidebar.querySelector(".portal-nav-card")) return;
+
+    const card = document.createElement("div");
+    card.className = "portal-nav-card";
+    card.setAttribute("aria-label", "사이트 이동");
+    card.innerHTML = `
+      <span>SITE NAVIGATION</span>
+      <a href="../"><span aria-hidden="true">⌂</span> 홈페이지로</a>
+      <button type="button" data-access-exit><span aria-hidden="true">↩</span> 접속 화면으로</button>
+    `;
+    card
+      .querySelector("[data-access-exit]")
+      ?.addEventListener("click", openGate);
+
+    const footer = sidebar.querySelector(".sidebar-footer");
+    sidebar.insertBefore(card, footer || null);
+  };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document
+      .getElementById("ipAgencyCodeBtn")
+      ?.addEventListener("click", submitCode);
+    document
+      .getElementById("ipAgencyCode")
+      ?.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") submitCode();
+      });
+    document
+      .getElementById("ipAgencyEnterBtn")
+      ?.addEventListener("click", submitLogin);
+    document
+      .getElementById("ipAgencyPassword")
+      ?.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") submitLogin();
+      });
+
+    resetGate();
+    insertPortalNavigation();
+    const root = document.getElementById("root");
+    if (root) {
+      new MutationObserver(insertPortalNavigation).observe(root, {
+        childList: true,
+        subtree: true,
+      });
+    }
+  });
+
+  window.ipValuationAccess = { open: openGate };
+})();
     </script>
   </body>
 </html>
