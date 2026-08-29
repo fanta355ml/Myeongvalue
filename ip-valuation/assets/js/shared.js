@@ -1,2 +1,684 @@
-function op(...e){return ap(Nd(e))}function sp({delayDuration:e=0,...t}){return(0,W.jsx)(Td,{"data-slot":`tooltip-provider`,delayDuration:e,...t})}function cp({...e}){return(0,W.jsx)(Ed,{"data-slot":`tooltip`,...e})}function lp({...e}){return(0,W.jsx)(Dd,{"data-slot":`tooltip-trigger`,...e})}function up({className:e,sideOffset:t=0,children:n,...r}){return(0,W.jsx)(Od,{children:(0,W.jsxs)(kd,{"data-slot":`tooltip-content`,sideOffset:t,className:op(`z-50 w-fit origin-(--radix-tooltip-content-transform-origin) animate-in rounded-md bg-foreground px-3 py-1.5 text-xs text-balance text-background fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95`,e),...r,children:[n,(0,W.jsx)(Ad,{className:`z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px] bg-foreground fill-foreground`})]})})}function dp({className:e,...t}){return(0,W.jsx)(Nl,{"data-slot":`radio-group`,className:op(`grid gap-3`,e),...t})}function fp({className:e,...t}){return(0,W.jsx)(Rl,{"data-slot":`radio-group-item`,className:op(`aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40`,e),...t,children:(0,W.jsx)(q,{"data-slot":`radio-group-indicator`,className:`relative flex items-center justify-center`,children:(0,W.jsx)(L,{className:`absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary`})})})}var pp=window.IP_VALUATION_CONFIG.bankRules,mp=window.IP_VALUATION_CONFIG.salesBasisLabels;function hp(e){return`${(e*100).toFixed(2)}%`}function gp(e){if(e.length<2)return null;let t=e[0],n=e.at(-1),r=n.year-t.year;return r<=0||t.revenueHundredMillion<=0||n.revenueHundredMillion<0?null:(n.revenueHundredMillion/t.revenueHundredMillion)**(1/r)-1}function _p(e){let t=[...e.salesHistory].filter(e=>Number.isFinite(e.year)&&Number.isFinite(e.revenueHundredMillion)).sort((e,t)=>e.year-t.year).slice(-5),n=gp(t),r=e.comparisonGrowthRate===void 0?`${e.comparisonGrowthLabel}은 별도 확인이 필요함`:`${e.comparisonGrowthLabel}은 ${hp(e.comparisonGrowthRate)}를 기록함`;if(t.length<2||n===null)return`동사는 창업초기기업이거나 최근 재무정보가 부족하여 매출액 성장률 산출이 어려운바, ${r}.`;let i=t.map(e=>`${e.year}년 ${e.revenueHundredMillion.toLocaleString(`ko-KR`,{maximumFractionDigits:2})}억 원`).join(`, `);return`동사의 최근 ${t.length}개년 매출액은 ${i}이고, 해당 기간 매출성장률(CAGR)은 ${hp(n)}이며, ${r}.`}function vp(e){let t=pp.find(t=>t.code===e.bankCode)??pp.find(e=>e.code===`OTHER`),n=e.targetPatents.filter(e=>e.exclusionReasons?.length);if(!e.valuationAvailable||e.targetPatents.length===0)return`동사는 보유 유효 등록특허가 미확인되거나 제외사유에 따라 평가가능한 특허가 없어 가치산정이 불가함.\n- ${n.length?n.map(e=>`${e.registrationNo}: ${e.exclusionReasons.join(`, `)}`).join(`; `):`보유 유효 등록특허 미확인 또는 평가가능 특허 없음`}`;let r=e.companyForm===`법인기업`?`설립`:`창업`,i=e.targetPatents.length,a=n.length?n.map(e=>`${e.registrationNo}은 ${e.exclusionReasons.join(`, `)}의 사유로 제외 검토됨`).join(`; `):`평가대상특허 외 유효 등록특허의 추가 제외사유는 미확인됨`,o=_p(e),s=e.businessSalesBasis.periodYears?`최근 ${e.businessSalesBasis.periodYears}개년 `:``,c=Number.isFinite(e.economicLifeYears)?e.economicLifeYears.toFixed(1):`0.0`;return[`- ${e.companyName}은 ${e.establishedYear}년 ${e.establishedMonth}월 ${r}된 ${e.industry} 영위 기업으로서, 평가대상특허 제품(솔루션)은 ${e.productName}에 관한 것임.`,`- 유효 등록특허는 ${e.validRegisteredPatentCount}건이며, 평가대상특허는 총 ${i}건임.`,`- ${t.name}의 법적 잔존기간 기준은 ${t.minimumRemainingYears}년 이상이며, 근질권·실시권·공동권리·등록공고 후 6개월 예외와 함께 검토함.`,`- ${a}.`,`- 평가대상특허 관련 사업화제품은 ${e.productName}에 관한 것으로, 홈페이지·기업자료 또는 평가자 확인자료에 따라 사업화 여부를 판단함.`,`- ${e.modelName} 모형을 적용하였으며, 기술의 경제적 수명은 ${c}년으로 산출됨.`,`- ${o}`,`- 사업화제품 매출액은 ${s}${mp[e.businessSalesBasis.method]} 방식으로 산정하였고, 전체 매출액 대비 사업화제품 매출비중은 ${hp(e.businessSalesBasis.ratio)}임.`,`- 사업화제품 매출액 중 평가대상특허 관련 매출비중은 ${hp(e.patentSalesRatio)}를 적용함.`,`- 상기 가정에 따른 평가대상특허의 가치금액은 ${e.valueLabel??`산출 전`}임.`].join(`
-`)}var yp=e=>typeof e==`boolean`?`${e}`:e===0?`0`:e,bp=Nd,xp=(e,t)=>n=>{if(t?.variants==null)return bp(e,n?.class,n?.className);let{variants:r,defaultVariants:i}=t,a=Object.keys(r).map(e=>{let t=n?.[e],a=i?.[e];if(t===null)return null;let o=yp(t)||yp(a);return r[e][o]}),o=n&&Object.entries(n).reduce((e,t)=>{let[n,r]=t;return r===void 0||(e[n]=r),e},{});return bp(e,a,t?.compoundVariants?.reduce((e,t)=>{let{class:n,className:r,...a}=t;return Object.entries(a).every(e=>{let[t,n]=e;return Array.isArray(n)?n.includes({...i,...o}[t]):{...i,...o}[t]===n})?[...e,n,r]:e},[]),n?.class,n?.className)},Sp=xp(`inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4`,{variants:{variant:{default:`bg-primary text-primary-foreground hover:bg-primary/90`,destructive:`bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40`,outline:`border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50`,secondary:`bg-secondary text-secondary-foreground hover:bg-secondary/80`,ghost:`hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50`,link:`text-primary underline-offset-4 hover:underline`},size:{default:`h-9 px-4 py-2 has-[>svg]:px-3`,xs:`h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3`,sm:`h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5`,lg:`h-10 rounded-md px-6 has-[>svg]:px-4`,icon:`size-9`,"icon-xs":`size-6 rounded-md [&_svg:not([class*='size-'])]:size-3`,"icon-sm":`size-8`,"icon-lg":`size-10`}},defaultVariants:{variant:`default`,size:`default`}});function Cp({className:e,variant:t=`default`,size:n=`default`,asChild:r=!1,...i}){return(0,W.jsx)(r?ql:`button`,{"data-slot":`button`,"data-variant":t,"data-size":n,className:op(Sp({variant:t,size:n,className:e})),...i})}function wp({...e}){return(0,W.jsx)(ca,{"data-slot":`dialog`,...e})}function Tp({...e}){return(0,W.jsx)(ua,{"data-slot":`dialog-trigger`,...e})}function Ep({...e}){return(0,W.jsx)(ma,{"data-slot":`dialog-portal`,...e})}function Dp({...e}){return(0,W.jsx)(ka,{"data-slot":`dialog-close`,...e})}function Op({className:e,...t}){return(0,W.jsx)(ga,{"data-slot":`dialog-overlay`,className:op(`fixed inset-0 z-50 bg-black/50 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0`,e),...t})}function kp({className:e,children:t,showCloseButton:n=!0,...r}){return(0,W.jsxs)(Ep,{"data-slot":`dialog-portal`,children:[(0,W.jsx)(Op,{}),(0,W.jsxs)(ba,{"data-slot":`dialog-content`,className:op(`fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg`,e),...r,children:[t,n&&(0,W.jsxs)(ka,{"data-slot":`dialog-close`,className:`absolute top-4 right-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4`,children:[(0,W.jsx)(ge,{}),(0,W.jsx)(`span`,{className:`sr-only`,children:`Close`})]})]})]})}function Ap({className:e,...t}){return(0,W.jsx)(`div`,{"data-slot":`dialog-header`,className:op(`flex flex-col gap-2 text-center sm:text-left`,e),...t})}function jp({className:e,showCloseButton:t=!1,children:n,...r}){return(0,W.jsxs)(`div`,{"data-slot":`dialog-footer`,className:op(`flex flex-col-reverse gap-2 sm:flex-row sm:justify-end`,e),...r,children:[n,t&&(0,W.jsx)(ka,{asChild:!0,children:(0,W.jsx)(Cp,{variant:`outline`,children:`Close`})})]})}function Mp({className:e,...t}){return(0,W.jsx)(Ta,{"data-slot":`dialog-title`,className:op(`text-lg leading-none font-semibold`,e),...t})}function Np({className:e,...t}){return(0,W.jsx)(Da,{"data-slot":`dialog-description`,className:op(`text-sm text-muted-foreground`,e),...t})}function Pp({className:e,orientation:t=`horizontal`,...n}){return(0,W.jsx)(Cu,{"data-slot":`tabs`,"data-orientation":t,orientation:t,className:op(`group/tabs flex gap-2 data-[orientation=horizontal]:flex-col`,e),...n})}var Fp=xp(`group/tabs-list inline-flex w-fit items-center justify-center rounded-lg p-[3px] text-muted-foreground group-data-[orientation=horizontal]/tabs:h-9 group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col data-[variant=line]:rounded-none`,{variants:{variant:{default:`bg-muted`,line:`gap-1 bg-transparent`}},defaultVariants:{variant:`default`}});function Ip({className:e,variant:t=`default`,...n}){return(0,W.jsx)(wu,{"data-slot":`tabs-list`,"data-variant":t,className:op(Fp({variant:t}),e),...n})}function Lp({className:e,...t}){return(0,W.jsx)(Tu,{"data-slot":`tabs-trigger`,className:op(`relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap text-foreground/60 transition-all group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 group-data-[variant=default]/tabs-list:data-[state=active]:shadow-sm group-data-[variant=line]/tabs-list:data-[state=active]:shadow-none dark:text-muted-foreground dark:hover:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4`,`group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent dark:group-data-[variant=line]/tabs-list:data-[state=active]:border-transparent dark:group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent`,`data-[state=active]:bg-background data-[state=active]:text-foreground dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 dark:data-[state=active]:text-foreground`,`after:absolute after:bg-foreground after:opacity-0 after:transition-opacity group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:bottom-[-5px] group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-[state=active]:after:opacity-100`,e),...t})}function Rp({className:e,...t}){return(0,W.jsx)(Eu,{"data-slot":`tabs-content`,className:op(`flex-1 outline-none`,e),...t})}function zp(e,t){let n=Math.max(0,Math.round(e*1e8)/1e8),r=Math.floor(n),i=Math.round((n-r)*1e8)/1e8,a=r+ +(i>0),o=Math.max(0,t-1),s=Math.min(a,o);return Array.from({length:s},(e,t)=>t===a-1&&i>0?i:1)}var Bp=864e5;function Vp(e){if(!/^\d{4}-\d{2}-\d{2}$/.test(e))return null;let t=new Date(`${e}T00:00:00Z`);return Number.isFinite(t.getTime())?t:null}function Hp(e,t){let n=new Date(e);return n.setUTCFullYear(n.getUTCFullYear()+t),n}function Up(e,t,n){let r=Vp(e),i=Vp(t);if(!r||!i||r.getTime()>i.getTime())return 0;let a=new Date(r),o=0;for(;a.getTime()<=i.getTime();){let e=a.getUTCFullYear(),t=new Date(Date.UTC(e,11,31)),r=t.getTime()<i.getTime()?t:i,s=Math.round((r.getTime()-a.getTime())/Bp)+1,c=(Date.UTC(e+1,0,1)-Date.UTC(e,0,1))/Bp,l=n.find(t=>t.year===e)?.amount??0;o+=l*s/c,a=new Date(r.getTime()+Bp)}return o}function Wp(e,t){let n=Vp(e);if(!n)return null;let r=t.map(Vp).filter(e=>!!(e&&e.getTime()>=n.getTime())).sort((e,t)=>e.getTime()-t.getTime())[0];if(!r)return null;let i=0;for(;i<100&&!(new Date(Hp(n,i+1).getTime()-Bp).getTime()>r.getTime());)i+=1;let a=Hp(n,i),o=a.getTime()<=r.getTime()?Math.round((r.getTime()-a.getTime())/Bp)+1:0;return{years:i+o/365,fullYears:i,partialDays:o,expirationDate:r.toISOString().slice(0,10)}}var Gp={매출액:`totalRevenue`,전체매출액:`totalRevenue`,총매출액:`totalRevenue`,매출수익:`totalRevenue`,제품매출액:`productRevenue`,제품매출:`productRevenue`,공사매출액:`constructionRevenue`,공사매출:`constructionRevenue`,공사수익:`constructionRevenue`,공사수입:`constructionRevenue`,공사수입액:`constructionRevenue`,기타매출액:`otherRevenue`,기타매출:`otherRevenue`,용역수익:`otherRevenue`,용역매출액:`otherRevenue`,용역매출:`otherRevenue`,임대매출액:`rentalRevenue`,임대매출:`rentalRevenue`,임대수익:`rentalRevenue`,도소매매출액:`wholesaleRetailRevenue`,도소매매출:`wholesaleRetailRevenue`,도매및소매매출액:`wholesaleRetailRevenue`,상품매출액:`wholesaleRetailRevenue`},Kp=new Set([`국내공사`,`해외공사`,`국내공사수입`,`해외공사수입`]);function qp(e){let t=e.normalize(`NFKC`).replace(/\s+/g,``).replaceAll(`·`,``).replace(/\(\s*[*+]\s*\)/g,``).replace(/[\[\]{}:：]/g,``);if(Kp.has(t)||/(?:국내|해외).*공사|공사.*(?:국내|해외)/.test(t))return;let n=t.replace(/\(.*$/,``),r=Gp[t]??Gp[n];if(r)return r;if(n.includes(`공사`)&&/(매출|수입|수익)/.test(n))return`constructionRevenue`}var Jp=[{key:`totalRevenue`,label:`전체 매출액`},{key:`productRevenue`,label:`제품 매출액`},{key:`constructionRevenue`,label:`공사 매출액`},{key:`otherRevenue`,label:`기타 매출액`},{key:`rentalRevenue`,label:`임대 매출액`},{key:`wholesaleRetailRevenue`,label:`도소매 매출액`}];function Yp(e,t=5){let n=[...e].sort((e,t)=>e.closingDate.localeCompare(t.closingDate)).filter(e=>e.revenue>0).slice(-Math.max(2,t));if(n.length<2)return null;let r=n[0],i=n.at(-1),a=Number(r.closingDate.slice(0,4)),o=Number(i.closingDate.slice(0,4))-a;return o>0?((i.revenue/r.revenue)**(1/o)-1)*100:null}function Xp(e,t,n){return e*t/100*(1+n/100)}function Zp(e,t){let n=new Map(t.map(e=>[e.year,e])),r=new Set,i=e.flatMap(e=>{let t=Number(e.closingDate.slice(0,4));if(!Number.isFinite(t))return[];r.add(t);let i=n.get(t);return[{year:t,totalRevenue:e.revenue,productRevenue:i?.productRevenue??0,constructionRevenue:i?.constructionRevenue??0,otherRevenue:i?.otherRevenue??0,rentalRevenue:i?.rentalRevenue??0,wholesaleRetailRevenue:i?.wholesaleRetailRevenue??0}]});return[...t.filter(e=>!r.has(e.year)),...i].sort((e,t)=>e.year-t.year)}function Qp(e,t){let n=[...e].sort((e,t)=>e.year-t.year).at(-1);return n?.totalRevenue?(t.selected.includes(`totalRevenue`)?n.totalRevenue:t.selected.reduce((e,t)=>e+n[t],0))/n.totalRevenue*t.patentShareWithinRelated:0}var $p=[{closingDate:`2025-12-31`,totalAssets:3926,paidInCapital:200,totalEquity:834,revenue:5813,operatingProfit:514,netIncome:399},{closingDate:`2024-12-31`,totalAssets:2480,paidInCapital:220,totalEquity:455,revenue:3414,operatingProfit:174,netIncome:130},{closingDate:`2023-12-31`,totalAssets:1213,paidInCapital:200,totalEquity:305,revenue:1516,operatingProfit:107,netIncome:88},{closingDate:`2022-12-31`,totalAssets:536,paidInCapital:200,totalEquity:217,revenue:145,operatingProfit:19,netIncome:17}],em=[{closingDate:`2023-12-31`,revenue:1516,costOfSales:1248,grossProfit:268,sga:161,operatingProfit:107,nonOperatingIncome:18,nonOperatingExpense:14,pretaxIncome:111,incomeTax:23,netIncome:88,depreciation:31},{closingDate:`2024-12-31`,revenue:3414,costOfSales:2816,grossProfit:598,sga:424,operatingProfit:174,nonOperatingIncome:31,nonOperatingExpense:24,pretaxIncome:181,incomeTax:51,netIncome:130,depreciation:57},{closingDate:`2025-12-31`,revenue:5813,costOfSales:4715,grossProfit:1098,sga:584,operatingProfit:514,nonOperatingIncome:42,nonOperatingExpense:37,pretaxIncome:519,incomeTax:120,netIncome:399,depreciation:83}],tm=[{year:2021,totalRevenue:980,productRevenue:0,constructionRevenue:0,otherRevenue:980,rentalRevenue:0,wholesaleRetailRevenue:0},{year:2022,totalRevenue:145,productRevenue:0,constructionRevenue:0,otherRevenue:145,rentalRevenue:0,wholesaleRetailRevenue:0},{year:2023,totalRevenue:1516,productRevenue:1213,constructionRevenue:0,otherRevenue:303,rentalRevenue:0,wholesaleRetailRevenue:0},{year:2024,totalRevenue:3414,productRevenue:2902,constructionRevenue:0,otherRevenue:512,rentalRevenue:0,wholesaleRetailRevenue:0},{year:2025,totalRevenue:5813,productRevenue:5232,constructionRevenue:0,otherRevenue:581,rentalRevenue:0,wholesaleRetailRevenue:0}],nm=[{year:2020,revenue:24326844},{year:2021,revenue:25968378},{year:2022,revenue:29540386},{year:2023,revenue:29959405},{year:2024,revenue:28536978}],rm={selected:[`productRevenue`],patentShareWithinRelated:75,commercializationFirstRevenueYear:2023,historicalSalesInputMode:`ratio`,historicalSalesShareByYear:{}};function im(e){return e.totalAssets?e.totalEquity/e.totalAssets*100:0}function am(e){return e.revenue?e.operatingProfit/e.revenue*100:0}var om={name:`국내 공기조화설비 시장`,unit:`억원`,source:`외부 시장자료, 2025.12`,mode:`three`,pastYear:2020,pastValue:98e3,baseYear:2025,baseValue:122695,futureYear:2030,futureValue:167174,directGrowth:6.38},sm={name:`세계 공기조화설비 시장`,unit:`백만 달러`,source:`외부 시장자료, 2025.12`,mode:`growth`,pastYear:2020,pastValue:0,baseYear:2025,baseValue:0,futureYear:2030,futureValue:0,directGrowth:0};function cm(e,t,n){return e>0&&t>0&&n>0?((t/e)**(1/n)-1)*100:0}function lm(e){return e.mode===`growth`?e.directGrowth:cm(e.baseValue,e.futureValue,e.futureYear-e.baseYear)}function um(e,t,n){let r=lm(e)/100,i=e.baseYear||t,a=e.baseValue||e.pastValue||e.futureValue||0;return Array.from({length:Math.max(0,n-t+1)},(e,n)=>{let o=t+n;return{year:o,value:a?a*(1+r)**+(o-i):0}})}var dm=`ip-valuation-workbench-home-v1`,fm=`ip-valuation-workbench-company-v1`,pm=`ip-valuation-workbench-benchmark-v1`,mm=`ip-valuation-workbench-valuation-v1`,hm=`ip-valuation-workbench-report-v1`,gm=`ip-valuation-workbench-sales-history-v1`,_m=`ip-valuation-workbench-market-`,vm=`ip-valuation-reference-data-v1`,ym=`ip-valuation-workbench-`;function bm(e){if(typeof window>`u`)return null;let t=window.localStorage.getItem(e);if(!t)return null;try{return JSON.parse(t)}catch{return null}}function xm(e,t){if(!(typeof window>`u`))try{window.localStorage.setItem(e,JSON.stringify(t))}catch{}}function Sm(e,t,n){let[r,i]=(0,C.useState)(!1);(0,C.useEffect)(()=>{let t=bm(e);t&&n(t),i(!0)},[e]),(0,C.useEffect)(()=>{r&&xm(e,t)},[e,r,t])}function Cm(e){return e.startsWith(ym)||e===vm}function wm(e){let t={};for(let e=0;e<window.localStorage.length;e+=1){let n=window.localStorage.key(e);n&&Cm(n)&&(t[n]=window.localStorage.getItem(n)??``)}let n={format:`myeong-value-workbench-draft`,version:1,exportedAt:new Date().toISOString(),entries:t},r=URL.createObjectURL(new Blob([JSON.stringify(n,null,2)],{type:`application/vnd.myeongvalue.workbench+json`})),i=document.createElement(`a`);i.href=r,i.download=e,i.click(),URL.revokeObjectURL(r)}async function Tm(e){let t=JSON.parse(await e.text());if(t.format!==`myeong-value-workbench-draft`||!t.entries)throw Error(`invalid-draft`);let n=Object.entries(t.entries).filter(([e,t])=>Cm(e)&&typeof t==`string`);if(!n.length)throw Error(`empty-draft`);return Array.from({length:window.localStorage.length},(e,t)=>window.localStorage.key(t)).filter(e=>!!(e&&Cm(e))).forEach(e=>window.localStorage.removeItem(e)),n.forEach(([e,t])=>window.localStorage.setItem(e,t)),n.length}
+function op(...e) {
+    return ap(Nd(e));
+}
+
+function sp({delayDuration: e = 0, ...t}) {
+    return (0, W.jsx)(Td, {
+        "data-slot": `tooltip-provider`,
+        delayDuration: e,
+        ...t
+    });
+}
+
+function cp({...e}) {
+    return (0, W.jsx)(Ed, {
+        "data-slot": `tooltip`,
+        ...e
+    });
+}
+
+function lp({...e}) {
+    return (0, W.jsx)(Dd, {
+        "data-slot": `tooltip-trigger`,
+        ...e
+    });
+}
+
+function up({className: e, sideOffset: t = 0, children: n, ...r}) {
+    return (0, W.jsx)(Od, {
+        children: (0, W.jsxs)(kd, {
+            "data-slot": `tooltip-content`,
+            sideOffset: t,
+            className: op(`z-50 w-fit origin-(--radix-tooltip-content-transform-origin) animate-in rounded-md bg-foreground px-3 py-1.5 text-xs text-balance text-background fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95`, e),
+            ...r,
+            children: [ n, (0, W.jsx)(Ad, {
+                className: `z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px] bg-foreground fill-foreground`
+            }) ]
+        })
+    });
+}
+
+function dp({className: e, ...t}) {
+    return (0, W.jsx)(Nl, {
+        "data-slot": `radio-group`,
+        className: op(`grid gap-3`, e),
+        ...t
+    });
+}
+
+function fp({className: e, ...t}) {
+    return (0, W.jsx)(Rl, {
+        "data-slot": `radio-group-item`,
+        className: op(`aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40`, e),
+        ...t,
+        children: (0, W.jsx)(q, {
+            "data-slot": `radio-group-indicator`,
+            className: `relative flex items-center justify-center`,
+            children: (0, W.jsx)(L, {
+                className: `absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 fill-primary`
+            })
+        })
+    });
+}
+
+var pp = window.IP_VALUATION_CONFIG.bankRules, mp = window.IP_VALUATION_CONFIG.salesBasisLabels;
+
+function hp(e) {
+    return `${(e * 100).toFixed(2)}%`;
+}
+
+function gp(e) {
+    if (e.length < 2) return null;
+    let t = e[0], n = e.at(-1), r = n.year - t.year;
+    return r <= 0 || t.revenueHundredMillion <= 0 || n.revenueHundredMillion < 0 ? null : (n.revenueHundredMillion / t.revenueHundredMillion) ** (1 / r) - 1;
+}
+
+function _p(e) {
+    let t = [ ...e.salesHistory ].filter(e => Number.isFinite(e.year) && Number.isFinite(e.revenueHundredMillion)).sort((e, t) => e.year - t.year).slice(-5), n = gp(t), r = e.comparisonGrowthRate === void 0 ? `${e.comparisonGrowthLabel}은 별도 확인이 필요함` : `${e.comparisonGrowthLabel}은 ${hp(e.comparisonGrowthRate)}를 기록함`;
+    if (t.length < 2 || n === null) return `동사는 창업초기기업이거나 최근 재무정보가 부족하여 매출액 성장률 산출이 어려운바, ${r}.`;
+    let i = t.map(e => `${e.year}년 ${e.revenueHundredMillion.toLocaleString(`ko-KR`, {
+        maximumFractionDigits: 2
+    })}억 원`).join(`, `);
+    return `동사의 최근 ${t.length}개년 매출액은 ${i}이고, 해당 기간 매출성장률(CAGR)은 ${hp(n)}이며, ${r}.`;
+}
+
+function vp(e) {
+    let t = pp.find(t => t.code === e.bankCode) ?? pp.find(e => e.code === `OTHER`), n = e.targetPatents.filter(e => e.exclusionReasons?.length);
+    if (!e.valuationAvailable || e.targetPatents.length === 0) return `동사는 보유 유효 등록특허가 미확인되거나 제외사유에 따라 평가가능한 특허가 없어 가치산정이 불가함.\n- ${n.length ? n.map(e => `${e.registrationNo}: ${e.exclusionReasons.join(`, `)}`).join(`; `) : `보유 유효 등록특허 미확인 또는 평가가능 특허 없음`}`;
+    let r = e.companyForm === `법인기업` ? `설립` : `창업`, i = e.targetPatents.length, a = n.length ? n.map(e => `${e.registrationNo}은 ${e.exclusionReasons.join(`, `)}의 사유로 제외 검토됨`).join(`; `) : `평가대상특허 외 유효 등록특허의 추가 제외사유는 미확인됨`, o = _p(e), s = e.businessSalesBasis.periodYears ? `최근 ${e.businessSalesBasis.periodYears}개년 ` : ``, c = Number.isFinite(e.economicLifeYears) ? e.economicLifeYears.toFixed(1) : `0.0`;
+    return [ `- ${e.companyName}은 ${e.establishedYear}년 ${e.establishedMonth}월 ${r}된 ${e.industry} 영위 기업으로서, 평가대상특허 제품(솔루션)은 ${e.productName}에 관한 것임.`, `- 유효 등록특허는 ${e.validRegisteredPatentCount}건이며, 평가대상특허는 총 ${i}건임.`, `- ${t.name}의 법적 잔존기간 기준은 ${t.minimumRemainingYears}년 이상이며, 근질권·실시권·공동권리·등록공고 후 6개월 예외와 함께 검토함.`, `- ${a}.`, `- 평가대상특허 관련 사업화제품은 ${e.productName}에 관한 것으로, 홈페이지·기업자료 또는 평가자 확인자료에 따라 사업화 여부를 판단함.`, `- ${e.modelName} 모형을 적용하였으며, 기술의 경제적 수명은 ${c}년으로 산출됨.`, `- ${o}`, `- 사업화제품 매출액은 ${s}${mp[e.businessSalesBasis.method]} 방식으로 산정하였고, 전체 매출액 대비 사업화제품 매출비중은 ${hp(e.businessSalesBasis.ratio)}임.`, `- 사업화제품 매출액 중 평가대상특허 관련 매출비중은 ${hp(e.patentSalesRatio)}를 적용함.`, `- 상기 가정에 따른 평가대상특허의 가치금액은 ${e.valueLabel ?? `산출 전`}임.` ].join(`\n`);
+}
+
+var yp = e => typeof e == `boolean` ? `${e}` : e === 0 ? `0` : e, bp = Nd, xp = (e, t) => n => {
+    if (t?.variants == null) return bp(e, n?.class, n?.className);
+    let {variants: r, defaultVariants: i} = t, a = Object.keys(r).map(e => {
+        let t = n?.[e], a = i?.[e];
+        if (t === null) return null;
+        let o = yp(t) || yp(a);
+        return r[e][o];
+    }), o = n && Object.entries(n).reduce((e, t) => {
+        let [n, r] = t;
+        return r === void 0 || (e[n] = r), e;
+    }, {});
+    return bp(e, a, t?.compoundVariants?.reduce((e, t) => {
+        let {class: n, className: r, ...a} = t;
+        return Object.entries(a).every(e => {
+            let [t, n] = e;
+            return Array.isArray(n) ? n.includes({
+                ...i,
+                ...o
+            }[t]) : {
+                ...i,
+                ...o
+            }[t] === n;
+        }) ? [ ...e, n, r ] : e;
+    }, []), n?.class, n?.className);
+}, Sp = xp(`inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4`, {
+    variants: {
+        variant: {
+            default: `bg-primary text-primary-foreground hover:bg-primary/90`,
+            destructive: `bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40`,
+            outline: `border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50`,
+            secondary: `bg-secondary text-secondary-foreground hover:bg-secondary/80`,
+            ghost: `hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50`,
+            link: `text-primary underline-offset-4 hover:underline`
+        },
+        size: {
+            default: `h-9 px-4 py-2 has-[>svg]:px-3`,
+            xs: `h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3`,
+            sm: `h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5`,
+            lg: `h-10 rounded-md px-6 has-[>svg]:px-4`,
+            icon: `size-9`,
+            "icon-xs": `size-6 rounded-md [&_svg:not([class*='size-'])]:size-3`,
+            "icon-sm": `size-8`,
+            "icon-lg": `size-10`
+        }
+    },
+    defaultVariants: {
+        variant: `default`,
+        size: `default`
+    }
+});
+
+function Cp({className: e, variant: t = `default`, size: n = `default`, asChild: r = !1, ...i}) {
+    return (0, W.jsx)(r ? ql : `button`, {
+        "data-slot": `button`,
+        "data-variant": t,
+        "data-size": n,
+        className: op(Sp({
+            variant: t,
+            size: n,
+            className: e
+        })),
+        ...i
+    });
+}
+
+function wp({...e}) {
+    return (0, W.jsx)(ca, {
+        "data-slot": `dialog`,
+        ...e
+    });
+}
+
+function Tp({...e}) {
+    return (0, W.jsx)(ua, {
+        "data-slot": `dialog-trigger`,
+        ...e
+    });
+}
+
+function Ep({...e}) {
+    return (0, W.jsx)(ma, {
+        "data-slot": `dialog-portal`,
+        ...e
+    });
+}
+
+function Dp({...e}) {
+    return (0, W.jsx)(ka, {
+        "data-slot": `dialog-close`,
+        ...e
+    });
+}
+
+function Op({className: e, ...t}) {
+    return (0, W.jsx)(ga, {
+        "data-slot": `dialog-overlay`,
+        className: op(`fixed inset-0 z-50 bg-black/50 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0`, e),
+        ...t
+    });
+}
+
+function kp({className: e, children: t, showCloseButton: n = !0, ...r}) {
+    return (0, W.jsxs)(Ep, {
+        "data-slot": `dialog-portal`,
+        children: [ (0, W.jsx)(Op, {}), (0, W.jsxs)(ba, {
+            "data-slot": `dialog-content`,
+            className: op(`fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg`, e),
+            ...r,
+            children: [ t, n && (0, W.jsxs)(ka, {
+                "data-slot": `dialog-close`,
+                className: `absolute top-4 right-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4`,
+                children: [ (0, W.jsx)(ge, {}), (0, W.jsx)(`span`, {
+                    className: `sr-only`,
+                    children: `Close`
+                }) ]
+            }) ]
+        }) ]
+    });
+}
+
+function Ap({className: e, ...t}) {
+    return (0, W.jsx)(`div`, {
+        "data-slot": `dialog-header`,
+        className: op(`flex flex-col gap-2 text-center sm:text-left`, e),
+        ...t
+    });
+}
+
+function jp({className: e, showCloseButton: t = !1, children: n, ...r}) {
+    return (0, W.jsxs)(`div`, {
+        "data-slot": `dialog-footer`,
+        className: op(`flex flex-col-reverse gap-2 sm:flex-row sm:justify-end`, e),
+        ...r,
+        children: [ n, t && (0, W.jsx)(ka, {
+            asChild: !0,
+            children: (0, W.jsx)(Cp, {
+                variant: `outline`,
+                children: `Close`
+            })
+        }) ]
+    });
+}
+
+function Mp({className: e, ...t}) {
+    return (0, W.jsx)(Ta, {
+        "data-slot": `dialog-title`,
+        className: op(`text-lg leading-none font-semibold`, e),
+        ...t
+    });
+}
+
+function Np({className: e, ...t}) {
+    return (0, W.jsx)(Da, {
+        "data-slot": `dialog-description`,
+        className: op(`text-sm text-muted-foreground`, e),
+        ...t
+    });
+}
+
+function Pp({className: e, orientation: t = `horizontal`, ...n}) {
+    return (0, W.jsx)(Cu, {
+        "data-slot": `tabs`,
+        "data-orientation": t,
+        orientation: t,
+        className: op(`group/tabs flex gap-2 data-[orientation=horizontal]:flex-col`, e),
+        ...n
+    });
+}
+
+var Fp = xp(`group/tabs-list inline-flex w-fit items-center justify-center rounded-lg p-[3px] text-muted-foreground group-data-[orientation=horizontal]/tabs:h-9 group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col data-[variant=line]:rounded-none`, {
+    variants: {
+        variant: {
+            default: `bg-muted`,
+            line: `gap-1 bg-transparent`
+        }
+    },
+    defaultVariants: {
+        variant: `default`
+    }
+});
+
+function Ip({className: e, variant: t = `default`, ...n}) {
+    return (0, W.jsx)(wu, {
+        "data-slot": `tabs-list`,
+        "data-variant": t,
+        className: op(Fp({
+            variant: t
+        }), e),
+        ...n
+    });
+}
+
+function Lp({className: e, ...t}) {
+    return (0, W.jsx)(Tu, {
+        "data-slot": `tabs-trigger`,
+        className: op(`relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap text-foreground/60 transition-all group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 group-data-[variant=default]/tabs-list:data-[state=active]:shadow-sm group-data-[variant=line]/tabs-list:data-[state=active]:shadow-none dark:text-muted-foreground dark:hover:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4`, `group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent dark:group-data-[variant=line]/tabs-list:data-[state=active]:border-transparent dark:group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent`, `data-[state=active]:bg-background data-[state=active]:text-foreground dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 dark:data-[state=active]:text-foreground`, `after:absolute after:bg-foreground after:opacity-0 after:transition-opacity group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:bottom-[-5px] group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-[state=active]:after:opacity-100`, e),
+        ...t
+    });
+}
+
+function Rp({className: e, ...t}) {
+    return (0, W.jsx)(Eu, {
+        "data-slot": `tabs-content`,
+        className: op(`flex-1 outline-none`, e),
+        ...t
+    });
+}
+
+function zp(e, t) {
+    let n = Math.max(0, Math.round(e * 1e8) / 1e8), r = Math.floor(n), i = Math.round((n - r) * 1e8) / 1e8, a = r + +(i > 0), o = Math.max(0, t - 1), s = Math.min(a, o);
+    return Array.from({
+        length: s
+    }, (e, t) => t === a - 1 && i > 0 ? i : 1);
+}
+
+var Bp = 864e5;
+
+function Vp(e) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(e)) return null;
+    let t = new Date(`${e}T00:00:00Z`);
+    return Number.isFinite(t.getTime()) ? t : null;
+}
+
+function Hp(e, t) {
+    let n = new Date(e);
+    return n.setUTCFullYear(n.getUTCFullYear() + t), n;
+}
+
+function Up(e, t, n) {
+    let r = Vp(e), i = Vp(t);
+    if (!r || !i || r.getTime() > i.getTime()) return 0;
+    let a = new Date(r), o = 0;
+    for (;a.getTime() <= i.getTime(); ) {
+        let e = a.getUTCFullYear(), t = new Date(Date.UTC(e, 11, 31)), r = t.getTime() < i.getTime() ? t : i, s = Math.round((r.getTime() - a.getTime()) / Bp) + 1, c = (Date.UTC(e + 1, 0, 1) - Date.UTC(e, 0, 1)) / Bp, l = n.find(t => t.year === e)?.amount ?? 0;
+        o += l * s / c, a = new Date(r.getTime() + Bp);
+    }
+    return o;
+}
+
+function Wp(e, t) {
+    let n = Vp(e);
+    if (!n) return null;
+    let r = t.map(Vp).filter(e => !!(e && e.getTime() >= n.getTime())).sort((e, t) => e.getTime() - t.getTime())[0];
+    if (!r) return null;
+    let i = 0;
+    for (;i < 100 && !(new Date(Hp(n, i + 1).getTime() - Bp).getTime() > r.getTime()); ) i += 1;
+    let a = Hp(n, i), o = a.getTime() <= r.getTime() ? Math.round((r.getTime() - a.getTime()) / Bp) + 1 : 0;
+    return {
+        years: i + o / 365,
+        fullYears: i,
+        partialDays: o,
+        expirationDate: r.toISOString().slice(0, 10)
+    };
+}
+
+var Gp = {
+    "매출액": `totalRevenue`,
+    "전체매출액": `totalRevenue`,
+    "총매출액": `totalRevenue`,
+    "매출수익": `totalRevenue`,
+    "제품매출액": `productRevenue`,
+    "제품매출": `productRevenue`,
+    "공사매출액": `constructionRevenue`,
+    "공사매출": `constructionRevenue`,
+    "공사수익": `constructionRevenue`,
+    "공사수입": `constructionRevenue`,
+    "공사수입액": `constructionRevenue`,
+    "기타매출액": `otherRevenue`,
+    "기타매출": `otherRevenue`,
+    "용역수익": `otherRevenue`,
+    "용역매출액": `otherRevenue`,
+    "용역매출": `otherRevenue`,
+    "임대매출액": `rentalRevenue`,
+    "임대매출": `rentalRevenue`,
+    "임대수익": `rentalRevenue`,
+    "도소매매출액": `wholesaleRetailRevenue`,
+    "도소매매출": `wholesaleRetailRevenue`,
+    "도매및소매매출액": `wholesaleRetailRevenue`,
+    "상품매출액": `wholesaleRetailRevenue`
+}, Kp = new Set([ `국내공사`, `해외공사`, `국내공사수입`, `해외공사수입` ]);
+
+function qp(e) {
+    let t = e.normalize(`NFKC`).replace(/\s+/g, ``).replaceAll(`·`, ``).replace(/\(\s*[*+]\s*\)/g, ``).replace(/[\[\]{}:：]/g, ``);
+    if (Kp.has(t) || /(?:국내|해외).*공사|공사.*(?:국내|해외)/.test(t)) return;
+    let n = t.replace(/\(.*$/, ``), r = Gp[t] ?? Gp[n];
+    if (r) return r;
+    if (n.includes(`공사`) && /(매출|수입|수익)/.test(n)) return `constructionRevenue`;
+}
+
+var Jp = [ {
+    key: `totalRevenue`,
+    label: `전체 매출액`
+}, {
+    key: `productRevenue`,
+    label: `제품 매출액`
+}, {
+    key: `constructionRevenue`,
+    label: `공사 매출액`
+}, {
+    key: `otherRevenue`,
+    label: `기타 매출액`
+}, {
+    key: `rentalRevenue`,
+    label: `임대 매출액`
+}, {
+    key: `wholesaleRetailRevenue`,
+    label: `도소매 매출액`
+} ];
+
+function Yp(e, t = 5) {
+    let s = Math.max(2, t), n = [ ...e ].sort((e, t) => e.closingDate.localeCompare(t.closingDate)).filter(e => e.revenue > 0).slice(-s);
+    if (n.length < s || n.some((e, t) => t > 0 && Number(e.closingDate.slice(0, 4)) !== Number(n[t - 1].closingDate.slice(0, 4)) + 1)) return null;
+    let r = n[0], i = n.at(-1), a = Number(r.closingDate.slice(0, 4)), o = Number(i.closingDate.slice(0, 4)) - a;
+    return o > 0 ? ((i.revenue / r.revenue) ** (1 / o) - 1) * 100 : null;
+}
+
+function Xp(e, t, n) {
+    return e * t / 100 * (1 + n / 100);
+}
+
+function Zp(e, t) {
+    let n = new Map(t.map(e => [ e.year, e ])), r = new Set, i = e.flatMap(e => {
+        let t = Number(e.closingDate.slice(0, 4));
+        if (!Number.isFinite(t)) return [];
+        r.add(t);
+        let i = n.get(t);
+        return [ {
+            year: t,
+            totalRevenue: e.revenue,
+            productRevenue: i?.productRevenue ?? 0,
+            constructionRevenue: i?.constructionRevenue ?? 0,
+            otherRevenue: i?.otherRevenue ?? 0,
+            rentalRevenue: i?.rentalRevenue ?? 0,
+            wholesaleRetailRevenue: i?.wholesaleRetailRevenue ?? 0
+        } ];
+    });
+    return [ ...t.filter(e => !r.has(e.year)), ...i ].sort((e, t) => e.year - t.year);
+}
+
+function Qp(e, t) {
+    let n = [ ...e ].sort((e, t) => e.year - t.year).at(-1);
+    return n?.totalRevenue ? (t.selected.includes(`totalRevenue`) ? n.totalRevenue : t.selected.reduce((e, t) => e + n[t], 0)) / n.totalRevenue * t.patentShareWithinRelated : 0;
+}
+
+var $p = [ {
+    closingDate: `2025-12-31`,
+    totalAssets: 3926,
+    paidInCapital: 200,
+    totalEquity: 834,
+    revenue: 5813,
+    operatingProfit: 514,
+    netIncome: 399
+}, {
+    closingDate: `2024-12-31`,
+    totalAssets: 2480,
+    paidInCapital: 220,
+    totalEquity: 455,
+    revenue: 3414,
+    operatingProfit: 174,
+    netIncome: 130
+}, {
+    closingDate: `2023-12-31`,
+    totalAssets: 1213,
+    paidInCapital: 200,
+    totalEquity: 305,
+    revenue: 1516,
+    operatingProfit: 107,
+    netIncome: 88
+}, {
+    closingDate: `2022-12-31`,
+    totalAssets: 536,
+    paidInCapital: 200,
+    totalEquity: 217,
+    revenue: 145,
+    operatingProfit: 19,
+    netIncome: 17
+} ], em = [ {
+    closingDate: `2023-12-31`,
+    revenue: 1516,
+    costOfSales: 1248,
+    grossProfit: 268,
+    sga: 161,
+    operatingProfit: 107,
+    nonOperatingIncome: 18,
+    nonOperatingExpense: 14,
+    pretaxIncome: 111,
+    incomeTax: 23,
+    netIncome: 88,
+    depreciation: 31
+}, {
+    closingDate: `2024-12-31`,
+    revenue: 3414,
+    costOfSales: 2816,
+    grossProfit: 598,
+    sga: 424,
+    operatingProfit: 174,
+    nonOperatingIncome: 31,
+    nonOperatingExpense: 24,
+    pretaxIncome: 181,
+    incomeTax: 51,
+    netIncome: 130,
+    depreciation: 57
+}, {
+    closingDate: `2025-12-31`,
+    revenue: 5813,
+    costOfSales: 4715,
+    grossProfit: 1098,
+    sga: 584,
+    operatingProfit: 514,
+    nonOperatingIncome: 42,
+    nonOperatingExpense: 37,
+    pretaxIncome: 519,
+    incomeTax: 120,
+    netIncome: 399,
+    depreciation: 83
+} ], tm = [ {
+    year: 2021,
+    totalRevenue: 980,
+    productRevenue: 0,
+    constructionRevenue: 0,
+    otherRevenue: 980,
+    rentalRevenue: 0,
+    wholesaleRetailRevenue: 0
+}, {
+    year: 2022,
+    totalRevenue: 145,
+    productRevenue: 0,
+    constructionRevenue: 0,
+    otherRevenue: 145,
+    rentalRevenue: 0,
+    wholesaleRetailRevenue: 0
+}, {
+    year: 2023,
+    totalRevenue: 1516,
+    productRevenue: 1213,
+    constructionRevenue: 0,
+    otherRevenue: 303,
+    rentalRevenue: 0,
+    wholesaleRetailRevenue: 0
+}, {
+    year: 2024,
+    totalRevenue: 3414,
+    productRevenue: 2902,
+    constructionRevenue: 0,
+    otherRevenue: 512,
+    rentalRevenue: 0,
+    wholesaleRetailRevenue: 0
+}, {
+    year: 2025,
+    totalRevenue: 5813,
+    productRevenue: 5232,
+    constructionRevenue: 0,
+    otherRevenue: 581,
+    rentalRevenue: 0,
+    wholesaleRetailRevenue: 0
+} ], nm = [ {
+    year: 2020,
+    revenue: 24326844
+}, {
+    year: 2021,
+    revenue: 25968378
+}, {
+    year: 2022,
+    revenue: 29540386
+}, {
+    year: 2023,
+    revenue: 29959405
+}, {
+    year: 2024,
+    revenue: 28536978
+} ], rm = {
+    selected: [ `productRevenue` ],
+    patentShareWithinRelated: 75,
+    commercializationFirstRevenueYear: 2023,
+    historicalSalesInputMode: `ratio`,
+    historicalSalesShareByYear: {}
+};
+
+function im(e) {
+    return e.totalAssets ? e.totalEquity / e.totalAssets * 100 : 0;
+}
+
+function am(e) {
+    return e.revenue ? e.operatingProfit / e.revenue * 100 : 0;
+}
+
+var om = {
+    name: `국내 공기조화설비 시장`,
+    unit: `억원`,
+    source: `외부 시장자료, 2025.12`,
+    mode: `three`,
+    pastYear: 2020,
+    pastValue: 98e3,
+    baseYear: 2025,
+    baseValue: 122695,
+    futureYear: 2030,
+    futureValue: 167174,
+    directGrowth: 6.38
+}, sm = {
+    name: `세계 공기조화설비 시장`,
+    unit: `백만 달러`,
+    source: `외부 시장자료, 2025.12`,
+    mode: `growth`,
+    pastYear: 2020,
+    pastValue: 0,
+    baseYear: 2025,
+    baseValue: 0,
+    futureYear: 2030,
+    futureValue: 0,
+    directGrowth: 0
+};
+
+function cm(e, t, n) {
+    return e > 0 && t > 0 && n > 0 ? ((t / e) ** (1 / n) - 1) * 100 : 0;
+}
+
+function lm(e) {
+    return e.mode === `growth` ? e.directGrowth : cm(e.baseValue, e.futureValue, e.futureYear - e.baseYear);
+}
+
+function um(e, t, n) {
+    let r = lm(e) / 100, i = e.baseYear || t, a = e.baseValue || e.pastValue || e.futureValue || 0;
+    return Array.from({
+        length: Math.max(0, n - t + 1)
+    }, (e, n) => {
+        let o = t + n;
+        return {
+            year: o,
+            value: a ? a * (1 + r) ** +(o - i) : 0
+        };
+    });
+}
+
+var dm = `ip-valuation-workbench-home-v1`, fm = `ip-valuation-workbench-company-v1`, pm = `ip-valuation-workbench-benchmark-v1`, mm = `ip-valuation-workbench-valuation-v1`, hm = `ip-valuation-workbench-report-v1`, gm = `ip-valuation-workbench-sales-history-v1`, _m = `ip-valuation-workbench-market-`, vm = `ip-valuation-reference-data-v1`, ym = `ip-valuation-workbench-`;
+
+function bm(e) {
+    if (typeof window > `u`) return null;
+    let t = window.localStorage.getItem(e);
+    if (!t) return null;
+    try {
+        return JSON.parse(t);
+    } catch {
+        return null;
+    }
+}
+
+function xm(e, t) {
+    if (!(typeof window > `u`)) try {
+        window.localStorage.setItem(e, JSON.stringify(t));
+    } catch {}
+}
+
+function Sm(e, t, n) {
+    let [r, i] = (0, C.useState)(!1);
+    (0, C.useEffect)(() => {
+        let t = bm(e);
+        t && n(t), i(!0);
+    }, [ e ]), (0, C.useEffect)(() => {
+        r && xm(e, t);
+    }, [ e, r, t ]);
+}
+
+function Cm(e) {
+    return e.startsWith(ym) || e === vm || e === `ip-valuation-cretop-pdf-import-v1`;
+}
+
+function wm(e) {
+    let t = {};
+    for (let e = 0; e < window.localStorage.length; e += 1) {
+        let n = window.localStorage.key(e);
+        n && Cm(n) && (t[n] = window.localStorage.getItem(n) ?? ``);
+    }
+    let n = {
+        format: `myeong-value-workbench-draft`,
+        version: 1,
+        exportedAt: (new Date).toISOString(),
+        entries: t
+    }, r = URL.createObjectURL(new Blob([ JSON.stringify(n, null, 2) ], {
+        type: `application/vnd.myeongvalue.workbench+json`
+    })), i = document.createElement(`a`);
+    i.href = r, i.download = e, i.click(), URL.revokeObjectURL(r);
+}
+
+async function Tm(e) {
+    let t = JSON.parse(await e.text());
+    if (t.format !== `myeong-value-workbench-draft` || !t.entries) throw Error(`invalid-draft`);
+    let n = Object.entries(t.entries).filter(([e, t]) => Cm(e) && typeof t == `string`);
+    if (!n.length) throw Error(`empty-draft`);
+    return Array.from({
+        length: window.localStorage.length
+    }, (e, t) => window.localStorage.key(t)).filter(e => !!(e && Cm(e))).forEach(e => window.localStorage.removeItem(e)),
+    n.forEach(([e, t]) => window.localStorage.setItem(e, t)), n.length;
+}
