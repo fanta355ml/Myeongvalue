@@ -16,20 +16,19 @@ if (nav && !nav.querySelector('a[href="valuation/"]')) {
 }
 
 const serviceCards = Array.from(document.querySelectorAll('.service-card'));
-const quickValuationCard = serviceCards.find(card => card.querySelector('span')?.textContent.trim() === '03');
-if (quickValuationCard) {
-  quickValuationCard.setAttribute('role', 'link');
-  quickValuationCard.setAttribute('tabindex', '0');
-  quickValuationCard.style.cursor = 'pointer';
-  const openQuickValuation = () => { window.location.href = 'valuation/'; };
-  quickValuationCard.addEventListener('click', openQuickValuation);
-  quickValuationCard.addEventListener('keydown', (event) => {
+serviceCards.filter(card => card.dataset.serviceLink).forEach(card => {
+  card.setAttribute('role', 'link');
+  card.setAttribute('tabindex', '0');
+  card.style.cursor = 'pointer';
+  const openService = () => { window.location.href = card.dataset.serviceLink; };
+  card.addEventListener('click', openService);
+  card.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      openQuickValuation();
+      openService();
     }
   });
-}
+});
 
 const revealTargets = document.querySelectorAll('.section, .service-card, .metric');
 revealTargets.forEach(el => el.classList.add('reveal'));
