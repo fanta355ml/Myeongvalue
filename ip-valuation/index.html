@@ -246,6 +246,7 @@ Error generating stack: `+e.message+`
         }
       }
     </style>
+    <script src="../access-control.js"></script>
     <script id="myeongvalue-workbench-access-gate">
       (() => {
         const agencies = {
@@ -256,7 +257,7 @@ Error generating stack: `+e.message+`
             subline: "MYEONG VALUE PARTNERS",
             logo: "../assets/logo.png",
             passwordHash:
-              "22911eac9037b16e97ae24dd35c5be4d2822346029abfc9075f6b581b4f3592b",
+              "4f89740697702b3b64effcb361b9aa3c647ac0a04b192c3b35f096077d23afe6",
           },
           "myeongvalue-admin": {
             id: "myeongvalue-admin",
@@ -365,6 +366,22 @@ Error generating stack: `+e.message+`
             return;
           }
 
+          const accessControl = window.MyeongvalueAccessControl;
+          if (agency.id === "myeongvalue-admin") {
+            accessControl?.startAdminSession();
+            window.location.href = "../access-admin/";
+            return;
+          }
+
+          const accessStatus = accessControl?.getAccessStatus(agency.id);
+          if (accessStatus && !accessStatus.allowed) {
+            if (status) {
+              status.textContent = `${agency.name}의 접속기한이 ${accessStatus.deadline}에 만료되었습니다. 관리자에게 문의해 주세요.`;
+            }
+            if (password) password.value = "";
+            return;
+          }
+
           if (status) status.textContent = "";
           closeGate(agency);
         };
@@ -390,6 +407,11 @@ Error generating stack: `+e.message+`
         };
 
         document.addEventListener("DOMContentLoaded", () => {
+          const requestedAgency = new URLSearchParams(window.location.search).get("agency");
+          const agencySelect = document.getElementById("ipAgencySelect");
+          if (agencySelect && agencies[requestedAgency]) {
+            agencySelect.value = requestedAgency;
+          }
           document
             .getElementById("ipAgencySelect")
             ?.addEventListener("change", renderPreview);

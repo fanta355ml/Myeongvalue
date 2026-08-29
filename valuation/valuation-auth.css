@@ -158,7 +158,26 @@ body.auth-locked {
 
 .agency-preview-card[data-agency="kodata"] > div,
 .agency-preview-card[data-agency="juhae"] > div {
+  display: block;
+  text-align: center;
+}
+
+.agency-preview-card[data-agency="kodata"],
+.agency-preview-card[data-agency="juhae"] {
+  flex-direction: column;
+  gap: 7px;
+  padding-top: 13px;
+  padding-bottom: 13px;
+}
+
+.agency-preview-card[data-agency="kodata"] small,
+.agency-preview-card[data-agency="juhae"] small {
   display: none;
+}
+
+.agency-preview-card[data-agency="kodata"] strong,
+.agency-preview-card[data-agency="juhae"] strong {
+  font-size: 14px;
 }
 
 .agency-password-wrap {

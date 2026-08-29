@@ -8,7 +8,7 @@ const QUICK_VALUATION_AGENCIES = {
     subline: 'MYEONG VALUE PARTNERS · IP & TECHNOLOGY VALUATION',
     previewSubline: 'MYEONG VALUE PARTNERS',
     logo: '../assets/logo.png',
-    passwordHash: '22911eac9037b16e97ae24dd35c5be4d2822346029abfc9075f6b581b4f3592b'
+    passwordHash: '4f89740697702b3b64effcb361b9aa3c647ac0a04b192c3b35f096077d23afe6'
   },
   'myeongvalue-admin': {
     id: 'myeongvalue-admin',
@@ -209,6 +209,20 @@ async function submitAgencyLogin() {
     return;
   }
 
+  const accessControl = window.MyeongvalueAccessControl;
+  if (agency.id === 'myeongvalue-admin') {
+    accessControl?.startAdminSession();
+    window.location.href = '../access-admin/';
+    return;
+  }
+
+  const accessStatus = accessControl?.getAccessStatus(agency.id);
+  if (accessStatus && !accessStatus.allowed) {
+    if (status) status.textContent = `${agency.name}의 접속기한이 ${accessStatus.deadline}에 만료되었습니다. 관리자에게 문의해 주세요.`;
+    if (passwordInput) passwordInput.value = '';
+    return;
+  }
+
   if (status) status.textContent = '';
   applyAgency(selectedAgencyId);
   closeAgencyGate();
@@ -237,5 +251,6 @@ document.addEventListener('DOMContentLoaded', () => {
     applyReportAgencyBrand();
     applyReportPolish();
   });
-  setAgencyChoice('myeongvalue');
+  const requestedAgency = new URLSearchParams(window.location.search).get('agency');
+  setAgencyChoice(QUICK_VALUATION_AGENCIES[requestedAgency] ? requestedAgency : 'myeongvalue');
 });
