@@ -301,6 +301,37 @@
   color: #435267;
 }
 
+/* 업종평균 표: 수치는 우측, 그 외 항목은 가운데 정렬 */
+.benchmark-workspace .industry-finance-table th,
+.benchmark-workspace .company-financial-table-wrap th,
+.benchmark-workspace .horizontal-input-table th,
+.benchmark-workspace .related-sales-table th,
+.benchmark-workspace .competitor-horizontal-table th,
+.benchmark-workspace .market-period-table th,
+.benchmark-workspace .average-profit-table th {
+  text-align: center;
+}
+
+.benchmark-workspace .industry-finance-table td,
+.benchmark-workspace .company-financial-table-wrap td,
+.benchmark-workspace .competitor-horizontal-table td,
+.benchmark-workspace .average-profit-table td {
+  text-align: right;
+}
+
+.benchmark-workspace .company-financial-table-wrap tbody td:first-child,
+.benchmark-workspace .company-financial-table-wrap .average-row td:nth-last-child(-n + 2),
+.benchmark-workspace .related-sales-table td:first-child,
+.benchmark-workspace .competitor-horizontal-table .competitor-source-cell,
+.benchmark-workspace .competitor-horizontal-table .competitor-name-cell,
+.benchmark-workspace table input:not([type="number"]) {
+  text-align: center;
+}
+
+.benchmark-workspace table input[type="number"] {
+  text-align: right;
+}
+
 .quickvalue-rating-sections {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: start;
