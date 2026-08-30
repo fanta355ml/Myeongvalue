@@ -191,3 +191,43 @@ test("경쟁기업 PDF 비율은 최근 3개년 직접입력 구조로 정규화
   assert.deepEqual(Array.from(normalized.cost), [81, 82, 83]);
   assert.deepEqual(Array.from(normalized.sga), [9, 8, 7]);
 });
+
+test("PDF 3개년 비율과 붙여넣기 5개년을 교차검증하여 추가 연도를 유지한다", () => {
+  const parser = loadParser();
+  const existing = [2021, 2022, 2023, 2024, 2025].map((year) => ({
+    date: `${year}-12-31`,
+    cost: year - 1900,
+    sga: year - 2000,
+  }));
+  const imported = existing.slice(-3).map((row) => ({ ...row }));
+  const result = parser.reconcileRatioRows(existing, imported);
+
+  assert.equal(result.rows.length, 5);
+  assert.equal(result.conflicts.length, 0);
+  assert.equal(result.matchedYears.length, 3);
+  assert.equal(result.rows[0].date, "2021-12-31");
+});
+
+test("동일 연도 PDF 비율이 다르면 붙여넣기 값을 유지하고 경고자료를 반환한다", () => {
+  const parser = loadParser();
+  const existing = [{ date: "2025-12-31", cost: 91.2, sga: 5.4 }];
+  const imported = [{ date: "2025-12-31", cost: 92.1, sga: 5.4 }];
+  const result = parser.reconcileRatioRows(existing, imported);
+
+  assert.equal(result.rows[0].cost, 91.2);
+  assert.equal(result.rows[0].sga, 5.4);
+  assert.equal(result.conflicts.length, 1);
+  assert.equal(result.conflicts[0].label, "매출원가율");
+});
+
+test("붙여넣기 비율의 공란만 같은 연도 PDF 값으로 보충한다", () => {
+  const parser = loadParser();
+  const existing = [{ date: "2025-12-31", cost: null, sga: 5.4 }];
+  const imported = [{ date: "2025-12-31", cost: 92.1, sga: 5.4 }];
+  const result = parser.reconcileRatioRows(existing, imported);
+
+  assert.equal(result.rows[0].cost, 92.1);
+  assert.equal(result.rows[0].sga, 5.4);
+  assert.equal(result.filledFields.length, 1);
+  assert.equal(result.conflicts.length, 0);
+});

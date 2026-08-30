@@ -14,7 +14,7 @@ const overrideCss = fs.readFileSync(
 );
 
 function loadFunction(name) {
-  const match = reportingSource.match(new RegExp(`function ${name}\\(e\\) \\{[\\s\\S]*?\\n\\}`));
+  const match = reportingSource.match(new RegExp(`function ${name}\\([^)]*\\) \\{[\\s\\S]*?\\n\\}`));
   assert.ok(match, `${name} 함수를 찾을 수 있어야 합니다.`);
   return vm.runInNewContext(`(${match[0]})`);
 }
@@ -51,4 +51,26 @@ test("업종평균 표는 수치 입력을 우측, 비수치 항목을 가운데
     overrideCss,
     /\.benchmark-workspace \.company-financial-table-wrap tbody td:first-child,/,
   );
+});
+
+test("수익구조 비교는 기준연도가 달라도 양쪽 최신 유효기간을 각각 적용한다", () => {
+  const selectProfitabilityComparisonPeriods = loadFunction("selectProfitabilityComparisonPeriods");
+  const periods = selectProfitabilityComparisonPeriods(
+    [2025, 2024, 2023],
+    [2024, 2023, 2022, 2021, 2020],
+    3,
+  );
+
+  assert.equal(periods.availableYears, 3);
+  assert.equal(periods.appliedYears, 3);
+  assert.deepEqual(Array.from(periods.companyYears), [2025, 2024, 2023]);
+  assert.deepEqual(Array.from(periods.industryYears), [2024, 2023, 2022]);
+
+  const fiveYears = selectProfitabilityComparisonPeriods(
+    [2025, 2024, 2023, 2022, 2021],
+    [2024, 2023, 2022, 2021, 2020],
+    5,
+  );
+  assert.equal(fiveYears.availableYears, 5);
+  assert.equal(fiveYears.appliedYears, 5);
 });

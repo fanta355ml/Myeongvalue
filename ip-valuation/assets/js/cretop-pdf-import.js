@@ -16,6 +16,11 @@
     operatingProfit: "영업이익",
     netIncome: "순이익",
   };
+  var RATIO_FIELDS = ["cost", "sga"];
+  var RATIO_LABELS = {
+    cost: "매출원가율",
+    sga: "판관비율",
+  };
 
   function compact(value) {
     return String(value || "").replace(/\s+/g, " ").trim();
@@ -386,31 +391,88 @@
     if (!card) return [];
     var dates = Array.from(card.querySelectorAll('thead input[type="date"]')).map(function (input) { return input.value; });
     var rows = card.querySelectorAll("tbody tr");
-    var costs = rows[0] ? Array.from(rows[0].querySelectorAll("input")).map(function (input) { return parseNumber(input.value); }) : [];
-    var sgas = rows[1] ? Array.from(rows[1].querySelectorAll("input")).map(function (input) { return parseNumber(input.value); }) : [];
+    var costs = rows[0] ? Array.from(rows[0].querySelectorAll("input")).map(function (input) { return input.value.trim() === "" ? null : parseNumber(input.value); }) : [];
+    var sgas = rows[1] ? Array.from(rows[1].querySelectorAll("input")).map(function (input) { return input.value.trim() === "" ? null : parseNumber(input.value); }) : [];
     return dates.map(function (date, index) {
       return { date: date, cost: costs[index], sga: sgas[index] };
     }).filter(function (row) { return /^\d{4}-\d{2}-\d{2}$/.test(row.date); });
   }
 
   function ratiosLookLikeSample(rows) {
-    return rows.some(function (row) {
-      return row.date === "2025-12-31" && Math.abs((row.cost || 0) - 108.14) < 0.001 && Math.abs((row.sga || 0) - 12.06) < 0.001;
+    var samples = [
+      { date: "2023-12-31", cost: 82.35, sga: 7.7 },
+      { date: "2024-12-31", cost: 92.97, sga: 8.22 },
+      { date: "2025-12-31", cost: 108.14, sga: 12.06 },
+    ];
+    return rows.length === samples.length && samples.every(function (sample) {
+      return rows.some(function (row) {
+        return row.date === sample.date
+          && Math.abs((row.cost || 0) - sample.cost) < 0.001
+          && Math.abs((row.sga || 0) - sample.sga) < 0.001;
+      });
     });
   }
 
-  function mergeRatioRows(existing, imported) {
+  function reconcileRatioRows(existing, imported) {
     var byDate = new Map();
+    var conflicts = [];
+    var matchedYears = [];
+    var addedYears = [];
+    var filledFields = [];
     existing.forEach(function (row) { byDate.set(row.date, row); });
     imported.forEach(function (row) {
-      var previous = byDate.get(row.date) || {};
-      byDate.set(row.date, {
-        date: row.date,
-        cost: row.cost == null ? previous.cost : row.cost,
-        sga: row.sga == null ? previous.sga : row.sga,
+      var previous = byDate.get(row.date);
+      if (!previous) {
+        byDate.set(row.date, row);
+        addedYears.push(row.date);
+        return;
+      }
+      var next = Object.assign({}, previous);
+      var yearMatched = false;
+      RATIO_FIELDS.forEach(function (key) {
+        var pastedValue = previous[key];
+        var pdfValue = row[key];
+        if (pdfValue == null) return;
+        if (pastedValue == null) {
+          next[key] = pdfValue;
+          filledFields.push({ date: row.date, key: key, value: pdfValue });
+          return;
+        }
+        if (sameFinancialValue(pastedValue, pdfValue)) {
+          yearMatched = true;
+          return;
+        }
+        conflicts.push({
+          date: row.date,
+          key: key,
+          label: RATIO_LABELS[key],
+          pastedValue: pastedValue,
+          pdfValue: pdfValue,
+        });
       });
+      if (yearMatched && !matchedYears.includes(row.date)) matchedYears.push(row.date);
+      byDate.set(row.date, next);
     });
-    return Array.from(byDate.values()).sort(function (left, right) { return left.date.localeCompare(right.date); }).slice(-5);
+    return {
+      rows: Array.from(byDate.values()).sort(function (left, right) { return left.date.localeCompare(right.date); }).slice(-5),
+      conflicts: conflicts,
+      matchedYears: matchedYears,
+      addedYears: addedYears,
+      filledFields: filledFields,
+    };
+  }
+
+  function ratioConflictMessage(reconciliation) {
+    if (!reconciliation.conflicts.length) {
+      return reconciliation.matchedYears.length
+        ? "원가율·판관비율 중복 " + reconciliation.matchedYears.length + "개년을 교차검증했으며 값이 일치합니다. 붙여넣기의 추가 연도는 그대로 유지합니다."
+        : "원가율·판관비율을 결산일 기준으로 병합하며, 붙여넣기의 추가 연도는 그대로 유지합니다.";
+    }
+    var details = reconciliation.conflicts.slice(0, 6).map(function (item) {
+      return item.date.slice(0, 4) + "년 " + item.label + "(붙여넣기 " + item.pastedValue.toLocaleString("ko-KR") + "% / PDF " + item.pdfValue.toLocaleString("ko-KR") + "%)";
+    }).join(", ");
+    var remainder = reconciliation.conflicts.length > 6 ? " 외 " + (reconciliation.conflicts.length - 6) + "건" : "";
+    return "주의: " + details + remainder + "이 서로 다릅니다. 기존 붙여넣기 비율을 유지했으니 원자료를 확인해 주세요.";
   }
 
   function wait(milliseconds) {
@@ -421,11 +483,15 @@
     document.documentElement.dataset.cretopPdfApplying = "true";
     var replaceSample = currentFinancialsLookLikeSample();
     var existingRatios = currentRatioRows();
+    var replaceRatioSample = ratiosLookLikeSample(existingRatios);
     document.documentElement.dataset.cretopPdfMerge = replaceSample ? "replace" : "merge";
     var reconciliation = replaceSample ? { rows: result.financials, conflicts: [], matchedYears: [], addedYears: [], filledFields: [] }
       : reconcileFinancialRows(currentDetailedFinancialRows(), result.financials);
     var appliedFinancials = reconciliation.rows;
-    var appliedRatios = ratiosLookLikeSample(existingRatios) ? result.ratios : mergeRatioRows(existingRatios, result.ratios);
+    var ratioReconciliation = replaceRatioSample
+      ? { rows: result.ratios, conflicts: [], matchedYears: [], addedYears: [], filledFields: [] }
+      : reconcileRatioRows(existingRatios, result.ratios);
+    var appliedRatios = ratioReconciliation.rows;
     window.CRETOP_PDF_IMPORT_STATE = result;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(result));
 
@@ -452,9 +518,10 @@
     updateAvailabilityControls({ financials: appliedFinancials });
     delete document.documentElement.dataset.cretopPdfApplying;
     delete document.documentElement.dataset.cretopPdfMerge;
-    var statusMessage = appliedFinancials.length + "개년 재무정보와 주요 판매처 " + result.majorCustomers.length + "곳을 반영했습니다. "
-      + financialConflictMessage(reconciliation);
-    showInlineStatus(statusMessage, reconciliation.conflicts.length ? "warning" : "success");
+    var ratioStatusMessage = replaceRatioSample ? "초기 예시 원가율·판관비율은 PDF 자료로 교체했습니다." : ratioConflictMessage(ratioReconciliation);
+    var statusMessage = appliedFinancials.length + "개년 재무정보와 " + appliedRatios.length + "개년 원가율·판관비율, 주요 판매처 " + result.majorCustomers.length + "곳을 반영했습니다. "
+      + financialConflictMessage(reconciliation) + " " + ratioStatusMessage;
+    showInlineStatus(statusMessage, reconciliation.conflicts.length || ratioReconciliation.conflicts.length ? "warning" : "success");
   }
 
   function consecutivePositiveYears(rows) {
@@ -612,10 +679,17 @@
     var previewReconciliation = currentFinancialsLookLikeSample()
       ? { conflicts: [], matchedYears: [], addedYears: [], filledFields: [] }
       : reconcileFinancialRows(currentDetailedFinancialRows(), result.financials);
-    mergeWarning.textContent = currentFinancialsLookLikeSample()
+    var previewRatioRows = currentRatioRows();
+    var previewReplaceRatioSample = ratiosLookLikeSample(previewRatioRows);
+    var previewRatioReconciliation = previewReplaceRatioSample
+      ? { conflicts: [], matchedYears: [], addedYears: [], filledFields: [] }
+      : reconcileRatioRows(previewRatioRows, result.ratios);
+    var previewFinancialMessage = currentFinancialsLookLikeSample()
       ? "초기 예시 재무자료는 PDF 자료로 교체합니다."
       : financialConflictMessage(previewReconciliation);
-    mergeWarning.parentElement.dataset.tone = previewReconciliation.conflicts.length ? "warning" : "info";
+    var previewRatioMessage = previewReplaceRatioSample ? "초기 예시 원가율·판관비율은 PDF 자료로 교체합니다." : ratioConflictMessage(previewRatioReconciliation);
+    mergeWarning.textContent = previewFinancialMessage + " " + previewRatioMessage;
+    mergeWarning.parentElement.dataset.tone = previewReconciliation.conflicts.length || previewRatioReconciliation.conflicts.length ? "warning" : "info";
     dialog.hidden = false;
     dialog.querySelector("[data-pdf-apply]").focus();
   }
@@ -735,6 +809,7 @@
   window.CretopPdfImportParser = {
     parseExtractedPages: parseExtractedPages,
     reconcileFinancialRows: reconcileFinancialRows,
+    reconcileRatioRows: reconcileRatioRows,
     normalizeCompetitorRatios: normalizeCompetitorRatios,
     extractPdf: extractPdf,
   };

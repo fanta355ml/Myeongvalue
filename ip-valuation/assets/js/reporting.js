@@ -54,6 +54,16 @@ function ensureCompetitorRows(e) {
     return t;
 }
 
+function selectProfitabilityComparisonPeriods(e, t, n) {
+    let r = [ ...new Set(e) ].filter(Number.isFinite).sort((e, t) => t - e).slice(0, 5), i = [ ...new Set(t) ].filter(Number.isFinite).sort((e, t) => t - e).slice(0, 5), a = Math.min(5, r.length, i.length), o = Math.min(Math.max(1, Number(n) || 1), a);
+    return {
+        companyYears: r.slice(0, o),
+        industryYears: i.slice(0, o),
+        availableYears: a,
+        appliedYears: o
+    };
+}
+
 function M_(e) {
     return e.length ? e.reduce((e, t) => e + t, 0) / e.length : 0;
 }
@@ -157,17 +167,20 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
     (0, C.useEffect)(() => {
         a(ae);
     }, [ a, ae ]);
-    let oe = lm(c), se = lm(l), ce = N_(c, `국내`), le = N_(l, `해외`), salesAvailableYears = Math.min(5, r.filter(e => e.totalRevenue > 0).length), companyFinancialByYear = new Map(t.map(e => [ Number(e.closingDate.slice(0, 4)), e ])), companyRatioByYear = new Map(R.map(e => [ Number(e.date.slice(0, 4)), e ])), industryIndexByYear = new Map(ie.map((e, t) => [ e, t ])), comparableYears = ie.filter(e => {
-        let t = companyFinancialByYear.get(e), n = companyRatioByYear.get(e), r = industryIndexByYear.get(e), i = r == null ? 0 : P_(U, `매출액`, r);
-        return !!(t?.revenue && n && Number.isFinite(n.cost) && Number.isFinite(n.sga) && i);
-    }).sort((e, t) => t - e), availableComparisonYears = comparableYears.length, appliedComparisonYears = Math.min(T, availableComparisonYears), selectedComparisonYears = comparableYears.slice(0, appliedComparisonYears), ue = selectedComparisonYears.map(e => industryIndexByYear.get(e)).filter(e => e != null).map(e => {
+    let oe = lm(c), se = lm(l), ce = N_(c, `국내`), le = N_(l, `해외`), salesAvailableYears = Math.min(5, r.filter(e => e.totalRevenue > 0).length), companyFinancialByYear = new Map(t.map(e => [ Number(e.closingDate.slice(0, 4)), e ])), companyRatioByYear = new Map(R.map(e => [ Number(e.date.slice(0, 4)), e ])), industryIndexByYear = new Map(ie.map((e, t) => [ e, t ])), companyComparableYears = [ ...companyFinancialByYear.keys() ].filter(e => {
+        let t = companyFinancialByYear.get(e), n = companyRatioByYear.get(e);
+        return !!(t?.revenue && n && Number.isFinite(n.cost) && Number.isFinite(n.sga));
+    }), industryComparableYears = ie.filter(e => {
+        let t = industryIndexByYear.get(e);
+        return !!(t != null && P_(U, `매출액`, t));
+    }), comparisonPeriods = selectProfitabilityComparisonPeriods(companyComparableYears, industryComparableYears, T), availableComparisonYears = comparisonPeriods.availableYears, appliedComparisonYears = comparisonPeriods.appliedYears, selectedCompanyYears = comparisonPeriods.companyYears, selectedIndustryYears = comparisonPeriods.industryYears, ue = selectedIndustryYears.map(e => industryIndexByYear.get(e)).filter(e => e != null).map(e => {
         let t = P_(U, `매출액`, e);
         return {
             cost: t ? P_(U, `매출원가`, e) / t * 100 : 0,
             sga: t ? P_(U, `판매비와관리비`, e) / t * 100 : 0,
             operating: t ? P_(U, `영업이익`, e) / t * 100 : 0
         };
-    }), de = selectedComparisonYears.map(e => companyFinancialByYear.get(e)).filter(e => e), fe = selectedComparisonYears.map(e => companyRatioByYear.get(e)).filter(e => e), pe = [ {
+    }), de = selectedCompanyYears.map(e => companyFinancialByYear.get(e)).filter(e => e), fe = selectedCompanyYears.map(e => companyRatioByYear.get(e)).filter(e => e), pe = [ {
         label: `매출원가율`,
         company: M_(fe.map(e => e.cost)),
         industry: M_(ue.map(e => e.cost))
@@ -754,7 +767,7 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
                             children: [ 1, 2, 3, 4, 5 ].map(e => (0, W.jsxs)(`option`, {
                                 value: e,
                                 disabled: e > availableComparisonYears,
-                                children: [ `최근 `, e, `개년`, e > availableComparisonYears ? ` — 공통연도 부족` : `` ]
+                                children: [ `최근 `, e, `개년`, e > availableComparisonYears ? ` — 유효자료 부족` : `` ]
                             }, e))
                         }) ]
                     }) ]
@@ -784,7 +797,7 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
                     }) ]
                 }), (0, W.jsx)(`p`, {
                     className: `card-help`,
-                    children: availableComparisonYears ? `사업화주체와 동업종에 모두 존재하는 동일 결산연도만 비교합니다. 현재 공통 유효연도는 ${comparableYears.slice().reverse().join(`·`)}년입니다. 음수 영업이익률은 0% 축 아래에 표시합니다.` : `사업화주체와 동업종의 공통 유효연도가 없어 수익구조 비교를 비활성화했습니다.`
+                    children: availableComparisonYears ? `사업화주체와 동업종의 최신 유효자료를 각각 같은 개수로 비교합니다. 현재 사업화주체 ${selectedCompanyYears.slice().reverse().join(`·`)}년 · 동업종 ${selectedIndustryYears.slice().reverse().join(`·`)}년을 적용합니다. 음수 영업이익률은 0% 축 아래에 표시합니다.` : `사업화주체 또는 동업종의 유효자료가 없어 수익구조 비교를 비활성화했습니다.`
                 }) ]
             }), (0, W.jsxs)(`article`, {
                 className: `stage-card span-2 ratio-compare-card`,
