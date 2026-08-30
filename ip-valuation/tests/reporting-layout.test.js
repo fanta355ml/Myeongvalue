@@ -8,6 +8,10 @@ const reportingSource = fs.readFileSync(
   path.join(__dirname, "../assets/js/reporting.js"),
   "utf8",
 );
+const scoringSource = fs.readFileSync(
+  path.join(__dirname, "../assets/js/scoring.js"),
+  "utf8",
+);
 const overrideCss = fs.readFileSync(
   path.join(__dirname, "../assets/css/overrides.css"),
   "utf8",
@@ -73,4 +77,24 @@ test("수익구조 비교는 기준연도가 달라도 양쪽 최신 유효기�
   );
   assert.equal(fiveYears.availableYears, 5);
   assert.equal(fiveYears.appliedYears, 5);
+});
+
+test("보고서 수익구조는 사업화주체와 동업종을 추세선 없이 비교한다", () => {
+  assert.match(reportingSource, /companyCostRate = pe\[0\]\.company/);
+  assert.match(reportingSource, /companySgaRate = pe\[1\]\.company/);
+  assert.match(reportingSource, /companyOperatingMargin = pe\[2\]\.company/);
+
+  const chartStart = scoringSource.indexOf("function reportProfitabilityComparisonChart");
+  const chartEnd = scoringSource.indexOf("function s_", chartStart);
+  assert.ok(chartStart >= 0 && chartEnd > chartStart);
+  const chartSource = scoringSource.slice(chartStart, chartEnd);
+
+  assert.match(chartSource, /kind:`company`/);
+  assert.match(chartSource, /kind:`industry`/);
+  assert.doesNotMatch(chartSource, /polyline|myeong-chart-line|myeong-chart-dot/);
+  assert.match(scoringSource, /children:`수익구조 비교`/);
+  assert.match(scoringSource, /\$\{companyName\|\|`사업화주체`\}\(동사\)/);
+  assert.match(scoringSource, /\$\{o\.code\}\(동업종\)/);
+  assert.match(overrideCss, /\.myeong-chart-bar\.is-company \{\s*fill: #5578a7;/);
+  assert.match(overrideCss, /\.myeong-chart-bar\.is-industry \{\s*fill: #aeb9c9;/);
 });

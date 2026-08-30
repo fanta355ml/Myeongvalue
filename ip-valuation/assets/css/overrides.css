@@ -219,6 +219,47 @@
   content: none;
 }
 
+.myeong-profitability-card {
+  grid-column: 1 / -1;
+}
+
+.myeong-chart-bar.is-company {
+  fill: #5578a7;
+}
+
+.myeong-chart-bar.is-industry {
+  fill: #aeb9c9;
+}
+
+.myeong-profitability-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 3px;
+  color: #5d6878;
+  font-size: 8.5px;
+  font-weight: 700;
+}
+
+.myeong-profitability-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.myeong-profitability-legend i {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: #aeb9c9;
+}
+
+.myeong-profitability-legend i.is-company {
+  background: #5578a7;
+}
+
 .competitor-import-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

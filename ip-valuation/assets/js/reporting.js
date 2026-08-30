@@ -192,7 +192,7 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
         label: `영업이익률`,
         company: M_(de.map(am)),
         industry: M_(ue.map(e => e.operating))
-    } ], me = M_(ue.map(e => e.cost)), he = M_(ue.map(e => e.sga)), ge = M_(ue.map(e => e.operating));
+    } ], companyCostRate = pe[0].company, companySgaRate = pe[1].company, companyOperatingMargin = pe[2].company, me = M_(ue.map(e => e.cost)), he = M_(ue.map(e => e.sga)), ge = M_(ue.map(e => e.operating));
     (0, C.useEffect)(() => {
         availableComparisonYears > 0 && T > availableComparisonYears && E(availableComparisonYears);
     }, [ T, availableComparisonYears ]), (0, C.useEffect)(() => {
@@ -201,11 +201,14 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
         m({
             source: g,
             years: appliedComparisonYears,
+            companyCostRate,
+            companySgaRate,
+            companyOperatingMargin,
             costRate: me,
             sgaRate: he,
             operatingMargin: ge
         });
-    }, [ appliedComparisonYears, me, ge, he, m, g ]);
+    }, [ appliedComparisonYears, companyCostRate, companySgaRate, companyOperatingMargin, me, ge, he, m, g ]);
     let _e = [ ...r ].sort((e, t) => t.year - e.year)[0], ve = _e ? o.selected.includes(`totalRevenue`) ? _e.totalRevenue : o.selected.reduce((e, t) => e + _e[t], 0) : 0, ye = _e?.totalRevenue ? ve / _e.totalRevenue * 100 : 0, be = Qp(r, o), xe = (e = v) => {
         y(e);
         let t = g === `starvalue` ? 5 : 3, n = new Map, r = e.split(/\r?\n/).map(e => e.trim()).filter(Boolean);
