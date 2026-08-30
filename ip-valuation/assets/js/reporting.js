@@ -32,6 +32,28 @@ function j_(e, t) {
     }, (e, n) => `${a - Math.max(1, t) + 1 + n}-${r}-${i}`);
 }
 
+function buildCompetitionYears(e) {
+    let t = Number(e);
+    return Number.isFinite(t) && t >= 1902 ? [ t - 2, t - 1, t ] : [ 2023, 2024, 2025 ];
+}
+
+function ensureCompetitorRows(e) {
+    let t = Array.isArray(e) ? e.slice(0, 4) : [], n = [ `경쟁기업 A`, `경쟁기업 B`, `경쟁기업 C` ];
+    t.length || t.push({
+        name: `사업화주체`,
+        cost: [ 92.97, 106.14, 122.14 ],
+        sga: [ 8.22, 12.06, 22.13 ],
+        source: `사업화주체 비율표 연계`
+    });
+    for (let e = 1; e <= 3; e += 1) t[e] || (t[e] = {
+        name: n[e - 1],
+        cost: [ 0, 0, 0 ],
+        sga: [ 0, 0, 0 ],
+        source: `직접입력`
+    });
+    return t;
+}
+
 function M_(e) {
     return e.length ? e.reduce((e, t) => e + t, 0) / e.length : 0;
 }
@@ -73,7 +95,7 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
         date: `2025-12-31`,
         cost: 108.14,
         sga: 12.06
-    } ]), [B, V] = (0, C.useState)([ 2023, 2024, 2025 ]), [ne, H] = (0, C.useState)([ {
+    } ]), [competitionLatestYear, setCompetitionLatestYear] = (0, C.useState)(2025), [ne, H] = (0, C.useState)([ {
         name: `사업화주체`,
         cost: [ 92.97, 106.14, 122.14 ],
         sga: [ 8.22, 12.06, 22.13 ],
@@ -88,7 +110,13 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
         cost: [ 116.69, 93.96, 92.24 ],
         sga: [ 5.43, 8.26, 4.89 ],
         source: `직접입력`
+    }, {
+        name: `경쟁기업 C`,
+        cost: [ 0, 0, 0 ],
+        sga: [ 0, 0, 0 ],
+        source: `직접입력`
     } ]);
+    let B = (0, C.useMemo)(() => buildCompetitionYears(competitionLatestYear), [ competitionLatestYear ]);
     Sm(pm, {
         source: g,
         paste: v,
@@ -102,6 +130,7 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
         companyRatioPaste: F,
         companyRatioLatestDate: L,
         companyRatios: R,
+        competitionLatestYear,
         competitionYears: B,
         competitors: ne
     }, e => {
@@ -110,8 +139,8 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
         typeof e.financialPaste == `string` && O(e.financialPaste), typeof e.revenuePaste == `string` && A(e.revenuePaste),
         typeof e.salesMixLatestYear == `number` && M(e.salesMixLatestYear), typeof e.salesMixYears == `number` && e.salesMixYears >= 1 && e.salesMixYears <= 5 && P(e.salesMixYears),
         typeof e.companyRatioPaste == `string` && I(e.companyRatioPaste), typeof e.companyRatioLatestDate == `string` && te(e.companyRatioLatestDate),
-        Array.isArray(e.companyRatios) && z(e.companyRatios), Array.isArray(e.competitionYears) && V(e.competitionYears),
-        Array.isArray(e.competitors) && H(e.competitors);
+        Array.isArray(e.companyRatios) && z(e.companyRatios), typeof e.competitionLatestYear == `number` ? setCompetitionLatestYear(e.competitionLatestYear) : Array.isArray(e.competitionYears) && e.competitionYears.length && setCompetitionLatestYear(Number(e.competitionYears.at(-1)) || 2025),
+        Array.isArray(e.competitors) && H(ensureCompetitorRows(e.competitors));
     });
     let ie = (0, C.useMemo)(() => Array.from({
         length: g === `starvalue` ? 5 : 3
@@ -348,7 +377,7 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
             if (!n?.extractPdf || !n?.normalizeCompetitorRatios) throw new Error(`PDF 인식 모듈을 불러오지 못했습니다.`);
             let r = await n.extractPdf(t, t => h(`${ne[e]?.name || `경쟁기업`} · ${t}`)), i = n.normalizeCompetitorRatios(r);
             if (!i.years.length) throw new Error(`기업종합보고서에서 원가율·판관비율을 찾지 못했습니다.`);
-            V(i.years), H(t => t.map((t, n) => n === e ? {
+            setCompetitionLatestYear(Number(i.years.at(-1)) || competitionLatestYear), H(t => ensureCompetitorRows(t).map((t, n) => n === e ? {
                 ...t,
                 name: i.companyName || t.name,
                 cost: i.cost,
@@ -895,9 +924,23 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
                         }), (0, W.jsx)(`h2`, {
                             children: `가격경쟁력 비교용 재무입력`
                         }) ]
-                    }), (0, W.jsx)(`span`, {
-                        className: `source-chip`,
-                        children: `PDF 업로드 또는 직접입력`
+                    }), (0, W.jsxs)(`div`, {
+                        className: `competitor-card-controls`,
+                        children: [ (0, W.jsxs)(`label`, {
+                            className: `latest-year-field competitor-latest-year-field`,
+                            children: [ (0, W.jsx)(`span`, {
+                                children: `최종 기준년도`
+                            }), (0, W.jsx)(`input`, {
+                                type: `number`,
+                                min: `1902`,
+                                max: `9999`,
+                                value: competitionLatestYear,
+                                onChange: e => setCompetitionLatestYear(Number(e.target.value) || 2025)
+                            }) ]
+                        }), (0, W.jsx)(`span`, {
+                            className: `source-chip`,
+                            children: `PDF 업로드 또는 직접입력`
+                        }) ]
                     }) ]
                 }), (0, W.jsx)(`div`, {
                     className: `competitor-import-grid`,
@@ -935,13 +978,8 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
                                     children: `입력근거`
                                 }), (0, W.jsx)(`th`, {
                                     children: `구분`
-                                }), B.map((e, t) => (0, W.jsxs)(`th`, {
-                                    children: [ (0, W.jsx)(`input`, {
-                                        type: `number`,
-                                        value: e,
-                                        "aria-label": `${t + 1}번째 비교연도`,
-                                        onChange: e => V(n => n.map((n, r) => r === t ? Number(e.target.value) : n))
-                                    }), `년` ]
+                                }), B.map((e, t) => (0, W.jsx)(`th`, {
+                                    children: `${e}년`
                                 }, t)), (0, W.jsx)(`th`, {
                                     children: `최근 3개년 평균`
                                 }) ]

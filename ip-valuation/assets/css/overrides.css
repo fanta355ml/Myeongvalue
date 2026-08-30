@@ -195,6 +195,10 @@
       }
 
 /* 2026-08-29 valuation workspace follow-up */
+.workspace-head h1 {
+  font-weight: 700;
+}
+
 .sticky-summary {
   grid-template-columns: 190px 145px 82px 92px 82px 70px 120px 60px 75px 240px 92px;
   padding-right: 16px;
@@ -217,9 +221,9 @@
 
 .competitor-import-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin: 12px 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 8px 0;
 }
 
 .competitor-import-item {
@@ -227,7 +231,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 11px 12px;
+  padding: 8px 10px;
   border: 1px solid #d8e2ec;
   border-radius: 9px;
   background: #f8fbfe;
@@ -243,7 +247,7 @@
 
 .competitor-pdf-button {
   flex: 0 0 auto;
-  padding: 7px 10px;
+  padding: 6px 9px;
   border: 1px solid #224d73;
   border-radius: 7px;
   background: #fff;
@@ -256,7 +260,33 @@
 .competitor-pdf-button:hover { background: #eef5fb; }
 .competitor-pdf-button input { display: none; }
 
+.competitor-card-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.competitor-latest-year-field input {
+  width: 70px;
+}
+
 .competitor-horizontal-table { min-width: 860px; }
+.competitor-table-wrap { margin-top: 8px; }
+.competitor-horizontal-table th,
+.competitor-horizontal-table td {
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 4px 7px !important;
+  line-height: 1.2;
+}
+
+.competitor-horizontal-table input {
+  height: 24px;
+  min-height: 0;
+  padding: 0 6px;
+}
+
 .competitor-horizontal-table .competitor-name-cell { width: 132px; }
 .competitor-horizontal-table .competitor-source-cell {
   width: 145px;
@@ -274,17 +304,27 @@
 .quickvalue-rating-sections {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: start;
+  grid-auto-flow: row;
   gap: 10px 12px;
   margin-top: 10px;
 }
 
-.quickvalue-rating-section:nth-child(3) { grid-column: 2; grid-row: 2; }
-.quickvalue-rating-section:nth-child(4) { grid-column: 1; grid-row: 2; }
+.quickvalue-rating-section:nth-child(1) { grid-column: 1; grid-row: 1; align-self: start; }
+.quickvalue-rating-section:nth-child(2) { grid-column: 1; grid-row: 2; align-self: start; }
+.quickvalue-rating-section:nth-child(3) { grid-column: 2; grid-row: 1; align-self: start; }
+.quickvalue-rating-section:nth-child(4) { grid-column: 2; grid-row: 2; align-self: start; }
 .rating-input-card .rating-footnote { margin-top: 8px; }
 
 @media (max-width: 900px) {
   .competitor-import-grid,
   .quickvalue-rating-sections { grid-template-columns: 1fr; }
+  .quickvalue-rating-section:nth-child(1),
+  .quickvalue-rating-section:nth-child(2),
   .quickvalue-rating-section:nth-child(3),
   .quickvalue-rating-section:nth-child(4) { grid-column: auto; grid-row: auto; }
+
+  .competitor-card-controls {
+    align-items: flex-end;
+    flex-direction: column;
+  }
 }
