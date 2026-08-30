@@ -98,3 +98,14 @@ test("보고서 수익구조는 사업화주체와 동업종을 추세선 없이
   assert.match(overrideCss, /\.myeong-chart-bar\.is-company \{\s*fill: #5578a7;/);
   assert.match(overrideCss, /\.myeong-chart-bar\.is-industry \{\s*fill: #aeb9c9;/);
 });
+
+test("수익성 평가의견 최하단에 매출원가율과 판매관리비율 의견을 추가한다", () => {
+  assert.match(scoringSource, /function reportCostStructureOpinion/);
+  assert.match(scoringSource, /평균 매출원가율은/);
+  assert.match(scoringSource, /판매관리비율은/);
+  assert.match(scoringSource, /비용구조 측면에서/);
+
+  const profitabilityOpinion = scoringSource.indexOf("평균수익성과 최근 실적 추이");
+  const costStructureOpinion = scoringSource.indexOf("reportCostStructureOpinion(a)", profitabilityOpinion);
+  assert.ok(profitabilityOpinion >= 0 && costStructureOpinion > profitabilityOpinion);
+});
