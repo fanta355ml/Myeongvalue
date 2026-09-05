@@ -431,6 +431,13 @@ test("모형·세금·경제적 수명 UI는 요청된 독립 선택과 확인 �
   assert.ok(source.indexOf("value: `tax`") < source.indexOf("value: `discount`"));
   assert.match(source, /value: lifeModel/);
   assert.match(source, /method1PreparationMonths/);
+  const economicLifeCard = source.indexOf("title: `경제적 수명 적용`");
+  const preparationCard = source.indexOf("title: `사업화 준비기간`", economicLifeCard);
+  const finalPeriodNotice = source.indexOf("children: `최종 적용기간 판정`", preparationCard);
+  assert.ok(economicLifeCard >= 0 && economicLifeCard < preparationCard && preparationCard < finalPeriodNotice);
+  assert.doesNotMatch(source.slice(economicLifeCard, preparationCard), /label: `준비기간\(/);
+  assert.match(source, /badge: `경제적 수명 별도 가산`/);
+  assert.match(source, /경제적 수명의 소수점 처리와 무관한 별도 입력값입니다/);
   assert.match(source, /function Cg\(e, t\) \{\s*let n = Number\.isFinite\(Number\(e\)\) \? Math\.max\(0, Number\(e\)\) : 0/);
   assert.match(source, /function countCalendarYearPeriods/);
   assert.match(source, /cashFlowPeriodCount = countCalendarYearPeriods\(nn, finalValuationEnd\)/);
@@ -485,7 +492,7 @@ test("개척률 UI는 StarValue·ECOS를 필수 자동연결하고 크레탑 대
 
   assert.doesNotMatch(source, /StarValue 산출값 적용/);
   assert.doesNotMatch(source, /ECOS 산출값 적용/);
-  assert.match(source, /필수 자동연결 · StarValue \+ ECOS/);
+  assert.match(source, /기준자료 경로 · StarValue \+ ECOS/);
   assert.match(source, /value: `starvalue-cretop`/);
   assert.match(source, /산업분류코드\(영문 1자 \+ 숫자 5자리\)/);
   assert.match(source, /\^\[A-Z\]\\d\{5\}\$/);
@@ -497,6 +504,20 @@ test("개척률 UI는 StarValue·ECOS를 필수 자동연결하고 크레탑 대
   assert.match(source, /method1AutomaticBenchmarkReady/);
   assert.match(source, /setMethod1IndustryAssetIncrease\(``\)/);
   assert.match(reporting, /가치산정에서 ECOS 연구개발비율과 자동 결합/);
+
+  const cardStart = source.indexOf("let pioneeringCard");
+  const benchmarkGrid = source.indexOf("pioneering-benchmark-grid", cardStart);
+  const investmentGrid = source.indexOf("method1-investment-fields", benchmarkGrid);
+  const decisionGrid = source.indexOf("pioneering-decision-grid", investmentGrid);
+  const resultCallout = source.indexOf("className: `result-callout`", decisionGrid);
+  const referencePath = source.indexOf("className: `reference-match-note pioneering-auto-note`", resultCallout);
+  assert.ok(
+    cardStart < benchmarkGrid &&
+      benchmarkGrid < investmentGrid &&
+      investmentGrid < decisionGrid &&
+      decisionGrid < resultCallout &&
+      resultCallout < referencePath,
+  );
 });
 
 test("기존 로열티Ⅱ 산출 분기는 유효성 적용 공식을 그대로 유지한다", () => {

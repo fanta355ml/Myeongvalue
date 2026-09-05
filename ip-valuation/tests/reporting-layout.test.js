@@ -215,3 +215,33 @@ test("보고서 가치평가금액은 산정값과 실시간 연동하고 수동
     /\.report-amount-editor-card \{[\s\S]*?grid-template-columns: minmax\(0, 1fr\) auto;/,
   );
 });
+
+test("사업화 준비기간은 매출추정 문안과 검토의견에 기간을 조건부 표시한다", () => {
+  const helperStart = scoringSource.indexOf("function formatCommercializationPreparation");
+  const helperEnd = scoringSource.indexOf("function Fg", helperStart);
+  assert.ok(helperStart >= 0 && helperEnd > helperStart);
+
+  const helpers = vm.runInNewContext(
+    `(()=>{${scoringSource.slice(helperStart, helperEnd)};return {formatCommercializationPreparation,Pg};})()`,
+  );
+  const base = {
+    salesMethod: "direct",
+    preparationYears: 2,
+    preparationMonths: 4,
+  };
+  assert.equal(helpers.formatCommercializationPreparation(base), "2년 4개월");
+  assert.match(helpers.Pg(base).join("\n"), /사업화 준비기간 2년 4개월 동안 매출액을 0으로 반영/);
+  assert.doesNotMatch(
+    helpers.Pg({ ...base, preparationYears: 0, preparationMonths: 0 }).join("\n"),
+    /사업화 준비기간/,
+  );
+  assert.match(scoringSource, /preparationPeriod\?`▪ 사업화 준비기간 \$\{preparationPeriod\} 동안 매출액을 0으로 반영하고, 준비기간 종료 후 최초 추정매출액/);
+  assert.match(scoringSource, /preparationPeriod\?`▪ 사업화 준비기간 \$\{preparationPeriod\} 동안 매출액을 0으로 반영하고, 준비기간 종료 후 매출이 발생/);
+});
+
+test("사업화 준비기간의 선행 0 매출 구간은 화면과 보고서 추세선에서 제외한다", () => {
+  assert.match(scoringSource, /function Ng\([\s\S]*?findIndex\(e=>Number\(e\.amount\)>0\)[\s\S]*?r=n<0\?\[\]:e\.slice\(n\)/);
+  assert.match(scoringSource, /firstPositive=_\.findIndex\(e=>Number\(e\.value\)>0\)/);
+  assert.match(scoringSource, /skipLeadingZeros\?firstPositive<0\?\[\]:_\.slice\(firstPositive\):_/);
+  assert.match(scoringSource, /series:c,main:!0,height:218,barWidth:52,digits:1,skipLeadingZeros:!0/);
+});

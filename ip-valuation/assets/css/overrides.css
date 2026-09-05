@@ -727,6 +727,26 @@
   gap: 8px;
 }
 
+.pioneering-benchmark-grid,
+.pioneering-decision-grid,
+.method1-investment-fields {
+  align-items: start;
+}
+
+.method1-investment-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.method1-investment-grid > strong {
+  color: #19324c;
+  font-size: 14px;
+}
+
+.pioneering-decision-grid .valuation-field {
+  align-items: start;
+}
+
 .pioneering-auto-note {
   border-color: #9fc9bb;
   background: #f2fbf7;
@@ -868,6 +888,9 @@
   .valuation-purpose-grid,
   .valuation-method-grid,
   .preparation-period-grid,
+  .pioneering-benchmark-grid,
+  .pioneering-decision-grid,
+  .method1-investment-fields,
   .pioneering-confirm-grid { grid-template-columns: 1fr; }
   .quickvalue-rating-section:nth-child(1),
   .quickvalue-rating-section:nth-child(2),

@@ -1743,30 +1743,6 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                 }
                 e.currentTarget.value = ``;
             }
-        }), method1PioneeringSource === `starvalue-ecos` && (0, W.jsxs)(`div`, {
-            className: `reference-match-note pioneering-auto-note`,
-            children: [ (0, W.jsx)(`span`, { children: `필수 자동연결 · StarValue + ECOS` }), (0, W.jsx)(`strong`, {
-                children: starvalueAutoAssetIncrease !== null && ecosAutoResearchDevelopment !== null ? `자동 반영됨 · 최근 ${method1AppliedLookbackYears}개년 평균` : `자료 대기`
-            }), (0, W.jsxs)(`small`, {
-                children: [ `유·무형자산 증감액 `, starvalueAutoAssetIncrease === null ? `산출 전` : `${starvalueAutoAssetIncrease.toLocaleString(`ko-KR`, { maximumFractionDigits: 6 })}백만원`, ` + 연구개발비 `, ecosAutoResearchDevelopment === null ? `산출 전` : `${ecosAutoResearchDevelopment.toLocaleString(`ko-KR`, { maximumFractionDigits: 6 })}백만원`, ` · `, ecosMatch?.code ?? `-`, ` `, ecosMatch?.name ?? `ECOS 일치 업종 없음` ]
-            }), (0, W.jsxs)(`div`, {
-                className: `pioneering-auto-controls`,
-                children: [ (0, W.jsxs)(`label`, {
-                    children: [ (0, W.jsx)(`span`, { children: `평균기간` }), (0, W.jsx)(`select`, {
-                        value: method1AppliedLookbackYears || method1BenchmarkLookbackYears,
-                        disabled: method1AvailableLookbackYears < 1,
-                        onChange: e => setMethod1BenchmarkLookbackYears(Number(e.target.value)),
-                        children: Array.from({ length: Math.max(1, method1AvailableLookbackYears) }, (e, t) => (0, W.jsxs)(`option`, { value: t + 1, children: [ t + 1, `개년` ] }, t + 1))
-                    }) ]
-                }), (0, W.jsxs)(`button`, {
-                    type: `button`, onClick: () => method1EcosInputRef.current?.click(),
-                    children: [ (0, W.jsx)(R, { size: 14 }), ` ECOS 최신자료 업로드` ]
-                }), method1EcosCustomData && (0, W.jsx)(`button`, {
-                    type: `button`, onClick: () => setMethod1EcosCustomData(null), children: `웹 내장자료로 복원`
-                }) ]
-            }), (0, W.jsxs)(`small`, {
-                children: [ ecosSourceLabel, ` · `, ecosResearchValues.map(e => `${e.year}년 ${e.revenue.toLocaleString(`ko-KR`, { maximumFractionDigits: 3 })}×${e.rate}%`).join(` · `) || `StarValue 자산증감·매출액과 ECOS 비율의 공통연도 자료가 필요합니다.` ]
-            }) ]
         }), method1PioneeringSource === `starvalue-cretop` && (0, W.jsxs)(`div`, {
             className: `cretop-pioneering-card`,
             children: [ (0, W.jsxs)(`div`, {
@@ -1802,41 +1778,74 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
             }), (0, W.jsx)(Dg, {
                 label: `표본기업 수`, children: (0, W.jsx)(`input`, { type: `number`, min: `1`, value: method1SourceSampleCount, placeholder: `확인된 경우`, onChange: e => setMethod1SourceSampleCount(e.target.value) })
             }) ]
-        }), (0, W.jsx)(Dg, {
-            label: `동업종 평균 유·무형자산 증감(백만원)`, children: (0, W.jsx)(`input`, { type: `number`, readOnly: [ `starvalue-ecos`, `starvalue-cretop` ].includes(method1PioneeringSource), value: method1IndustryAssetIncrease, onChange: e => setMethod1IndustryAssetIncrease(e.target.value === `` ? `` : Number(e.target.value)) })
-        }), (0, W.jsx)(Dg, {
-            label: `동업종 평균 연구개발비(백만원)`, children: (0, W.jsx)(`input`, { type: `number`, min: `0`, readOnly: [ `starvalue-ecos`, `starvalue-cretop` ].includes(method1PioneeringSource), value: method1IndustryResearchDevelopment, onChange: e => setMethod1IndustryResearchDevelopment(e.target.value === `` ? `` : Math.max(0, Number(e.target.value))) })
+        }), (0, W.jsxs)(`div`, {
+            className: `section-grid two-columns pioneering-benchmark-grid`,
+            children: [ (0, W.jsx)(Dg, {
+                label: `동업종 평균 유·무형자산 증감(백만원)`, children: (0, W.jsx)(`input`, { type: `number`, readOnly: [ `starvalue-ecos`, `starvalue-cretop` ].includes(method1PioneeringSource), value: method1IndustryAssetIncrease, onChange: e => setMethod1IndustryAssetIncrease(e.target.value === `` ? `` : Number(e.target.value)) })
+            }), (0, W.jsx)(Dg, {
+                label: `동업종 평균 연구개발비(백만원)`, children: (0, W.jsx)(`input`, { type: `number`, min: `0`, readOnly: [ `starvalue-ecos`, `starvalue-cretop` ].includes(method1PioneeringSource), value: method1IndustryResearchDevelopment, onChange: e => setMethod1IndustryResearchDevelopment(e.target.value === `` ? `` : Math.max(0, Number(e.target.value))) })
+            }) ]
         }), preparationTotalMonths > 0 && (0, W.jsxs)(`div`, {
             className: `method1-investment-grid`,
-            children: [ (0, W.jsx)(`strong`, { children: `사업화 준비기간 구간별 투자금액(백만원)` }), Array.from({ length: preparationInvestmentPeriods }, (e, t) => (0, W.jsx)(Dg, {
-                label: t === preparationInvestmentPeriods - 1 && method1PreparationMonths > 0 ? `${rn + t}년 중 ${method1PreparationMonths}개월` : `${rn + t}년`,
-                children: (0, W.jsx)(`input`, {
-                    type: `number`, min: `0`, value: method1Investments[t] ?? ``,
-                    onChange: e => {
-                        let n = [ ...method1Investments ];
-                        n[t] = e.target.value === `` ? `` : Math.max(0, Number(e.target.value)), setMethod1Investments(n);
-                    }
+            children: [ (0, W.jsx)(`strong`, { children: `사업화 준비기간 구간별 투자금액(백만원)` }), (0, W.jsx)(`div`, {
+                className: `section-grid two-columns method1-investment-fields`,
+                children: Array.from({ length: preparationInvestmentPeriods }, (e, t) => (0, W.jsx)(Dg, {
+                    label: t === preparationInvestmentPeriods - 1 && method1PreparationMonths > 0 ? `${rn + t}년 중 ${method1PreparationMonths}개월` : `${rn + t}년`,
+                    children: (0, W.jsx)(`input`, {
+                        type: `number`, min: `0`, value: method1Investments[t] ?? ``,
+                        onChange: e => {
+                            let n = [ ...method1Investments ];
+                            n[t] = e.target.value === `` ? `` : Math.max(0, Number(e.target.value)), setMethod1Investments(n);
+                        }
+                    })
+                }, t))
+            }) ]
+        }), (0, W.jsxs)(`div`, {
+            className: `section-grid two-columns pioneering-decision-grid`,
+            children: [ (0, W.jsx)(Dg, {
+                label: `출처 상세`, children: (0, W.jsx)(`textarea`, { readOnly: [ `starvalue-ecos`, `starvalue-cretop` ].includes(method1PioneeringSource), value: method1SourceDetail, onChange: e => setMethod1SourceDetail(e.target.value), placeholder: `자료명·작성기관·기준일` })
+            }), (0, W.jsx)(Dg, {
+                label: `개척률 확정값`,
+                children: (0, W.jsxs)(`div`, {
+                    className: `pioneering-confirm-grid`,
+                    children: [ (0, W.jsxs)(`select`, {
+                        value: method1PioneeringOverride === null ? `auto` : `manual`, onChange: e => setMethod1PioneeringOverride(e.target.value === `auto` ? null : method1PioneeringRecommended ?? 100),
+                        children: [ (0, W.jsxs)(`option`, { value: `auto`, children: [ `자동추천 `, method1PioneeringRecommended ?? `산출 전`, method1PioneeringRecommended === null ? `` : `%` ] }), (0, W.jsx)(`option`, { value: `manual`, children: `평가자 직접확정` }) ]
+                    }), method1PioneeringOverride !== null && (0, W.jsxs)(`span`, {
+                        className: `percent-input`,
+                        children: [ (0, W.jsx)(`input`, { type: `number`, min: `50`, max: `100`, step: `0.01`, value: method1PioneeringOverride, onChange: e => setMethod1PioneeringOverride(e.target.value === `` ? NaN : Number(e.target.value)) }), (0, W.jsx)(`b`, { children: `%` }) ]
+                    }) ]
                 })
-            }, t)) ]
-        }), (0, W.jsx)(Dg, {
-            label: `출처 상세`, children: (0, W.jsx)(`textarea`, { readOnly: [ `starvalue-ecos`, `starvalue-cretop` ].includes(method1PioneeringSource), value: method1SourceDetail, onChange: e => setMethod1SourceDetail(e.target.value), placeholder: `자료명·작성기관·기준일` })
-        }), (0, W.jsx)(Dg, {
-            label: `개척률 확정값`,
-            children: (0, W.jsxs)(`div`, {
-                className: `pioneering-confirm-grid`,
-                children: [ (0, W.jsxs)(`select`, {
-                    value: method1PioneeringOverride === null ? `auto` : `manual`, onChange: e => setMethod1PioneeringOverride(e.target.value === `auto` ? null : method1PioneeringRecommended ?? 100),
-                    children: [ (0, W.jsxs)(`option`, { value: `auto`, children: [ `자동추천 `, method1PioneeringRecommended ?? `산출 전`, method1PioneeringRecommended === null ? `` : `%` ] }), (0, W.jsx)(`option`, { value: `manual`, children: `평가자 직접확정` }) ]
-                }), method1PioneeringOverride !== null && (0, W.jsxs)(`span`, {
-                    className: `percent-input`,
-                    children: [ (0, W.jsx)(`input`, { type: `number`, min: `50`, max: `100`, step: `0.01`, value: method1PioneeringOverride, onChange: e => setMethod1PioneeringOverride(e.target.value === `` ? NaN : Number(e.target.value)) }), (0, W.jsx)(`b`, { children: `%` }) ]
-                }) ]
-            })
+            }) ]
         }), method1PioneeringOverride !== null && method1PioneeringOverride !== method1PioneeringRecommended && (0, W.jsx)(Dg, {
             label: `확정 근거`, children: (0, W.jsx)(`textarea`, { value: method1PioneeringReason, onChange: e => setMethod1PioneeringReason(e.target.value) })
         }), (0, W.jsxs)(`div`, {
             className: `result-callout`,
             children: [ (0, W.jsx)(`span`, { children: `개척률` }), (0, W.jsx)(`strong`, { children: method1PioneeringRate === null ? `산출 전` : `${method1PioneeringRate}%` }), (0, W.jsx)(`small`, { children: preparationTotalMonths === 0 ? `사업화 준비기간 0개월: 즉시 사업화 가능한 상태로 보아 개척률 100%를 적용합니다.` : method1PioneeringInputsReady ? `투자금액 ${method1CostTotal.toLocaleString()} ÷ 기준금액 ${method1BenchmarkTotal.toLocaleString()} · 기간 ${preparationDurationYears.toFixed(4)}년 · 비율 ${method1PioneeringRatio.toFixed(2)}` : `준비기간·연도별 투자금액·동업종 기준자료를 입력해 주세요. 개월은 12로 나눈 소수연수로 자동 환산합니다.` }) ]
+        }), method1PioneeringSource === `starvalue-ecos` && (0, W.jsxs)(`div`, {
+            className: `reference-match-note pioneering-auto-note`,
+            children: [ (0, W.jsx)(`span`, { children: `기준자료 경로 · StarValue + ECOS` }), (0, W.jsx)(`strong`, {
+                children: starvalueAutoAssetIncrease !== null && ecosAutoResearchDevelopment !== null ? `자동 반영됨 · 최근 ${method1AppliedLookbackYears}개년 평균` : `자료 대기`
+            }), (0, W.jsxs)(`small`, {
+                children: [ `유·무형자산 증감액 `, starvalueAutoAssetIncrease === null ? `산출 전` : `${starvalueAutoAssetIncrease.toLocaleString(`ko-KR`, { maximumFractionDigits: 6 })}백만원`, ` + 연구개발비 `, ecosAutoResearchDevelopment === null ? `산출 전` : `${ecosAutoResearchDevelopment.toLocaleString(`ko-KR`, { maximumFractionDigits: 6 })}백만원`, ` · `, ecosMatch?.code ?? `-`, ` `, ecosMatch?.name ?? `ECOS 일치 업종 없음` ]
+            }), (0, W.jsxs)(`div`, {
+                className: `pioneering-auto-controls`,
+                children: [ (0, W.jsxs)(`label`, {
+                    children: [ (0, W.jsx)(`span`, { children: `평균기간` }), (0, W.jsx)(`select`, {
+                        value: method1AppliedLookbackYears || method1BenchmarkLookbackYears,
+                        disabled: method1AvailableLookbackYears < 1,
+                        onChange: e => setMethod1BenchmarkLookbackYears(Number(e.target.value)),
+                        children: Array.from({ length: Math.max(1, method1AvailableLookbackYears) }, (e, t) => (0, W.jsxs)(`option`, { value: t + 1, children: [ t + 1, `개년` ] }, t + 1))
+                    }) ]
+                }), (0, W.jsxs)(`button`, {
+                    type: `button`, onClick: () => method1EcosInputRef.current?.click(),
+                    children: [ (0, W.jsx)(R, { size: 14 }), ` ECOS 최신자료 업로드` ]
+                }), method1EcosCustomData && (0, W.jsx)(`button`, {
+                    type: `button`, onClick: () => setMethod1EcosCustomData(null), children: `웹 내장자료로 복원`
+                }) ]
+            }), (0, W.jsxs)(`small`, {
+                children: [ ecosSourceLabel, ` · `, ecosResearchValues.map(e => `${e.year}년 ${e.revenue.toLocaleString(`ko-KR`, { maximumFractionDigits: 3 })}×${e.rate}%`).join(` · `) || `StarValue 자산증감·매출액과 ECOS 비율의 공통연도 자료가 필요합니다.` ]
+            }) ]
         }) ]
     }) : null;
     return (0, W.jsxs)(`section`, {
@@ -3169,28 +3178,6 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                                 onChange: e => setLifeModel(e.target.value),
                                 children: [ (0, W.jsx)(`option`, { value: `model1`, children: `수명모델Ⅰ` }), (0, W.jsx)(`option`, { value: `model2`, children: `수명모델Ⅱ` }) ]
                             })
-                        }), (0, W.jsxs)(`div`, {
-                            className: `preparation-period-grid`,
-                            children: [ (0, W.jsx)(Dg, {
-                                label: `사업화 준비기간(년)`,
-                                children: (0, W.jsx)(`input`, {
-                                    type: `number`,
-                                    min: `0`,
-                                    step: `1`,
-                                    value: method1PreparationYears,
-                                    onChange: e => setMethod1PreparationYears(Math.max(0, Math.floor(Number(e.target.value) || 0)))
-                                })
-                            }), (0, W.jsx)(Dg, {
-                                label: `추가 개월`,
-                                children: (0, W.jsx)(`input`, {
-                                    type: `number`,
-                                    min: `0`,
-                                    max: `11`,
-                                    step: `1`,
-                                    value: method1PreparationMonths,
-                                    onChange: e => setMethod1PreparationMonths(Math.min(11, Math.max(0, Math.floor(Number(e.target.value) || 0))))
-                                })
-                            }) ]
                         }), (0, W.jsx)(Dg, {
                             label: `소수점 처리`,
                             children: (0, W.jsxs)(`select`, {
@@ -3214,6 +3201,35 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                                 onChange: e => Ge(e.target.value),
                                 placeholder: `반올림 적용근거를 입력하세요.`
                             })
+                        }) ]
+                    }), (0, W.jsxs)(Eg, {
+                        title: `사업화 준비기간`,
+                        badge: `경제적 수명 별도 가산`,
+                        children: [ (0, W.jsxs)(`div`, {
+                            className: `preparation-period-grid`,
+                            children: [ (0, W.jsx)(Dg, {
+                                label: `준비기간(정수 연도)`,
+                                children: (0, W.jsx)(`input`, {
+                                    type: `number`,
+                                    min: `0`,
+                                    step: `1`,
+                                    value: method1PreparationYears,
+                                    onChange: e => setMethod1PreparationYears(Math.max(0, Math.floor(Number(e.target.value) || 0)))
+                                })
+                            }), (0, W.jsx)(Dg, {
+                                label: `추가 개월(0~11개월)`,
+                                children: (0, W.jsx)(`input`, {
+                                    type: `number`,
+                                    min: `0`,
+                                    max: `11`,
+                                    step: `1`,
+                                    value: method1PreparationMonths,
+                                    onChange: e => setMethod1PreparationMonths(Math.min(11, Math.max(0, Math.floor(Number(e.target.value) || 0))))
+                                })
+                            }) ]
+                        }), (0, W.jsx)(`p`, {
+                            className: `helper-text`,
+                            children: `경제적 수명의 소수점 처리와 무관한 별도 입력값입니다. 평가기준일부터 준비기간 동안 매출액을 0으로 처리하고, 입력한 기간을 산출 경제적 수명에 가산합니다.`
                         }) ]
                     }), (0, W.jsxs)(`article`, {
                         className: `stage-card info-banner`,
