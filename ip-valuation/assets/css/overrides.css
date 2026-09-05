@@ -475,6 +475,41 @@
 .quickvalue-rating-section:nth-child(4) { grid-column: 2; grid-row: 2; align-self: start; }
 .rating-input-card .rating-footnote { margin-top: 8px; }
 
+.report-amount-editor-card {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.report-amount-editor-card > span,
+.report-amount-editor-card > small {
+  grid-column: 1 / -1;
+}
+
+.report-amount-editor-card > input {
+  grid-column: 1;
+  min-width: 0;
+}
+
+.report-amount-reset-button {
+  grid-column: 2;
+  min-height: 34px;
+  padding: 0 11px;
+  border: 1px solid #b9c8d8;
+  border-radius: 8px;
+  background: #f6f9fc;
+  color: #24415f;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.report-amount-reset-button:hover {
+  border-color: #477ca8;
+  background: #edf4fa;
+}
+
 /* 다중 평가모형: 기존 화면 밀도를 유지하고 신규 표의 행 높이는 내용에 맡긴다. */
 .valuation-purpose-grid {
   display: grid;

@@ -12,6 +12,10 @@ const scoringSource = fs.readFileSync(
   path.join(__dirname, "../assets/js/scoring.js"),
   "utf8",
 );
+const uiFixesSource = fs.readFileSync(
+  path.join(__dirname, "../assets/js/ui-fixes.js"),
+  "utf8",
+);
 const overrideCss = fs.readFileSync(
   path.join(__dirname, "../assets/css/overrides.css"),
   "utf8",
@@ -174,7 +178,7 @@ test("보고서 발급일자는 오늘 날짜를 기본으로 하며 평가기�
     scoringSource,
     /\[issueDate,setIssueDate\]=\(0,C\.useState\)\(reportToday\)/,
   );
-  assert.match(scoringSource, /contact:j,valuationAmount:N,issueDate/);
+  assert.match(scoringSource, /contact:j,issueDate/);
   assert.match(
     scoringSource,
     /typeof e\.issueDate==`string`&&setIssueDate\(e\.issueDate\)/,
@@ -186,5 +190,28 @@ test("보고서 발급일자는 오늘 날짜를 기본으로 하며 평가기�
   assert.match(
     scoringSource,
     /children:`발급일자`\}\),\(0,W\.jsx\)\(`b`,\{children:issueDate\}\)/,
+  );
+});
+
+test("보고서 가치평가금액은 산정값과 실시간 연동하고 수동값은 현재 화면에서만 유지한다", () => {
+  assert.match(
+    scoringSource,
+    /z=N\.trim\(\)\|\|\(h\?`\$\{Rg\(h\.finalValue\)\}백만원`:`산출 전`\)/,
+  );
+  assert.match(scoringSource, /value:z,onChange:e=>P\(e\.target\.value\)/);
+  assert.doesNotMatch(scoringSource, /valuationAmount:N/);
+  assert.doesNotMatch(scoringSource, /typeof e\.valuationAmount==`string`/);
+  assert.match(
+    scoringSource,
+    /산정값과 실시간 연동되며 직접 수정 시 현재 보고서 화면에서만 유지/,
+  );
+  assert.match(uiFixesSource, /자동가액으로 초기화/);
+  assert.match(
+    uiFixesSource,
+    /setter\?\.call\(input, ""\)[\s\S]*?dispatchEvent\(new Event\("input", \{ bubbles: true \}\)\)/,
+  );
+  assert.match(
+    overrideCss,
+    /\.report-amount-editor-card \{[\s\S]*?grid-template-columns: minmax\(0, 1fr\) auto;/,
   );
 });

@@ -28,6 +28,34 @@
                 input.inputMode = "numeric";
               }
             });
+
+          document
+            .querySelectorAll(".report-editor-card")
+            .forEach((card) => {
+              const caption = card.querySelector(":scope > span");
+              const input = card.querySelector(":scope > input");
+              if (caption?.textContent !== "가치평가금액" || !input) return;
+
+              card.classList.add("report-amount-editor-card");
+              if (card.querySelector(".report-amount-reset-button")) return;
+
+              const button = document.createElement("button");
+              button.className = "report-amount-reset-button";
+              button.type = "button";
+              button.textContent = "자동가액으로 초기화";
+              button.addEventListener("click", (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                const setter = Object.getOwnPropertyDescriptor(
+                  HTMLInputElement.prototype,
+                  "value",
+                )?.set;
+                setter?.call(input, "");
+                input.dispatchEvent(new Event("input", { bubbles: true }));
+                input.focus();
+              });
+              input.insertAdjacentElement("afterend", button);
+            });
         };
 
         const root = document.getElementById("root");
