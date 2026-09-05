@@ -359,6 +359,27 @@ test("2026년 법인세 표준세율·누진공제와 지방소득세를 자동 
   close(middle.total, 198);
 });
 
+test("사업화 준비기간 입력 직후 미완성 개척률이 세금 계산 화면을 중단시키지 않는다", () => {
+  const source = fs.readFileSync(
+    path.join(__dirname, "../assets/js/valuation-engine.js"),
+    "utf8",
+  );
+  const start = source.indexOf("function Cg(e, t)");
+  const end = source.indexOf("\n}\n\nasync function extractPioneeringPdfText", start) + 2;
+  const calculateTaxSafely = Function(`return (${source.slice(start, end)})`)();
+
+  assert.deepEqual(calculateTaxSafely(NaN, "corporation"), {
+    national: 0,
+    local: 0,
+    total: 0,
+    effectiveRate: 0,
+    bracket: "2억원 이하",
+    nationalRate: 10,
+    combinedRate: 11,
+    deduction: 0,
+  });
+});
+
 test("저장·불러오기 왕복과 평가방법 없는 기존 파일의 하위 호환성을 유지한다", () => {
   const method1 = {
     valuationMethod: methods.ROYALTY_METHOD_1,
@@ -410,6 +431,7 @@ test("모형·세금·경제적 수명 UI는 요청된 독립 선택과 확인 �
   assert.ok(source.indexOf("value: `tax`") < source.indexOf("value: `discount`"));
   assert.match(source, /value: lifeModel/);
   assert.match(source, /method1PreparationMonths/);
+  assert.match(source, /function Cg\(e, t\) \{\s*let n = Number\.isFinite\(Number\(e\)\) \? Math\.max\(0, Number\(e\)\) : 0/);
   assert.match(source, /function countCalendarYearPeriods/);
   assert.match(source, /cashFlowPeriodCount = countCalendarYearPeriods\(nn, finalValuationEnd\)/);
   assert.match(source, /periodCount = cashFlowPeriodCount/);

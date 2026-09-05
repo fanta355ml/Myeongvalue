@@ -1059,7 +1059,7 @@ function formatStickyCashFlowPeriod(e) {
 }
 
 function Cg(e, t) {
-    let n = Math.max(0, e), r = (t === `corporation` ? [ {
+    let n = Number.isFinite(Number(e)) ? Math.max(0, Number(e)) : 0, r = (t === `corporation` ? [ {
         cap: 200,
         rate: .1,
         deduction: 0,
