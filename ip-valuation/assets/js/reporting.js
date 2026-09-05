@@ -88,11 +88,11 @@ function P_(e, t, n) {
     return e.find(e => e.label === t)?.values[n] ?? 0;
 }
 
-function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, salesMix: r, onSalesMixChange: i, onIndustryRevenueSeriesChange: a, relatedSalesBasis: o, onRelatedSalesBasisChange: s, domesticMarket: c, worldMarket: l, onDomesticMarketChange: u, onWorldMarketChange: d, profitabilityScore: f, onProfitabilityScoreChange: p, onIndustryProfitabilityChange: m, setNotice: h}) {
+function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, salesMix: r, onSalesMixChange: i, onIndustryRevenueSeriesChange: a, onIndustryAssetMetricsChange: onIndustryAssetMetricsChange, relatedSalesBasis: o, onRelatedSalesBasisChange: s, domesticMarket: c, worldMarket: l, onDomesticMarketChange: u, onWorldMarketChange: d, profitabilityScore: f, onProfitabilityScoreChange: p, onIndustryProfitabilityChange: m, setNotice: h}) {
     let [g, _] = (0, C.useState)(`starvalue`), [v, y] = (0, C.useState)(``), [b, x] = (0,
     C.useState)(2024), [S, w] = (0, C.useState)(D_), [T, E] = (0, C.useState)(3), [D, O] = (0,
     C.useState)(``), [k, A] = (0, C.useState)(``), [j, M] = (0, C.useState)(() => Math.max(...r.map(e => e.year), 2025)), [N, P] = (0,
-    C.useState)(3), [F, I] = (0, C.useState)(``), [L, te] = (0, C.useState)(`2025-12-31`), [R, z] = (0,
+    C.useState)(3), [starvalueBalanceRows, setStarvalueBalanceRows] = (0, C.useState)([]), [F, I] = (0, C.useState)(``), [L, te] = (0, C.useState)(`2025-12-31`), [R, z] = (0,
     C.useState)([ {
         date: `2023-12-31`,
         cost: 82.35,
@@ -132,6 +132,7 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
         paste: v,
         latestYear: b,
         industryRows: S,
+        starvalueBalanceRows,
         comparisonYears: T,
         financialPaste: D,
         revenuePaste: k,
@@ -145,7 +146,7 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
         competitors: ne
     }, e => {
         e.source && _(e.source), typeof e.paste == `string` && y(e.paste), typeof e.latestYear == `number` && x(e.latestYear),
-        Array.isArray(e.industryRows) && w(e.industryRows), typeof e.comparisonYears == `number` && E(e.comparisonYears),
+        Array.isArray(e.industryRows) && w(e.industryRows), Array.isArray(e.starvalueBalanceRows) && setStarvalueBalanceRows(e.starvalueBalanceRows), typeof e.comparisonYears == `number` && E(e.comparisonYears),
         typeof e.financialPaste == `string` && O(e.financialPaste), typeof e.revenuePaste == `string` && A(e.revenuePaste),
         typeof e.salesMixLatestYear == `number` && M(e.salesMixLatestYear), typeof e.salesMixYears == `number` && e.salesMixYears >= 1 && e.salesMixYears <= 5 && P(e.salesMixYears),
         typeof e.companyRatioPaste == `string` && I(e.companyRatioPaste), typeof e.companyRatioLatestDate == `string` && te(e.companyRatioLatestDate),
@@ -164,6 +165,29 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
             revenue: e[n] ?? 0
         }));
     }, [ ie, U ]);
+    let starvalueAssetMetrics = (0, C.useMemo)(() => {
+        let tangible = starvalueBalanceRows.find(e => e.label === `유형자산`)?.values ?? [], intangible = starvalueBalanceRows.find(e => e.label === `무형자산`)?.values ?? [], combined = ie.map((year, index) => {
+            let tangibleValue = tangible[index], intangibleValue = intangible[index];
+            return Number.isFinite(tangibleValue) && Number.isFinite(intangibleValue) ? { year, value: tangibleValue + intangibleValue } : { year, value: null };
+        }), changes = combined.slice(1).map((current, index) => ({
+            year: current.year,
+            value: current.value !== null && combined[index].value !== null ? current.value - combined[index].value : null
+        })), recent = changes.filter(e => Number.isFinite(e.value)).slice(-3), averageThousandWon = recent.length === 3 ? recent.reduce((sum, item) => sum + item.value, 0) / 3 : null;
+        return {
+            source: `starvalue`,
+            sourceLabel: `KISTI StarValue 동업종 재무상태표`,
+            years: ie,
+            tangible,
+            intangible,
+            combined,
+            changes,
+            averageRecent3Million: averageThousandWon === null ? null : averageThousandWon / 1000,
+            complete: averageThousandWon !== null
+        };
+    }, [ starvalueBalanceRows, ie ]);
+    (0, C.useEffect)(() => {
+        onIndustryAssetMetricsChange?.(starvalueAssetMetrics);
+    }, [ onIndustryAssetMetricsChange, starvalueAssetMetrics ]);
     (0, C.useEffect)(() => {
         a(ae);
     }, [ a, ae ]);
@@ -211,10 +235,10 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
     }, [ appliedComparisonYears, companyCostRate, companySgaRate, companyOperatingMargin, me, ge, he, m, g ]);
     let _e = [ ...r ].sort((e, t) => t.year - e.year)[0], ve = _e ? o.selected.includes(`totalRevenue`) ? _e.totalRevenue : o.selected.reduce((e, t) => e + _e[t], 0) : 0, ye = _e?.totalRevenue ? ve / _e.totalRevenue * 100 : 0, be = Qp(r, o), xe = (e = v) => {
         y(e);
-        let t = g === `starvalue` ? 5 : 3, n = new Map, r = e.split(/\r?\n/).map(e => e.trim()).filter(Boolean);
+        let t = g === `starvalue` ? 5 : 3, n = new Map, r = e.split(/\r?\n/).map(e => e.trim()).filter(Boolean), balanceLabels = [ `고정자산`, `유형자산`, `무형자산`, `유동자산`, `유동부채`, `자산총계`, `부채총계`, `매출채권`, `재고자산`, `매입채무` ], recognizedLabels = [ ...E_, ...balanceLabels ];
         if (r.map(e => e.split(`\t`).map(e => e.trim())).forEach(e => {
             let r = k_(e[0] ?? ``), i = e.slice(1).filter(e => /[-+]?\d/.test(e)).map(O_).slice(-t);
-            i.length && E_.includes(r) && n.set(r, Array(Math.max(0, t - i.length)).fill(0).concat(i));
+            i.length && recognizedLabels.includes(r) && n.set(r, Array(Math.max(0, t - i.length)).fill(null).concat(i));
         }), !n.size) {
             let e = r.map(e => {
                 let n = e.match(/[-+]?\d[\d,]*(?:\.\d+)?%?/g) ?? [], r = n[0]?.includes(`%`) || n.length > t ? n.slice(-t) : n;
@@ -232,7 +256,10 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
                 label: r,
                 values: n.get(r) ?? a
             };
-        })), h(`${b}년을 최근연도로 하여 ${n.size}개 계정과목을 자동 매칭했습니다. StarValue 금액은 천 원 단위 원문값으로 보존하며, 항목명이 없는 표는 붙여넣은 행만 위에서부터 고정 순서로 반영합니다.`);
+        })), g === `starvalue` && setStarvalueBalanceRows(balanceLabels.filter(label => n.has(label)).map(label => ({
+            label,
+            values: n.get(label)
+        }))), h(`${b}년을 최근연도로 하여 손익 ${[ ...n.keys() ].filter(label => E_.includes(label)).length}개·재무상태표 ${[ ...n.keys() ].filter(label => balanceLabels.includes(label)).length}개 계정과목을 자동 매칭했습니다. StarValue 금액은 천 원 단위 원문값으로 보존합니다.`);
     }, Se = (e = D, t = ``) => {
         let r = e.split(/\r?\n/).map(e => e.split(`\t`).map(e => e.trim())).filter(e => e.some(Boolean)), i = t && typeof DOMParser < `u` ? Array.from((new DOMParser).parseFromString(t, `text/html`).querySelectorAll(`tr`)).map(e => Array.from(e.querySelectorAll(`th,td`)).map(e => e.textContent?.trim() ?? ``)).filter(e => e.some(Boolean)) : [], a = i.some(e => e.length >= 7) ? i : r, o = {
             "총자산": `totalAssets`,
@@ -486,7 +513,7 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
                     }) ]
                 }), (0, W.jsx)(`p`, {
                     className: `card-help`,
-                    children: `연도·계정과목명이 복사되지 않아도 11개 행의 고정 순서로 인식하고, 최우측 수치를 최근연도로 보아 왼쪽으로 1년씩 자동 배정합니다. 일부 행만 붙여넣어도 위에서부터 순서대로 반영됩니다.`
+                    children: g === `starvalue` ? `손익계산서와 재무상태표를 함께 붙여넣으면 계정과목명으로 구분해 인식합니다. 유형자산·무형자산은 최근 3개년 증감 산출 후 로열티공제법Ⅰ 개척률 후보값으로 연결합니다.` : `연도·계정과목명이 복사되지 않아도 11개 행의 고정 순서로 인식하고, 최우측 수치를 최근연도로 보아 왼쪽으로 1년씩 자동 배정합니다.`
                 }), (0, W.jsx)(`textarea`, {
                     value: v,
                     onChange: e => y(e.target.value),
@@ -547,6 +574,17 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
                 }), (0, W.jsx)(`p`, {
                     className: `card-help`,
                     children: `표의 모든 금액은 StarValue 원문과 동일한 천 원 단위로 저장·표시합니다. 가치산정에서 금액으로 연결할 때만 백만 원 단위로 자동 변환합니다.`
+                }), g === `starvalue` && (0, W.jsxs)(W.Fragment, {
+                    children: [ (0, W.jsx)(`h3`, { children: `재무상태표 인식 결과` }), starvalueBalanceRows.length ? (0, W.jsx)(`div`, {
+                        className: `industry-table-wrap`,
+                        children: (0, W.jsxs)(`table`, {
+                            className: `industry-finance-table`,
+                            children: [ (0, W.jsx)(`thead`, { children: (0, W.jsxs)(`tr`, { children: [ (0, W.jsx)(`th`, { children: `구분` }), ie.map(year => (0, W.jsxs)(`th`, { children: [ year, `년` ] }, year)) ] }) }), (0, W.jsx)(`tbody`, { children: starvalueBalanceRows.map(row => (0, W.jsxs)(`tr`, { children: [ (0, W.jsx)(`th`, { children: row.label }), row.values.map((value, index) => (0, W.jsx)(`td`, { children: Number.isFinite(value) ? Number(value).toLocaleString() : `-` }, index)) ] }, row.label)) }) ]
+                        })
+                    }) : (0, W.jsx)(`p`, { className: `card-help`, children: `StarValue 재무상태표를 계정과목명과 함께 붙여넣으면 별도로 인식합니다.` }), (0, W.jsxs)(`div`, {
+                        className: `reference-match-note`,
+                        children: [ (0, W.jsx)(`span`, { children: `개척률 연결 후보` }), (0, W.jsx)(`strong`, { children: starvalueAssetMetrics.complete ? `${starvalueAssetMetrics.averageRecent3Million.toLocaleString(`ko-KR`, { maximumFractionDigits: 6 })}백만원` : `산출 전` }), (0, W.jsx)(`small`, { children: starvalueAssetMetrics.complete ? `유형자산+무형자산의 최근 3개년 순증감 평균 · 평가자가 가치산정에서 확인 후 적용` : `유형자산·무형자산 4개년 이상 자료가 필요합니다.` }) ]
+                    }) ]
                 }) ]
             }), (0, W.jsxs)(`article`, {
                 className: `stage-card span-2 company-finance-input`,

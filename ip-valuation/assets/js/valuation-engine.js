@@ -610,6 +610,7 @@ var ng = {
 }, rg = [ `신규성 또는 진보성 무효화 가능성`, `기타 요인에 의한 무효 가능성`, `제품 보호 가능성`, `IP포트폴리오 구축 적절성`, `침해발견 및 입증 용이성`, `권리행사 제한 가능성`, `분쟁 및 라이선스 활성도`, `특허출원 활성도` ], ig = [ 4, 4, 3, 3, 3, 4, 3, 3 ], ag = {
     superiority: 3,
     innovation: 3,
+    utility: 3,
     differentiation: 4,
     techCompetition: 3,
     commercializationEnvironment: 4,
@@ -629,6 +630,8 @@ var ng = {
     newProductLikelihood: 3,
     demandSensitivity: 3,
     productionEase: 4,
+    commercializationCapital: 3,
+    salesGrowthTrend: 3,
     marketShare: 3,
     profitability: 4
 }, og = [ {
@@ -865,8 +868,67 @@ var ng = {
     demandSensitivity: `가격·경기 등 외부요인에 대한 수요 민감도`,
     productionEase: `안정적 생산과 규모 확대의 용이성`,
     marketShare: `사업화제품이 확보할 것으로 예상되는 점유율`,
-    profitability: `사업화주체와 동업종 수익구조 비교 결과`
-}, dg = e => [ ``, `매우 미흡`, `미흡`, `보통`, `우수`, `매우 우수` ][e] ?? `-`, $ = e => `${e.toFixed(2)}%`, fg = e => Number.isFinite(e) ? Math.round(e * 100) / 100 : 0;
+    profitability: `사업화주체와 동업종 수익구조 비교 결과`,
+    utility: `사업전략과의 부합성 및 기술 활용을 통한 경제적 이익 창출 가능성`,
+    commercializationCapital: `후속개발·실증·인증·생산준비에 필요한 자본 부담 수준`,
+    salesGrowthTrend: `현금흐름 추정기간의 매출 성장률과 동업종·목표시장 성장률 비교 결과`
+}, method1RatingGroups = [ {
+    title: `기술성`,
+    rows: [ `superiority`, `innovation`, `utility`, `differentiation`, `techCompetition`, `commercializationEnvironment`, `substitutability`, `imitationDifficulty` ]
+}, {
+    title: `권리성`,
+    rows: [ `rightStability`, `protectionStrength`, `enforcementEase` ]
+}, {
+    title: `시장성`,
+    rows: [ `marketEntry`, `marketCompetition`, `marketCompetitionChange`, `marketGrowthOutlook`, `newProductLikelihood`, `demandSensitivity`, `marketShare` ]
+}, {
+    title: `사업성`,
+    rows: [ `productionEase`, `commercializationCapital`, `salesGrowthTrend`, `profitability` ]
+} ].map(e => ({
+    title: e.title,
+    rows: e.rows.map(t => ({
+        key: t,
+        label: {
+            superiority: `우월성`, innovation: `혁신성`, utility: `활용성`, differentiation: `차별성`, techCompetition: `기술경쟁강도`,
+            commercializationEnvironment: `기술사업화환경`, substitutability: `대체가능성`, imitationDifficulty: `모방난이도`,
+            rightStability: `권리안정성`, protectionStrength: `권리보호강도`, enforcementEase: `침해발견 및 입증용이성`,
+            marketEntry: `시장진입가능성`, marketCompetition: `시장경쟁강도`, marketCompetitionChange: `시장경쟁의 변화`,
+            marketGrowthOutlook: `시장 성장전망`, newProductLikelihood: `신제품 출현가능성`, demandSensitivity: `수요민감도`,
+            marketShare: `예상 시장점유율`, productionEase: `생산용이성`, commercializationCapital: `사업화 소요자본`,
+            salesGrowthTrend: `매출성장 추세`, profitability: `수익성`
+        }[t]
+    }))
+})), method1LifeKeys = sg.map(e => e.key), method1AdjustmentRows = [ {
+    group: `기술성`, label: `혁신성`, key: `innovation`
+}, {
+    group: `기술성`, label: `활용성`, key: `utility`
+}, {
+    group: `기술성`, label: `차별성`, key: `differentiation`
+}, {
+    group: `기술성`, label: `기술경쟁강도`, key: `techCompetition`
+}, {
+    group: `기술성`, label: `대체가능성`, key: `substitutability`
+}, {
+    group: `기술성`, label: `모방난이도`, key: `imitationDifficulty`
+}, {
+    group: `권리성`, label: `권리안정성`, key: `rightStability`
+}, {
+    group: `권리성`, label: `권리보호강도`, key: `protectionStrength`
+}, {
+    group: `권리성`, label: `침해발견 및 입증용이성`, key: `enforcementEase`
+}, {
+    group: `시장성·사업성`, label: `시장경쟁강도`, key: `marketCompetition`
+}, {
+    group: `시장성·사업성`, label: `수요민감도`, key: `demandSensitivity`
+}, {
+    group: `시장성·사업성`, label: `예상 시장점유율`, key: `marketShare`
+}, {
+    group: `시장성·사업성`, label: `사업화 소요자본`, key: `commercializationCapital`
+}, {
+    group: `시장성·사업성`, label: `매출성장 추세`, key: `salesGrowthTrend`
+}, {
+    group: `시장성·사업성`, label: `수익성`, key: `profitability`
+} ], dg = e => [ ``, `매우 미흡`, `미흡`, `보통`, `우수`, `매우 우수` ][e] ?? `-`, $ = e => `${e.toFixed(2)}%`, fg = e => Number.isFinite(e) ? Math.round(e * 100) / 100 : 0;
 
 function pg(e) {
     let [t, n, r] = e.split(`-`).map(Number), i = new Date(Date.UTC(t, (n || 1) - 1, r || 1));
@@ -1022,8 +1084,22 @@ function Cg(e, t) {
     };
 }
 
-function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFinancials: i, salesMix: a, industryRevenueSeries: o, onSalesMixChange: s, relatedSalesBasis: c, onRelatedSalesBasisChange: l, domesticMarket: u, worldMarket: d, onDomesticMarketChange: f, onWorldMarketChange: p, companySize: m, patentIpcs: h, patentExpirationDates: g, patentCount: _, profitabilityScore: v, setNotice: y, onValueChange: b, onReportSnapshotChange: x}) {
-    let [S, w] = (0, C.useState)(`growth`), [T, E] = (0, C.useState)(`totalRevenue`), [D, O] = (0,
+async function extractPioneeringPdfText(file) {
+    if (!file) throw new Error(`PDF 파일이 필요합니다.`);
+    if (!window.pdfjsLib) throw new Error(`PDF 처리 모듈을 불러오지 못했습니다.`);
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = `./assets/vendor/pdfjs/pdf.worker.min.js`;
+    let documentTask = window.pdfjsLib.getDocument({
+        data: new Uint8Array(await file.arrayBuffer())
+    }), document = await documentTask.promise, pages = [];
+    for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
+        let page = await document.getPage(pageNumber), content = await page.getTextContent();
+        pages.push(content.items.map(e => e.str).join(` `));
+    }
+    return pages.join(`\n`);
+}
+
+function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFinancials: i, salesMix: a, industryRevenueSeries: o, industryAssetMetrics, onSalesMixChange: s, relatedSalesBasis: c, onRelatedSalesBasisChange: l, domesticMarket: u, worldMarket: d, onDomesticMarketChange: f, onWorldMarketChange: p, companySize: m, patentIpcs: h, patentExpirationDates: g, patentCount: _, profitabilityScore: v, setNotice: y, onValueChange: b, onReportSnapshotChange: x}) {
+    let [valuationMethod, setValuationMethod] = (0, C.useState)(`royaltyDeduction2`), [dcfPlannedNotice, setDcfPlannedNotice] = (0, C.useState)(!1), isMethod1 = valuationMethod === `royaltyDeduction1`, [S, w] = (0, C.useState)(`growth`), [T, E] = (0, C.useState)(`totalRevenue`), [D, O] = (0,
     C.useState)(5), [k, A] = (0, C.useState)(5), [M, I] = (0, C.useState)(() => o.at(-1)?.year ?? 2024), [L, ee] = (0,
     C.useState)(!1), [B, V] = (0, C.useState)(null), [H, ie] = (0, C.useState)(`industry`), [U, ae] = (0,
     C.useState)(`domestic`), [se, ue] = (0, C.useState)(50), [pe, ge] = (0, C.useState)(`domestic`), [_e, ve] = (0,
@@ -1088,7 +1164,13 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
     }, [Be, Ve] = (0, C.useState)(``), [He, Ue] = (0, C.useState)(`daily`), [We, Ge] = (0,
     C.useState)(``), [Ke, qe] = (0, C.useState)({
         ...ag
-    }), Je = {
+    }), [method1PreparationYears, setMethod1PreparationYears] = (0, C.useState)(0), [method1AnnualCost, setMethod1AnnualCost] = (0,
+    C.useState)(``), [method1Investments, setMethod1Investments] = (0, C.useState)([]), [method1IndustryAssetIncrease, setMethod1IndustryAssetIncrease] = (0,
+    C.useState)(``), [method1IndustryResearchDevelopment, setMethod1IndustryResearchDevelopment] = (0, C.useState)(``), [method1PioneeringOverride, setMethod1PioneeringOverride] = (0,
+    C.useState)(null), [method1PioneeringReason, setMethod1PioneeringReason] = (0, C.useState)(``), [method1PioneeringSource, setMethod1PioneeringSource] = (0,
+    C.useState)(`direct`), [method1SourceDetail, setMethod1SourceDetail] = (0, C.useState)(``), [method1SourceBaseYear, setMethod1SourceBaseYear] = (0,
+    C.useState)(``), [method1SourceSampleCount, setMethod1SourceSampleCount] = (0, C.useState)(``), [method1PdfCandidate, setMethod1PdfCandidate] = (0,
+    C.useState)(null), method1PdfInputRef = (0, C.useRef)(null), Je = {
         ...Ke,
         profitability: v
     }, [Ye, Xe] = (0, C.useState)(`kisti`), [Ze, Qe] = (0, C.useState)(`median`), [$e, et] = (0,
@@ -1117,6 +1199,7 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
         kipa: null
     });
     Sm(mm, {
+        valuationMethod,
         salesMethod: S,
         companyGrowthBasis: T,
         companyGrowthYears: D,
@@ -1141,6 +1224,17 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
         lifeRounding: He,
         lifeReason: We,
         ratings: Ke,
+        method1PreparationYears,
+        method1AnnualCost,
+        method1Investments,
+        method1IndustryAssetIncrease,
+        method1IndustryResearchDevelopment,
+        method1PioneeringOverride,
+        method1PioneeringReason,
+        method1PioneeringSource,
+        method1SourceDetail,
+        method1SourceBaseYear,
+        method1SourceSampleCount,
         royaltySource: Ye,
         royaltyStatistic: Ze,
         royaltyOverride: $e,
@@ -1159,6 +1253,7 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
         stabilityReason: wt,
         protectionReason: Et
     }, e => {
+        setDcfPlannedNotice(!1), setValuationMethod(e.valuationMethod === `royaltyDeduction1` ? `royaltyDeduction1` : `royaltyDeduction2`),
         typeof e.salesMethod == `string` && w(e.salesMethod), e.companyGrowthBasis && E(e.companyGrowthBasis),
         typeof e.companyGrowthYears == `number` && O(Math.max(2, e.companyGrowthYears)),
         typeof e.industryGrowthYears == `number` && A(Math.max(2, e.industryGrowthYears)),
@@ -1171,7 +1266,21 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
         Array.isArray(e.salesPlanItems) && Ee(e.salesPlanItems), Array.isArray(e.salesYears) && Ae(e.salesYears),
         e.tctSource && Pe(e.tctSource), e.selectedIpcSourceKey === Fe && Array.isArray(e.selectedIpcs) && ze(e.selectedIpcs),
         typeof e.ipcQuery == `string` && Ve(e.ipcQuery), typeof e.lifeRounding == `string` && Ue(e.lifeRounding),
-        typeof e.lifeReason == `string` && Ge(e.lifeReason), e.ratings && qe(e.ratings),
+        typeof e.lifeReason == `string` && Ge(e.lifeReason), e.ratings && qe({
+            ...ag,
+            ...e.ratings
+        }),
+        typeof e.method1PreparationYears == `number` && setMethod1PreparationYears(Math.max(0, e.method1PreparationYears)),
+        (typeof e.method1AnnualCost == `number` || typeof e.method1AnnualCost == `string`) && setMethod1AnnualCost(e.method1AnnualCost),
+        Array.isArray(e.method1Investments) && setMethod1Investments(e.method1Investments),
+        (typeof e.method1IndustryAssetIncrease == `number` || typeof e.method1IndustryAssetIncrease == `string`) && setMethod1IndustryAssetIncrease(e.method1IndustryAssetIncrease),
+        (typeof e.method1IndustryResearchDevelopment == `number` || typeof e.method1IndustryResearchDevelopment == `string`) && setMethod1IndustryResearchDevelopment(e.method1IndustryResearchDevelopment),
+        (typeof e.method1PioneeringOverride == `number` || e.method1PioneeringOverride === null) && setMethod1PioneeringOverride(e.method1PioneeringOverride),
+        typeof e.method1PioneeringReason == `string` && setMethod1PioneeringReason(e.method1PioneeringReason),
+        typeof e.method1PioneeringSource == `string` && setMethod1PioneeringSource(e.method1PioneeringSource),
+        typeof e.method1SourceDetail == `string` && setMethod1SourceDetail(e.method1SourceDetail),
+        (typeof e.method1SourceBaseYear == `number` || typeof e.method1SourceBaseYear == `string`) && setMethod1SourceBaseYear(e.method1SourceBaseYear),
+        (typeof e.method1SourceSampleCount == `number` || typeof e.method1SourceSampleCount == `string`) && setMethod1SourceSampleCount(e.method1SourceSampleCount),
         e.royaltySource && Xe(e.royaltySource), typeof e.royaltyStatistic == `string` && Qe(e.royaltyStatistic),
         (typeof e.royaltyOverride == `number` || e.royaltyOverride === null) && et(e.royaltyOverride),
         typeof e.utilization == `number` && nt(e.utilization), Array.isArray(e.utilRows) && it(e.utilRows),
@@ -1205,6 +1314,12 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
     }, [ ai, k ]), (0, C.useEffect)(() => {
         si > 0 && lt > si && ut(si), si === 0 && st === `company` && ct(`industry`);
     }, [ si, lt, st ]);
+    let ecosRows = globalThis.ECOS_RD_RATIO_DATA?.rows ?? [], normalizedIndustryCode = String(n.code ?? ``).replace(/[^A-Z0-9]/gi, ``).toUpperCase(), ecosMatch = ecosRows.filter(e => normalizedIndustryCode.startsWith(e.code)).sort((e, t) => t.code.length - e.code.length)[0] ?? null, ecosResearchValues = [ ...o ].sort((e, t) => e.year - t.year).filter(e => Number.isFinite(e.revenue) && Number.isFinite(ecosMatch?.rates?.[e.year])).slice(-3).map(e => ({
+        year: e.year,
+        revenue: e.revenue,
+        rate: ecosMatch.rates[e.year],
+        researchDevelopment: e.revenue * ecosMatch.rates[e.year] / 100
+    })), ecosAutoResearchDevelopment = ecosResearchValues.length ? ecosResearchValues.reduce((e, t) => e + t.researchDevelopment, 0) / ecosResearchValues.length : null;
     let Lt = Sg(o, k, M), Rt = B ?? Lt, qt = xg(Ut, `productRevenue`, D), Jt = Yp(i, D), Yt = T === `productRevenue` && qt === null, Xt = Yt ? `totalRevenue` : T, Zt = (Xt === `productRevenue` ? qt : Jt) ?? 0, Qt = lm(u), $t = lm(d), en = (Qt + $t) / 2, tn = U === `domestic` ? Qt : U === `world` ? $t : en, nn = pg(r), rn = nn.getUTCFullYear(), an = rn, on = rn + ke.length - 1, sn = um(u, rn, on), cn = um(d, rn, on), ln = (pe === `domestic` ? um(u, _e, _e)[0]?.value : pe === `world` ? um(d, _e, _e)[0]?.value : (um(u, _e, _e)[0]?.value ?? 0) + (um(d, _e, _e)[0]?.value ?? 0)) ?? 0, un = ln * ye / 100, dn = Math.max(1, Math.min(5, on - an + 1)), fn = Math.min(xe, dn), pn = Array.from({
         length: fn
     }, (e, t) => an + t), mn = pn.map(e => Te.reduce((t, n) => {
@@ -1215,10 +1330,10 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
         return t + r.quantity * r.unitPrice / 1e3;
     }, 0)), hn = new Map(pn.map((e, t) => [ e, mn[t] ?? 0 ])), gn = [ ...new Set([ ...Array.from({
         length: Math.max(1, Math.min(fn, on - an))
-    }, (e, t) => an + t + 1), Math.min(on, an + fn) ]) ].sort((e, t) => e - t), _n = gn.includes(Ce) ? Ce : gn.at(-1) ?? Math.min(on, an + 1), vn = H === `market` ? tn : Rt, yn = Zt * se / 100 + vn * (100 - se) / 100, bn = mn[0] ?? 0, xn = Bt === `ratio` ? Xp(Wt?.totalRevenue ?? 0, Gt, yn) : Kt * (1 + yn / 100), Sn = S === `share` ? un : S === `plan` ? bn : S === `growth` ? xn : Kt, Cn = sg.reduce((e, t) => e + Je[t.key] * (t.weight ?? 1), 0), wn = Cn / 205 * 100, Tn = cg.reduce((e, t) => e + Je[t.key], 0), En = lg.reduce((e, t) => e + Je[t.key], 0), Dn = je.businessRiskPremium[String(Math.min(50, Math.max(20, En)))] ?? 0, On = Re.map(e => Am(At.tct, e)).filter(e => !!e), kn = e => {
+    }, (e, t) => an + t + 1), Math.min(on, an + fn) ]) ].sort((e, t) => e - t), _n = gn.includes(Ce) ? Ce : gn.at(-1) ?? Math.min(on, an + 1), vn = H === `market` ? tn : Rt, yn = Zt * se / 100 + vn * (100 - se) / 100, bn = mn[0] ?? 0, xn = Bt === `ratio` ? Xp(Wt?.totalRevenue ?? 0, Gt, yn) : Kt * (1 + yn / 100), Sn = S === `share` ? un : S === `plan` ? bn : S === `growth` ? xn : Kt, Cn = sg.reduce((e, t) => e + Je[t.key] * (t.weight ?? 1), 0), wn = Cn / 205 * 100, method1LifeScore = method1LifeKeys.reduce((e, t) => e + Je[t] - 3, 0), Tn = cg.reduce((e, t) => e + Je[t.key], 0), method1AdjustmentScore = method1AdjustmentRows.reduce((e, t) => e + Je[t.key] - 3, 0), method1AdjustmentCoefficient = 1 + method1AdjustmentScore / 30, En = lg.reduce((e, t) => e + Je[t.key], 0), Dn = je.businessRiskPremium[String(Math.min(50, Math.max(20, En)))] ?? 0, On = Re.map(e => Am(At.tct, e)).filter(e => !!e), kn = e => {
         let t = On.map(t => t[e]).filter(e => typeof e == `number`);
         return t.length ? t.reduce((e, t) => e + t, 0) / t.length : 0;
-    }, An = kn(`q1`), jn = kn(`median`), Mn = kn(`q3`), Nn = Math.max(0, wn >= 60 ? jn + (Mn - jn) * (wn - 60) / 40 : An + (jn - An) * (wn - 20) / 40), Pn = He === `floor` ? Math.floor(Nn) : He === `round` ? Math.round(Nn) : Nn, Fn = Wp(r, g), In = Fn?.years ?? null, Ln = Math.floor(Pn), Rn = Math.max(0, (Pn - Ln) * 365), zn = Rn > 1e-4 ? hg(gg(nn, Ln), Math.max(1, Math.round(Rn)) - 1) : hg(gg(nn, Ln), -1), Bn = Fn !== null && pg(Fn.expirationDate).getTime() < zn.getTime(), Vn = Bn ? Fn.years : Pn, Hn = Math.max(2, Math.ceil(Vn) + 1), Un = bg(ke, Hn, rn), Wn = (e, t) => e.preset === `weighted` ? yn : e.preset === `market` ? tn : e.preset === `industry` ? Rt : e.preset === `previous` ? t : e.preset === `half` ? t / 2 : e.preset === `third` ? t / 3 : e.preset === `quarter` ? t / 4 : e.preset === `direct` ? e.directRate : 0, Gn = Un.reduce((e, t, n) => {
+    }, An = kn(`q1`), jn = kn(`median`), Mn = kn(`q3`), Nn = Math.max(0, isMethod1 ? method1LifeScore < 0 ? An + (jn - An) * method1LifeScore / 20 : jn + (Mn - jn) * method1LifeScore / 20 : wn >= 60 ? jn + (Mn - jn) * (wn - 60) / 40 : An + (jn - An) * (wn - 20) / 40), Pn = He === `floor` ? Math.floor(Nn) : He === `round` ? Math.round(Nn) : Nn, Fn = Wp(r, g), In = Fn?.years ?? null, Ln = Math.floor(Pn), Rn = Math.max(0, (Pn - Ln) * 365), zn = Rn > 1e-4 ? hg(gg(nn, Ln), Math.max(1, Math.round(Rn)) - 1) : hg(gg(nn, Ln), -1), Bn = Fn !== null && pg(Fn.expirationDate).getTime() < zn.getTime(), Vn = Bn ? Fn.years : Pn, valuationPeriodYears = Vn + (isMethod1 ? method1PreparationYears : 0), Hn = Math.max(2, Math.ceil(valuationPeriodYears) + 1), Un = bg(ke, Hn, rn), Wn = (e, t) => e.preset === `weighted` ? yn : e.preset === `market` ? tn : e.preset === `industry` ? Rt : e.preset === `previous` ? t : e.preset === `half` ? t / 2 : e.preset === `third` ? t / 3 : e.preset === `quarter` ? t / 4 : e.preset === `direct` ? e.directRate : 0, Gn = Un.reduce((e, t, n) => {
         let r = rn + n, i = e.at(-1)?.rate ?? yn, a = ke.slice(0, n).filter(e => e.stage === `decline`).length, o = e.filter(e => e.stage === `maturity` && Math.abs(e.rate) > 1e-6).map(e => Math.abs(e.rate)).reverse(), s = -(o[a] ?? o.at(-1) ?? Math.abs(yn / 3)), c = S === `plan` && r < an, l = S === `plan` && r >= an && r < _n ? hn.get(r) ?? 0 : null, u = c ? 0 : l === null ? S === `plan` ? yn : t.stage === `decline` && t.preset === `lifecycle` ? s : t.stage === `maturity` && t.preset === `lifecycle` ? 0 : Wn(t, i) : n > 0 && e[n - 1].beforeProration > 0 ? (l / e[n - 1].beforeProration - 1) * 100 : 0, d = c ? `pre-revenue` : l === null ? S === `plan` ? `weighted` : t.stage === `decline` && t.preset === `lifecycle` ? `lifecycle-decline` : t.stage === `maturity` && t.preset === `lifecycle` ? `lifecycle-maturity` : t.preset : `sales-plan`, f = n === 0 ? Sn : e[n - 1].beforeProration, p = c ? 0 : l === null ? n === 0 ? Sn : f * (1 + u / 100) : l, m = p * (t.partialRatio ?? 1);
         return e.push({
             ...t,
@@ -1228,14 +1343,14 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
             amount: Math.round(m),
             rateBasis: d
         }), e;
-    }, []), Kn = km(jt.royalty, n.code), qn = Ze === `average` ? Kn?.average : Kn?.median, Jn = $e ?? qn ?? 0, Yn = Kn?.q1 ?? Jn, Xn = Kn?.median ?? Jn, Zn = Kn?.q3 ?? Jn, Qn = Tn <= 30 ? Yn + (Xn - Yn) * Math.max(0, Tn - 10) / 20 : Xn + (Zn - Xn) * Math.min(20, Tn - 30) / 20, $n = Jn ? Qn / Jn : 0, er = Qn * tt / 100, tr = rt.reduce((e, t) => e + t.weight * t.patentShare / 100, 0), nr = rt.reduce((e, t) => e + t.weight, 0), rr = oi.map(im), ir = Math.min(lt, rr.length), ar = ir ? rr.slice(0, ir).reduce((e, t) => e + t, 0) / ir : 0, or = km(Mt.discount, n.code), sr = Dm(m), cr = or?.equityRatio ?? 0, lr = st === `company` && ir > 0 ? ar : st === `direct` ? G : cr, ur = or?.costOfEquity[sr] ?? 0, dr = ur + Dn, fr = or?.costOfDebt[sr] ?? 0, pr = new Date(Date.UTC(rn, 11, 31)), mr = hg(gg(nn, 1), -1), hr = vg(nn, pr), gr = new Date(Date.UTC(rn + 1, 0, 1)), _r = vg(gr, mr), vr = mg(mr), yr = Bn && Fn ? [ ...Array.from({
+    }, []), Kn = km(jt.royalty, n.code), qn = Ze === `average` ? Kn?.average : Kn?.median, Jn = $e ?? qn ?? 0, Yn = Kn?.q1 ?? Jn, Xn = Kn?.median ?? Jn, Zn = Kn?.q3 ?? Jn, Qn = Tn <= 30 ? Yn + (Xn - Yn) * Math.max(0, Tn - 10) / 20 : Xn + (Zn - Xn) * Math.min(20, Tn - 30) / 20, $n = Jn ? Qn / Jn : 0, method1AssetInputProvided = method1IndustryAssetIncrease !== `` && Number.isFinite(Number(method1IndustryAssetIncrease)), method1ResearchInputProvided = method1IndustryResearchDevelopment !== `` && Number.isFinite(Number(method1IndustryResearchDevelopment)), method1InvestmentInputsReady = method1PreparationYears === 0 || method1Investments.length >= method1PreparationYears && method1Investments.slice(0, method1PreparationYears).every(e => e !== `` && Number.isFinite(Number(e)) && Number(e) >= 0), method1CostTotal = method1PreparationYears === 0 ? 0 : method1InvestmentInputsReady ? method1Investments.slice(0, method1PreparationYears).reduce((e, t) => e + Number(t), 0) : NaN, method1BenchmarkTotal = (Number(method1IndustryAssetIncrease) + Number(method1IndustryResearchDevelopment)) * method1PreparationYears, method1PioneeringInputsReady = method1PreparationYears === 0 || method1InvestmentInputsReady && method1AssetInputProvided && method1ResearchInputProvided && method1BenchmarkTotal > 0, method1PioneeringRatio = method1PreparationYears === 0 ? 0 : method1PioneeringInputsReady ? method1CostTotal / method1BenchmarkTotal : NaN, method1PioneeringRecommended = !method1PioneeringInputsReady ? null : method1PreparationYears === 0 || method1PioneeringRatio < .5 ? 100 : method1PioneeringRatio <= 1 ? 75 : 50, method1PioneeringOverrideValid = method1PioneeringOverride === null || Number.isFinite(method1PioneeringOverride) && method1PioneeringOverride >= 50 && method1PioneeringOverride <= 100, method1PioneeringRate = method1PioneeringInputsReady && method1PioneeringOverrideValid ? method1PioneeringOverride ?? method1PioneeringRecommended : null, method1CalculationReady = !isMethod1 || method1PioneeringInputsReady && method1PioneeringOverrideValid, er = isMethod1 ? method1CalculationReady ? Jn * method1AdjustmentCoefficient * tt / 100 * method1PioneeringRate / 100 : NaN : Qn * tt / 100, tr = rt.reduce((e, t) => e + t.weight * t.patentShare / 100, 0), nr = rt.reduce((e, t) => e + t.weight, 0), rr = oi.map(im), ir = Math.min(lt, rr.length), ar = ir ? rr.slice(0, ir).reduce((e, t) => e + t, 0) / ir : 0, or = km(Mt.discount, n.code), sr = Dm(m), cr = or?.equityRatio ?? 0, lr = st === `company` && ir > 0 ? ar : st === `direct` ? G : cr, ur = or?.costOfEquity[sr] ?? 0, dr = ur + Dn, fr = or?.costOfDebt[sr] ?? 0, pr = new Date(Date.UTC(rn, 11, 31)), mr = hg(gg(nn, 1), -1), hr = vg(nn, pr), gr = new Date(Date.UTC(rn + 1, 0, 1)), _r = vg(gr, mr), vr = mg(mr), yr = Bn && Fn ? [ ...Array.from({
         length: Fn.fullYears
-    }, () => 1), ...Fn.partialDays > 0 ? [ Fn.partialDays / 365 ] : [] ] : zp(Vn, Gn.length), br = yr.map((e, t) => Bn && Fn ? t === yr.length - 1 && Fn.partialDays > 0 : e < 1), xr = yr.map((e, t) => Bn && Fn && t === yr.length - 1 ? pg(Fn.expirationDate) : e < 1 ? hg(gg(nn, t), Math.max(1, Math.round(365 * e)) - 1) : hg(gg(nn, t + 1), -1)), Sr = mg(xr.at(-1) ?? hg(nn, -1)), Cr = yr.map((e, t) => `${mg(gg(nn, t))}~${mg(xr[t])}`), wr = Math.max(0, Math.round(Vn * 12)), Tr = `${Math.floor(wr / 12)}년 ${wr % 12}개월`, Er = yr.map((e, t) => Up(mg(gg(nn, t)), mg(xr[t]), Gn.map(e => ({
+    }, () => 1), ...Fn.partialDays > 0 ? [ Fn.partialDays / 365 ] : [] ] : zp(valuationPeriodYears, Gn.length), br = yr.map((e, t) => Bn && Fn ? t === yr.length - 1 && Fn.partialDays > 0 : e < 1), xr = yr.map((e, t) => Bn && Fn && t === yr.length - 1 ? pg(Fn.expirationDate) : e < 1 ? hg(gg(nn, t), Math.max(1, Math.round(365 * e)) - 1) : hg(gg(nn, t + 1), -1)), Sr = mg(xr.at(-1) ?? hg(nn, -1)), Cr = yr.map((e, t) => `${mg(gg(nn, t))}~${mg(xr[t])}`), wr = Math.max(0, Math.round(valuationPeriodYears * 12)), Tr = `${Math.floor(wr / 12)}년 ${wr % 12}개월`, Er = yr.map((e, t) => t < (isMethod1 ? method1PreparationYears : 0) ? 0 : Up(mg(gg(nn, t)), mg(xr[t]), Gn.map(e => ({
         year: e.year,
         amount: e.beforeProration
     })))), Dr = gg(nn, Math.max(0, yr.length - 1)), Or = xr.at(-1) ?? Dr, kr = Array.from({
         length: Or.getUTCFullYear() - Dr.getUTCFullYear() + 1
-    }, (e, t) => Dr.getUTCFullYear() + t), Ar = kr.map(e => Gn.find(t => t.year === e)?.beforeProration ?? 0).map(e => Math.round(e).toLocaleString()).join(` · `), jr = Er.map(e => e * er / 100), Mr = jr.map(e => Cg(e, t)), Nr = jr.reduce((e, t) => e + t, 0), Pr = Nr ? Mr.reduce((e, t) => e + t.total, 0) / Nr * 100 : 0, Fr = dr * lr / 100 + fr * (1 - lr / 100) * (1 - Pr / 100), Ir = gt <= 1 ? 2 : vt ? 4 : 3, Lr = mt.map((e, t) => t === 3 ? Ir : e), Rr = Lr.reduce((e, t) => e + t, 0), zr = Rr / 40, Br = Math.min(Lr[0], Lr[1]), Vr = Math.min(Lr[2], Lr[3]), Hr = jr.map((e, t) => Math.max(0, e - Mr[t].total)), Ur = jr.map((e, t) => 1 / (1 + Fr / 100) ** (t + 1)), Wr = Hr.map((e, t) => e * Ur[t]), Gr = Wr.reduce((e, t) => e + t, 0), Kr = Gr * zr, qr = async (e, t) => {
+    }, (e, t) => Dr.getUTCFullYear() + t), Ar = kr.map(e => Gn.find(t => t.year === e)?.beforeProration ?? 0).map(e => Math.round(e).toLocaleString()).join(` · `), jr = Er.map(e => e * er / 100), Mr = jr.map(e => Cg(e, t)), Nr = jr.reduce((e, t) => e + t, 0), Pr = Nr ? Mr.reduce((e, t) => e + t.total, 0) / Nr * 100 : 0, Fr = dr * lr / 100 + fr * (1 - lr / 100) * (1 - Pr / 100), Ir = gt <= 1 ? 2 : vt ? 4 : 3, Lr = mt.map((e, t) => t === 3 ? Ir : e), Rr = Lr.reduce((e, t) => e + t, 0), zr = Rr / 40, Br = Math.min(Lr[0], Lr[1]), Vr = Math.min(Lr[2], Lr[3]), Hr = jr.map((e, t) => Math.max(0, e - Mr[t].total)), Ur = jr.map((e, t) => 1 / (1 + Fr / 100) ** (t + 1)), Wr = Hr.map((e, t) => e * Ur[t]), Gr = Wr.reduce((e, t) => e + t, 0), Kr = isMethod1 ? Gr : Gr * zr, qr = async (e, t) => {
         if (t) try {
             let n = await tg(t, e, je.institutions[e]), r = {
                 ...je,
@@ -1258,7 +1373,50 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
     }, Jr = () => {
         Me(Em), window.localStorage.removeItem(`ip-valuation-reference-data-v1`), y(`샘플 엑셀 기준 기본 변수데이터로 복원했습니다.`);
     };
-    (0, C.useEffect)(() => b(Math.round(Kr)), [ Kr, b ]), (0, C.useEffect)(() => {
+    let method1OverrideReasonReady = method1PioneeringOverride === null || method1PioneeringOverride === method1PioneeringRecommended || method1PioneeringReason.trim().length > 0;
+    if (isMethod1) {
+        method1CalculationReady = method1CalculationReady && method1OverrideReasonReady;
+        if (method1CalculationReady && globalThis.MyeongValuationMethods) {
+            let method1PioneeringResult = globalThis.MyeongValuationMethods.calculatePioneeringRate({
+                annualCommercializationCosts: method1Investments,
+                industryAssetIncrease: method1IndustryAssetIncrease,
+                industryResearchDevelopment: method1IndustryResearchDevelopment,
+                preparationYears: method1PreparationYears,
+                overrideRate: method1PioneeringOverride,
+                overrideReason: method1PioneeringReason
+            });
+            method1CostTotal = method1PioneeringResult.costTotal;
+            method1BenchmarkTotal = method1PioneeringResult.benchmarkTotal;
+            method1PioneeringRatio = method1PioneeringResult.ratio;
+            method1PioneeringRecommended = method1PioneeringResult.recommendedRate;
+            method1PioneeringRate = method1PioneeringResult.appliedRate;
+            er = globalThis.MyeongValuationMethods.calculateRoyaltyRate1({
+                baseRoyaltyRate: Jn,
+                adjustmentCoefficient: method1AdjustmentCoefficient,
+                technologyShare: tt,
+                pioneeringRate: method1PioneeringRate
+            });
+            jr = Er.map(e => e * er / 100);
+            Mr = jr.map(e => Cg(e, t));
+            Nr = jr.reduce((e, t) => e + t, 0);
+            Pr = Nr ? Mr.reduce((e, t) => e + t.total, 0) / Nr * 100 : 0;
+            Fr = dr * lr / 100 + fr * (1 - lr / 100) * (1 - Pr / 100);
+            let method1DcfResult = globalThis.MyeongValuationMethods.calculateDiscountedCashFlows({
+                sales: Er,
+                royaltyRate: er,
+                discountRate: Fr,
+                companyForm: t
+            });
+            Hr = method1DcfResult.cashFlows.map(e => e.afterTaxRoyalty);
+            Ur = method1DcfResult.cashFlows.map(e => e.presentFactor);
+            Wr = method1DcfResult.cashFlows.map(e => e.presentValue);
+            Gr = method1DcfResult.presentValueTotal;
+            Kr = Gr;
+        }
+    }
+    (0, C.useEffect)(() => {
+        b(method1CalculationReady ? Math.round(Kr) : null);
+    }, [ Kr, b, method1CalculationReady ]), (0, C.useEffect)(() => {
         if (!x) return;
         let e = {
             growth: [ `성장률 추세 반영`, `혼합추정` ],
@@ -1266,6 +1424,8 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
             plan: [ `판매계획 방식`, `직접추정·혼합추정` ],
             direct: [ `평가자 직접입력`, `직접추정` ]
         }, [t, n] = e[S] ?? e.growth, r = {
+            valuationMethod,
+            valuationMethodLabel: isMethod1 ? `로열티공제법Ⅰ` : `로열티공제법Ⅱ`,
             salesMethod: S,
             salesMethodLabel: t,
             salesMethodClassification: n,
@@ -1282,7 +1442,8 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                 beforeProration: e.beforeProration,
                 rateBasis: e.rateBasis
             })),
-            cashFlows: Er.map((e, t) => ({
+            calculationComplete: method1CalculationReady,
+            cashFlows: method1CalculationReady ? Er.map((e, t) => ({
                 year: t + 1,
                 period: Cr[t],
                 sales: e,
@@ -1292,17 +1453,31 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                 afterTaxRoyalty: Hr[t],
                 presentFactor: Ur[t],
                 presentValue: Wr[t]
-            })),
+            })) : [],
             economicLife: Vn,
             economicLifeLabel: Tr,
+            preparationYears: isMethod1 ? method1PreparationYears : 0,
+            cashFlowPeriodYears: valuationPeriodYears,
             legalLifeApplied: Bn,
-            finalRoyalty: er,
+            baseRoyalty: Jn,
+            finalRoyalty: method1CalculationReady ? er : null,
             utilization: tt,
+            utilizationLabel: isMethod1 ? `기술의 비중` : `이용률`,
+            adjustmentCoefficient1: isMethod1 ? method1AdjustmentCoefficient : null,
+            adjustmentScore1: isMethod1 ? method1AdjustmentScore : null,
+            pioneeringRate: isMethod1 ? method1PioneeringRate : null,
+            pioneeringRatio: isMethod1 && method1PioneeringInputsReady ? method1PioneeringRatio : null,
+            pioneeringCostTotal: isMethod1 && method1InvestmentInputsReady ? method1CostTotal : null,
+            pioneeringBenchmarkTotal: isMethod1 && method1PioneeringInputsReady ? method1BenchmarkTotal : null,
+            pioneeringSource: isMethod1 ? method1PioneeringSource : null,
+            pioneeringSourceDetail: isMethod1 ? method1SourceDetail : null,
+            pioneeringSourceBaseYear: isMethod1 ? method1SourceBaseYear : null,
+            pioneeringSourceSampleCount: isMethod1 ? method1SourceSampleCount : null,
             discountRate: Fr,
-            validityRate: zr,
-            presentValueTotal: Gr,
-            finalValue: Kr,
-            ratings: og.map(e => ({
+            validityRate: isMethod1 ? null : zr,
+            presentValueTotal: method1CalculationReady ? Gr : null,
+            finalValue: method1CalculationReady ? Kr : null,
+            ratings: (isMethod1 ? method1RatingGroups : og).map(e => ({
                 title: e.title,
                 rows: e.rows.map(e => ({
                     label: e.label,
@@ -1312,7 +1487,7 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
             }))
         }, i = JSON.stringify(r);
         i !== Ot.current && (Ot.current = i, x(r));
-    }, [ Gn, Vn, Tr, Je, br, Cr, Er, Zt, se, Fr, Sn, er, Kr, Bn, x, Ur, Gr, vn, H, jr, S, Mr, Hr, Wr, tt, zr, yn ]);
+    }, [ Gn, Vn, Tr, Je, br, Cr, Er, Zt, se, Fr, Sn, er, Kr, Bn, x, Ur, Gr, vn, H, jr, S, Mr, Hr, Wr, tt, zr, yn, Jn, valuationMethod, isMethod1, method1PreparationYears, valuationPeriodYears, method1AdjustmentCoefficient, method1AdjustmentScore, method1PioneeringRate, method1PioneeringRatio, method1CostTotal, method1BenchmarkTotal, method1PioneeringSource, method1SourceDetail, method1SourceBaseYear, method1SourceSampleCount, method1CalculationReady, method1PioneeringInputsReady, method1InvestmentInputsReady ]);
     let Yr = (e, t, n, r) => {
         Ee(i => i.map(i => i.id === e ? {
             ...i,
@@ -1363,9 +1538,129 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
         } : e), Ae(n);
     }, ei = (e, t) => {
         ht(n => n.map((n, r) => r === e ? t : n));
-    }, ti = [ Re.length === 0 ? `대표 IPC를 한 개 이상 선택해야 합니다.` : null, He === `round` && !We.trim() ? `경제적 수명 반올림 근거가 필요합니다.` : null, nr === 100 ? null : `이용률 구성기술 비중 합계가 100%가 아닙니다.`, st === `direct` && !ft.trim() ? `자기자본비율 직접입력 근거가 필요합니다.` : null, bt > Br && !wt.trim() ? `권리안정성 상향근거가 필요합니다.` : null, St > Vr && !Et.trim() ? `권리보호강도 상향근거가 필요합니다.` : null, En < 20 || En > 50 ? `사업화위험 평점 합계는 20~50점 범위여야 합니다.` : null ].filter(Boolean);
+    }, ti = [ Re.length === 0 ? `대표 IPC를 한 개 이상 선택해야 합니다.` : null, He === `round` && !We.trim() ? `경제적 수명 반올림 근거가 필요합니다.` : null, nr === 100 ? null : `${isMethod1 ? `기술의 비중` : `이용률`} 구성기술 비중 합계가 100%가 아닙니다.`, isMethod1 && method1PreparationYears > 0 && !method1InvestmentInputsReady ? `사업화 준비기간의 연도별 투자금액을 모두 입력해야 합니다.` : null, isMethod1 && method1PreparationYears > 0 && (!method1AssetInputProvided || !method1ResearchInputProvided || method1BenchmarkTotal <= 0) ? `개척률 산정을 위한 동업종 유·무형자산 증가액과 연구개발비가 필요합니다.` : null, isMethod1 && !method1PioneeringOverrideValid ? `개척률 확정값은 50~100% 범위여야 합니다.` : null, isMethod1 && method1PioneeringOverride !== null && method1PioneeringOverride !== method1PioneeringRecommended && !method1PioneeringReason.trim() ? `개척률 자동추천값 변경 근거가 필요합니다.` : null, st === `direct` && !ft.trim() ? `자기자본비율 직접입력 근거가 필요합니다.` : null, !isMethod1 && bt > Br && !wt.trim() ? `권리안정성 상향근거가 필요합니다.` : null, !isMethod1 && St > Vr && !Et.trim() ? `권리보호강도 상향근거가 필요합니다.` : null, En < 20 || En > 50 ? `사업화위험 평점 합계는 20~50점 범위여야 합니다.` : null ].filter(Boolean);
+    let pioneeringCard = isMethod1 ? (0, W.jsxs)(Eg, {
+        title: `개척률 산정`,
+        badge: `평가자 확정`,
+        children: [ (0, W.jsx)(Dg, {
+            label: `기준자료 경로`,
+            children: (0, W.jsxs)(`select`, {
+                value: method1PioneeringSource,
+                onChange: e => setMethod1PioneeringSource(e.target.value),
+                children: [ (0, W.jsx)(`option`, {
+                    value: `direct`, children: `평가자 직접입력`
+                }), (0, W.jsx)(`option`, {
+                    value: `starvalue-ecos`, children: `StarValue + 한국은행 ECOS`
+                }), (0, W.jsx)(`option`, {
+                    value: `kodata-table`, children: `KoDATA 업종별 개척률 표`
+                }), (0, W.jsx)(`option`, {
+                    value: `pdf`, children: `기타 PDF 산정표`
+                }) ]
+            })
+        }), (0, W.jsx)(`input`, {
+            className: `sr-only`, ref: method1PdfInputRef, type: `file`, accept: `.pdf,application/pdf`,
+            onChange: async e => {
+                let t = e.target.files?.[0];
+                if (!t) return;
+                try {
+                    let n = await extractPioneeringPdfText(t), r = globalThis.MyeongValuationMethods?.parsePioneeringTableText(n);
+                    setMethod1PdfCandidate({ ...r, fileName: t.name }), setMethod1PioneeringSource(`pdf`), y(`개척률 PDF에서 후보값을 인식했습니다. 검토 후 적용해 주세요.`);
+                } catch {
+                    setMethod1PdfCandidate(null), y(`개척률 PDF를 인식하지 못했습니다. 직접입력값을 사용해 주세요.`);
+                }
+                e.currentTarget.value = ``;
+            }
+        }), (0, W.jsxs)(`button`, {
+            className: `detail-calc-button`, type: `button`, onClick: () => method1PdfInputRef.current?.click(),
+            children: [ (0, W.jsx)(R, { size: 15 }), ` 개척률 산정표 PDF 불러오기` ]
+        }), method1PdfCandidate && (0, W.jsxs)(`div`, {
+            className: `reference-match-note`,
+            children: [ (0, W.jsx)(`span`, { children: `PDF 인식 후보 · 자동확정 안 함` }), (0, W.jsx)(`strong`, { children: method1PdfCandidate.fileName }), (0, W.jsxs)(`small`, {
+                children: [ `준비기간 `, method1PdfCandidate.preparationYears ?? `미인식`, `년 · 연간 투자 `, method1PdfCandidate.annualCommercializationCost ?? `미인식`, ` · 자산증감 `, method1PdfCandidate.industryAssetIncrease ?? `미인식`, ` · 연구개발비 `, method1PdfCandidate.industryResearchDevelopment ?? `미인식` ]
+            }), (0, W.jsx)(`button`, {
+                type: `button`,
+                onClick: () => {
+                    let e = method1PdfCandidate.preparationYears, t = Number.isFinite(e) ? Math.max(0, Math.floor(e)) : method1PreparationYears;
+                    Number.isFinite(e) && setMethod1PreparationYears(t);
+                    Number.isFinite(method1PdfCandidate.annualCommercializationCost) && (setMethod1AnnualCost(method1PdfCandidate.annualCommercializationCost), setMethod1Investments(Array.from({ length: t }, () => method1PdfCandidate.annualCommercializationCost)));
+                    Number.isFinite(method1PdfCandidate.industryAssetIncrease) && setMethod1IndustryAssetIncrease(method1PdfCandidate.industryAssetIncrease);
+                    Number.isFinite(method1PdfCandidate.industryResearchDevelopment) && setMethod1IndustryResearchDevelopment(method1PdfCandidate.industryResearchDevelopment);
+                    setMethod1SourceDetail(method1PdfCandidate.fileName), y(`PDF 인식 후보값을 적용했습니다.`);
+                },
+                children: `인식값 적용`
+            }) ]
+        }), (0, W.jsxs)(`div`, {
+            className: `reference-match-note`,
+            children: [ (0, W.jsx)(`span`, { children: `StarValue 재무상태표 후보` }), (0, W.jsx)(`strong`, {
+                children: industryAssetMetrics?.complete ? `${industryAssetMetrics.averageRecent3Million.toLocaleString(`ko-KR`, { maximumFractionDigits: 6 })}백만원` : `산출 전`
+            }), (0, W.jsx)(`small`, {
+                children: industryAssetMetrics?.complete ? `유형자산+무형자산 최근 3개년 순증감 평균 · 자동확정 안 함` : `업종평균·시장정보에서 유형자산과 무형자산 4개년 이상을 붙여넣어 주세요.`
+            }), (0, W.jsx)(`button`, {
+                type: `button`, disabled: !industryAssetMetrics?.complete,
+                onClick: () => {
+                    if (!industryAssetMetrics?.complete) return;
+                    setMethod1IndustryAssetIncrease(Number(industryAssetMetrics.averageRecent3Million.toFixed(6))), setMethod1PioneeringSource(`starvalue-ecos`), setMethod1SourceBaseYear(industryAssetMetrics.years?.at(-1) ?? ``), setMethod1SourceDetail(`KISTI StarValue 동업종 재무상태표`), y(`StarValue 유·무형자산 최근 3개년 증감 후보값을 반영했습니다.`);
+                },
+                children: `StarValue 산출값 적용`
+            }) ]
+        }), (0, W.jsxs)(`div`, {
+            className: `reference-match-note`,
+            children: [ (0, W.jsx)(`span`, { children: `웹 내장 ECOS 매칭` }), (0, W.jsxs)(`strong`, { children: [ ecosMatch?.code ?? `-`, ` · `, ecosMatch?.name ?? `일치 업종 없음` ] }), (0, W.jsxs)(`small`, {
+                children: [ `한국은행 경제통계시스템(ECOS) 동업종 통계자료 · 연구개발비대매출액 · `, ecosResearchValues.map(e => `${e.year}년 ${e.rate}%`).join(` · `) || `적용 가능한 업종매출 연도 없음` ]
+            }), (0, W.jsx)(`button`, {
+                type: `button`, disabled: ecosAutoResearchDevelopment === null,
+                onClick: () => {
+                    if (ecosAutoResearchDevelopment === null) return;
+                    setMethod1IndustryResearchDevelopment(Number(ecosAutoResearchDevelopment.toFixed(6))), setMethod1PioneeringSource(`starvalue-ecos`), setMethod1SourceBaseYear(ecosResearchValues.at(-1)?.year ?? ``), setMethod1SourceDetail(`StarValue 산업분류별 재무통계 + 한국은행 경제통계시스템(ECOS) 동업종 통계자료`), y(`최근 ${ecosResearchValues.length}개년 ECOS 비율 적용 연구개발비를 반영했습니다.`);
+                },
+                children: `ECOS 산출값 적용`
+            }) ]
+        }), (0, W.jsxs)(`div`, {
+            className: `section-grid two-columns`,
+            children: [ (0, W.jsx)(Dg, {
+                label: `기준연도`, children: (0, W.jsx)(`input`, { type: `number`, value: method1SourceBaseYear, placeholder: `예: 2024`, onChange: e => setMethod1SourceBaseYear(e.target.value) })
+            }), (0, W.jsx)(Dg, {
+                label: `표본기업 수`, children: (0, W.jsx)(`input`, { type: `number`, min: `1`, value: method1SourceSampleCount, placeholder: `확인된 경우`, onChange: e => setMethod1SourceSampleCount(e.target.value) })
+            }) ]
+        }), (0, W.jsx)(Dg, {
+            label: `동업종 평균 유·무형자산 증감(백만원)`, children: (0, W.jsx)(`input`, { type: `number`, value: method1IndustryAssetIncrease, onChange: e => setMethod1IndustryAssetIncrease(e.target.value === `` ? `` : Number(e.target.value)) })
+        }), (0, W.jsx)(Dg, {
+            label: `동업종 평균 연구개발비(백만원)`, children: (0, W.jsx)(`input`, { type: `number`, min: `0`, value: method1IndustryResearchDevelopment, onChange: e => setMethod1IndustryResearchDevelopment(e.target.value === `` ? `` : Math.max(0, Number(e.target.value))) })
+        }), method1PreparationYears > 0 && (0, W.jsxs)(`div`, {
+            className: `method1-investment-grid`,
+            children: [ (0, W.jsx)(`strong`, { children: `연도별 사업화 투자금액(백만원)` }), Array.from({ length: method1PreparationYears }, (e, t) => (0, W.jsx)(Dg, {
+                label: `${rn + t}년`,
+                children: (0, W.jsx)(`input`, {
+                    type: `number`, min: `0`, value: method1Investments[t] ?? ``,
+                    onChange: e => {
+                        let n = [ ...method1Investments ];
+                        n[t] = e.target.value === `` ? `` : Math.max(0, Number(e.target.value)), setMethod1Investments(n);
+                    }
+                })
+            }, t)) ]
+        }), (0, W.jsx)(Dg, {
+            label: `출처 상세`, children: (0, W.jsx)(`textarea`, { value: method1SourceDetail, onChange: e => setMethod1SourceDetail(e.target.value), placeholder: `자료명·작성기관·기준일` })
+        }), (0, W.jsx)(Dg, {
+            label: `개척률 확정값`,
+            children: (0, W.jsxs)(`div`, {
+                className: `pioneering-confirm-grid`,
+                children: [ (0, W.jsxs)(`select`, {
+                    value: method1PioneeringOverride === null ? `auto` : `manual`, onChange: e => setMethod1PioneeringOverride(e.target.value === `auto` ? null : method1PioneeringRecommended ?? 100),
+                    children: [ (0, W.jsxs)(`option`, { value: `auto`, children: [ `자동추천 `, method1PioneeringRecommended ?? `산출 전`, method1PioneeringRecommended === null ? `` : `%` ] }), (0, W.jsx)(`option`, { value: `manual`, children: `평가자 직접확정` }) ]
+                }), method1PioneeringOverride !== null && (0, W.jsxs)(`span`, {
+                    className: `percent-input`,
+                    children: [ (0, W.jsx)(`input`, { type: `number`, min: `50`, max: `100`, step: `0.01`, value: method1PioneeringOverride, onChange: e => setMethod1PioneeringOverride(e.target.value === `` ? NaN : Number(e.target.value)) }), (0, W.jsx)(`b`, { children: `%` }) ]
+                }) ]
+            })
+        }), method1PioneeringOverride !== null && method1PioneeringOverride !== method1PioneeringRecommended && (0, W.jsx)(Dg, {
+            label: `확정 근거`, children: (0, W.jsx)(`textarea`, { value: method1PioneeringReason, onChange: e => setMethod1PioneeringReason(e.target.value) })
+        }), (0, W.jsxs)(`div`, {
+            className: `result-callout`,
+            children: [ (0, W.jsx)(`span`, { children: `개척률` }), (0, W.jsx)(`strong`, { children: method1PioneeringRate === null ? `산출 전` : `${method1PioneeringRate}%` }), (0, W.jsx)(`small`, { children: method1PioneeringInputsReady ? `투자금액 ${method1CostTotal.toLocaleString()} ÷ 기준금액 ${method1BenchmarkTotal.toLocaleString()} · 비율 ${method1PioneeringRatio.toFixed(2)}` : `준비기간·연도별 투자금액·동업종 기준자료를 입력해 주세요.` }) ]
+        }) ]
+    }) : null;
     return (0, W.jsxs)(`section`, {
-        className: `valuation-workbench`,
+        className: `valuation-workbench${isMethod1 ? ` method1-valuation-workbench` : ``}`,
         children: [ (0, W.jsxs)(`div`, {
             className: `applied-industry-banner valuation-industry-banner`,
             children: [ (0, W.jsxs)(`div`, {
@@ -1384,6 +1679,45 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                 }), (0, W.jsx)(`p`, {
                     children: `업체정보의 사업화제품 기준값 적용`
                 }) ]
+            }) ]
+        }), (0, W.jsxs)(`article`, {
+            className: `stage-card valuation-method-selector`,
+            children: [ (0, W.jsxs)(`div`, {
+                children: [ (0, W.jsx)(`span`, {
+                    className: `eyebrow`,
+                    children: `평가모형`
+                }), (0, W.jsx)(`h2`, {
+                    children: isMethod1 ? `로열티공제법Ⅰ` : `로열티공제법Ⅱ · 기존 방식`
+                }), (0, W.jsx)(`p`, {
+                    children: `공통 매출·기간·세금·할인 계산은 유지하고 평점항목과 로열티율 산정표만 모형에 맞게 전환합니다.`
+                }) ]
+            }), (0, W.jsxs)(`label`, {
+                children: [ (0, W.jsx)(`span`, {
+                    children: `평가방법 선택`
+                }), (0, W.jsxs)(`select`, {
+                    value: valuationMethod,
+                    onChange: e => {
+                        if (e.target.value === `discountedCashFlow`) {
+                            setDcfPlannedNotice(!0);
+                            return;
+                        }
+                        setDcfPlannedNotice(!1), setValuationMethod(e.target.value);
+                    },
+                    children: [ (0, W.jsx)(`option`, {
+                        value: `royaltyDeduction2`,
+                        children: `로열티공제법Ⅱ · 기존 방식`
+                    }), (0, W.jsx)(`option`, {
+                        value: `royaltyDeduction1`,
+                        children: `로열티공제법Ⅰ`
+                    }), (0, W.jsx)(`option`, {
+                        value: `discountedCashFlow`,
+                        children: `DCF · 업데이트 예정`
+                    }) ]
+                }) ]
+            }), dcfPlannedNotice && (0, W.jsxs)(`div`, {
+                className: `valuation-method-planned-note`,
+                role: `status`,
+                children: [ (0, W.jsx)(`strong`, { children: `DCF 평가모형은 업데이트 예정입니다.` }), (0, W.jsx)(`span`, { children: `현재 저장·계산 중인 로열티공제법 모형과 입력값은 변경되지 않습니다.` }) ]
             }) ]
         }), (0, W.jsxs)(`details`, {
             className: `reference-data-manager`,
@@ -1454,7 +1788,7 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
             children: [ (0, W.jsxs)(`div`, {
                 className: `card-title`,
                 children: [ (0, W.jsx)(`h2`, {
-                    children: `지식재산가치 산출표`
+                    children: `${isMethod1 ? `로열티공제법Ⅰ` : `로열티공제법Ⅱ`} 지식재산가치 산출표`
                 }), (0, W.jsx)(`span`, {
                     className: `source-chip`,
                     children: `단위: 백만원`
@@ -1542,7 +1876,7 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                                     })
                                 })
                             }) ]
-                        }), (0, W.jsxs)(`tr`, {
+                        }), !isMethod1 && (0, W.jsxs)(`tr`, {
                             children: [ (0, W.jsx)(`th`, {
                                 children: `지식재산 유효성`
                             }), (0, W.jsx)(`td`, {
@@ -1559,7 +1893,7 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                             }), (0, W.jsx)(`td`, {
                                 colSpan: Er.length,
                                 children: (0, W.jsxs)(`strong`, {
-                                    children: [ `현재가치 합계 × 지식재산 유효성 = `, Math.round(Kr).toLocaleString(), `백만원` ]
+                                    children: method1CalculationReady ? [ isMethod1 ? `현재가치 합계 = ` : `현재가치 합계 × 지식재산 유효성 = `, Math.round(Kr).toLocaleString(), `백만원` ] : `개척률 필수자료 입력 후 산출`
                                 })
                             }) ]
                         })
@@ -1583,7 +1917,7 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                     className: `eyebrow`,
                     children: `최종 IP가치`
                 }), (0, W.jsxs)(`strong`, {
-                    children: [ Math.round(Kr).toLocaleString(), `백만원` ]
+                    children: method1CalculationReady ? [ Math.round(Kr).toLocaleString(), `백만원` ] : `산출 전`
                 }), (0, W.jsx)(`p`, {
                     children: `반올림 전 계산값으로 산출하고 화면에는 백만원 단위로 표시합니다.`
                 }), (0, W.jsx)(`div`, {
@@ -1621,7 +1955,7 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                         }), (0, W.jsx)(`strong`, {
                             children: $(Fr)
                         }) ]
-                    }), (0, W.jsxs)(`div`, {
+                    }), !isMethod1 && (0, W.jsxs)(`div`, {
                         children: [ (0, W.jsx)(`span`, {
                             children: `IP유효성`
                         }), (0, W.jsx)(`strong`, {
@@ -1637,7 +1971,7 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                     }) ]
                 }), (0, W.jsx)(`p`, {
                     className: `calculation-line`,
-                    children: `예상매출 × 최종 로열티율 − 누진세액 × IP유효성 × 할인계수`
+                    children: isMethod1 ? `예상매출 × 최종 로열티율 − 누진세액 × 할인계수` : `예상매출 × 최종 로열티율 − 누진세액 × IP유효성 × 할인계수`
                 }) ]
             }), (0, W.jsxs)(`article`, {
                 className: `stage-card valuation-check-card ${ti.length ? `has-warning` : `is-ready`}`,
@@ -1680,11 +2014,11 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                     children: [ (0, W.jsx)(te, {}), ` 경제적 수명` ]
                 }), (0, W.jsxs)(Lp, {
                     value: `royalty`,
-                    children: [ (0, W.jsx)(j, {}), ` 로열티율·이용률` ]
+                    children: [ (0, W.jsx)(j, {}), isMethod1 ? ` 로열티율·기술의 비중` : ` 로열티율·이용률` ]
                 }), (0, W.jsxs)(Lp, {
                     value: `discount`,
                     children: [ (0, W.jsx)(le, {}), ` 할인율` ]
-                }), (0, W.jsxs)(Lp, {
+                }), !isMethod1 && (0, W.jsxs)(Lp, {
                     value: `validity`,
                     children: [ (0, W.jsx)(de, {}), ` IP유효성` ]
                 }), (0, W.jsxs)(Lp, {
@@ -1716,7 +2050,7 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                             children: `가장 우측 평점 칸에 1~5점을 입력하면 해당 등급에 체크가 자동 표시됩니다. 등급 칸은 확인용이며 직접 선택하지 않습니다.`
                         }), (0, W.jsx)(`div`, {
                             className: `quickvalue-rating-sections`,
-                            children: og.map(e => (0, W.jsxs)(`section`, {
+                            children: (isMethod1 ? method1RatingGroups : og).map(e => (0, W.jsxs)(`section`, {
                                 className: `quickvalue-rating-section`,
                                 children: [ (0, W.jsx)(`h3`, {
                                     children: e.title
@@ -1731,15 +2065,15 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                                                 }), (0, W.jsx)(`th`, {
                                                     children: `정의`
                                                 }), (0, W.jsx)(`th`, {
-                                                    children: `매우우수`
+                                                    children: isMethod1 ? `매우우수 (+2)` : `매우우수`
                                                 }), (0, W.jsx)(`th`, {
-                                                    children: `우수`
+                                                    children: isMethod1 ? `우수 (+1)` : `우수`
                                                 }), (0, W.jsx)(`th`, {
-                                                    children: `보통`
+                                                    children: isMethod1 ? `보통 (0)` : `보통`
                                                 }), (0, W.jsx)(`th`, {
-                                                    children: `미흡`
+                                                    children: isMethod1 ? `미흡 (-1)` : `미흡`
                                                 }), (0, W.jsx)(`th`, {
-                                                    children: `매우미흡`
+                                                    children: isMethod1 ? `매우미흡 (-2)` : `매우미흡`
                                                 }), (0, W.jsx)(`th`, {
                                                     children: `평점 입력`
                                                 }) ]
@@ -1787,7 +2121,7 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                             }, e.title))
                         }), (0, W.jsx)(`p`, {
                             className: `rating-footnote`,
-                            children: `※ 입력범위 1~5점 · 수익성은 업종평균 확정값으로 자동 연결되어 수정할 수 없습니다.`
+                            children: isMethod1 ? `※ 입력은 1~5점이며 로열티Ⅰ 산식에서는 3점을 차감하여 -2~+2점으로 자동 환산합니다. 수익성은 업종평균 확정값과 연계됩니다.` : `※ 입력범위 1~5점 · 수익성은 업종평균 확정값으로 자동 연결되어 수정할 수 없습니다.`
                         }) ]
                     }), (0, W.jsxs)(`article`, {
                         className: `stage-card info-banner`,
@@ -2441,12 +2775,14 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                         className: `life-score-column`,
                         children: (0, W.jsx)(Tg, {
                             title: `기술수명 영향요인 산출`,
-                            subtitle: `기술수명 영향요인 평가표`,
+                            subtitle: isMethod1 ? `경제적 수명 모델Ⅰ · 1~5점에서 3점 차감` : `기술수명 영향요인 평가표`,
                             rows: sg,
-                            ratings: Je,
-                            weighted: !0,
-                            totalLabel: `${Cn}`,
-                            resultLabel: `점수 ${$(wn)}`
+                            ratings: isMethod1 ? Object.fromEntries(method1LifeKeys.map(e => [ e, Je[e] - 3 ])) : Je,
+                            ratingValues: isMethod1 ? [ 2, 1, 0, -1, -2 ] : void 0,
+                            ratingLabels: isMethod1 ? [ `매우우수 (+2)`, `우수 (+1)`, `보통 (0)`, `미흡 (-1)`, `매우미흡 (-2)` ] : void 0,
+                            weighted: !isMethod1,
+                            totalLabel: isMethod1 ? `${method1LifeScore}` : `${Cn}`,
+                            resultLabel: isMethod1 ? `모델Ⅰ 점수 ${method1LifeScore}` : `점수 ${$(wn)}`
                         })
                     }), (0, W.jsxs)(`article`, {
                         className: `stage-card tct-reference-card life-tct-column`,
@@ -2591,9 +2927,9 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                                 }) ]
                             }), (0, W.jsxs)(`div`, {
                                 children: [ (0, W.jsx)(`span`, {
-                                    children: `기술수명 획득값`
+                                    children: isMethod1 ? `모델Ⅰ 환산점수` : `기술수명 획득값`
                                 }), (0, W.jsx)(`strong`, {
-                                    children: $(wn)
+                                    children: isMethod1 ? `${method1LifeScore}점` : $(wn)
                                 }) ]
                             }), (0, W.jsxs)(`div`, {
                                 children: [ (0, W.jsx)(`span`, {
@@ -2605,9 +2941,18 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                                 children: [ (0, W.jsx)(`span`, {
                                     children: `최종 적용기간`
                                 }), (0, W.jsxs)(`strong`, {
-                                    children: [ Vn.toFixed(2), `년 · `, Tr ]
+                                    children: [ isMethod1 ? `${Vn.toFixed(2)}년 + 준비 ${method1PreparationYears}년` : `${Vn.toFixed(2)}년`, ` · `, Tr ]
                                 }) ]
                             }) ]
+                        }), isMethod1 && (0, W.jsx)(Dg, {
+                            label: `사업화 준비기간(년)`,
+                            children: (0, W.jsx)(`input`, {
+                                type: `number`,
+                                min: `0`,
+                                step: `1`,
+                                value: method1PreparationYears,
+                                onChange: e => setMethod1PreparationYears(Math.max(0, Number(e.target.value) || 0))
+                            })
                         }), (0, W.jsx)(Dg, {
                             label: `소수점 처리`,
                             children: (0, W.jsxs)(`select`, {
@@ -2653,12 +2998,14 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                     children: [ (0, W.jsx)(`div`, {
                         className: `valuation-table-pane`,
                         children: (0, W.jsx)(Tg, {
-                            title: `조정계수 산출`,
-                            subtitle: `조정점수 산출표`,
-                            rows: cg,
-                            ratings: Je,
-                            totalLabel: `${Tn}`,
-                            resultLabel: `조정계수 ${$n.toFixed(2)}`
+                            title: isMethod1 ? `조정계수1 산출` : `조정계수 산출`,
+                            subtitle: isMethod1 ? `15개 평점 · 1~5점에서 3점 차감` : `조정점수 산출표`,
+                            rows: isMethod1 ? method1AdjustmentRows : cg,
+                            ratings: isMethod1 ? Object.fromEntries(method1AdjustmentRows.map(e => [ e.key, Je[e.key] - 3 ])) : Je,
+                            ratingValues: isMethod1 ? [ 2, 1, 0, -1, -2 ] : void 0,
+                            ratingLabels: isMethod1 ? [ `매우우수 (+2)`, `우수 (+1)`, `보통 (0)`, `미흡 (-1)`, `매우미흡 (-2)` ] : void 0,
+                            totalLabel: isMethod1 ? `${method1AdjustmentScore}` : `${Tn}`,
+                            resultLabel: isMethod1 ? `조정계수1 ${method1AdjustmentCoefficient.toFixed(2)}` : `조정계수 ${$n.toFixed(2)}`
                         })
                     }), (0, W.jsxs)(`div`, {
                         className: `valuation-side-stack`,
@@ -2712,14 +3059,14 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                                 }) ]
                             }) ]
                         }), (0, W.jsxs)(Eg, {
-                            title: `조정계수·합리적 로열티율`,
+                            title: isMethod1 ? `조정계수1` : `조정계수·합리적 로열티율`,
                             badge: `평점 연계`,
                             children: [ (0, W.jsxs)(`div`, {
                                 className: `linked-score-note`,
                                 children: [ (0, W.jsx)(`span`, {
                                     children: `조정점수 합계`
                                 }), (0, W.jsxs)(`strong`, {
-                                    children: [ Tn, `점` ]
+                                    children: [ isMethod1 ? method1AdjustmentScore : Tn, `점` ]
                                 }), (0, W.jsx)(`small`, {
                                     children: "`평점 입력` 탭의 공통 평점에서 자동 연결"
                                 }) ]
@@ -2730,25 +3077,28 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                                 }), (0, W.jsx)(`b`, {
                                     children: `×`
                                 }), (0, W.jsx)(`span`, {
-                                    children: $n.toFixed(2)
+                                    children: isMethod1 ? method1AdjustmentCoefficient.toFixed(2) : $n.toFixed(2)
                                 }), (0, W.jsx)(`b`, {
                                     children: `=`
                                 }), (0, W.jsx)(`strong`, {
-                                    children: $(Qn)
+                                    children: isMethod1 ? `조정계수1` : $(Qn)
                                 }) ]
                             }), (0, W.jsx)(`p`, {
                                 className: `helper-text`,
-                                children: `평점 변경 시 조정계수와 합리적 로열티율을 즉시 다시 산출합니다.`
+                                children: isMethod1 ? `1 + (15개 환산점수 합계 ÷ 30)으로 조정계수1을 산출합니다.` : `평점 변경 시 조정계수와 합리적 로열티율을 즉시 다시 산출합니다.`
                             }) ]
                         }) ]
                     }) ]
+                }), pioneeringCard && (0, W.jsx)(`div`, {
+                    className: `section-grid one-column method1-pioneering-row`,
+                    children: pioneeringCard
                 }), (0, W.jsx)(`div`, {
                     className: `section-grid one-column royalty-final-row`,
                     children: (0, W.jsxs)(Eg, {
-                        title: `이용률·최종 로열티율`,
+                        title: isMethod1 ? `기술의 비중·개척률·최종 로열티율` : `이용률·최종 로열티율`,
                         badge: `평가자 확정`,
                         children: [ (0, W.jsx)(Dg, {
-                            label: `이용률`,
+                            label: isMethod1 ? `기술의 비중` : `이용률`,
                             children: (0, W.jsx)(Og, {
                                 value: tt,
                                 onChange: nt
@@ -2767,9 +3117,9 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                                 className: `utilization-dialog`,
                                 children: [ (0, W.jsxs)(Ap, {
                                     children: [ (0, W.jsx)(Mp, {
-                                        children: `이용률 상세 산출`
+                                        children: isMethod1 ? `기술의 비중 상세 산출` : `이용률 상세 산출`
                                     }), (0, W.jsx)(Np, {
-                                        children: `구성기술 비중과 평가대상특허 적용비중을 입력하면 이용률을 자동 산출합니다.`
+                                        children: isMethod1 ? `구성기술 비중과 평가대상기술 적용비중을 입력하면 기술의 비중을 자동 산출합니다.` : `구성기술 비중과 평가대상특허 적용비중을 입력하면 이용률을 자동 산출합니다.`
                                     }) ]
                                 }), (0, W.jsxs)(`div`, {
                                     className: `utilization-table`,
@@ -2780,7 +3130,7 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                                         }), (0, W.jsx)(`span`, {
                                             children: `구성기술 비중`
                                         }), (0, W.jsx)(`span`, {
-                                            children: `특허 적용비중`
+                                            children: isMethod1 ? `대상기술 적용비중` : `특허 적용비중`
                                         }), (0, W.jsx)(`span`, {
                                             children: `기여율`
                                         }), (0, W.jsx)(`span`, {}) ]
@@ -2831,7 +3181,7 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                                     children: [ (0, W.jsxs)(`span`, {
                                         children: [ `비중 합계 `, $(nr) ]
                                     }), (0, W.jsxs)(`strong`, {
-                                        children: [ `산출 이용률 `, $(tr) ]
+                                        children: [ isMethod1 ? `산출 기술의 비중 ` : `산출 이용률 `, $(tr) ]
                                     }) ]
                                 }), (0, W.jsxs)(jp, {
                                     children: [ (0, W.jsx)(Dp, {
@@ -2848,7 +3198,7 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                                             type: `button`,
                                             disabled: nr !== 100,
                                             onClick: () => {
-                                                nt(Number(tr.toFixed(2))), y(`상세 산출표의 이용률을 최종 이용률에 적용했습니다.`);
+                                                nt(Number(tr.toFixed(2))), y(`상세 산출표의 ${isMethod1 ? `기술의 비중` : `이용률`}을 최종값에 적용했습니다.`);
                                             },
                                             children: `적용`
                                         })
@@ -2860,9 +3210,9 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                             children: [ (0, W.jsx)(`span`, {
                                 children: `최종 로열티율`
                             }), (0, W.jsx)(`strong`, {
-                                children: $(er)
+                                children: method1CalculationReady ? $(er) : `산출 전`
                             }), (0, W.jsxs)(`small`, {
-                                children: [ $(Qn), ` × 이용률 `, $(tt) ]
+                                children: isMethod1 ? method1CalculationReady ? [ $(Jn), ` × 조정계수1 `, method1AdjustmentCoefficient.toFixed(2), ` × 기술의 비중 `, $(tt), ` × 개척률 `, $(method1PioneeringRate) ] : `개척률 필수자료를 입력해 주세요.` : [ $(Qn), ` × 이용률 `, $(tt) ]
                             }) ]
                         }) ]
                     })
@@ -3148,7 +3498,7 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                         }) ]
                     }) ]
                 }) ]
-            }), (0, W.jsx)(Rp, {
+            }), !isMethod1 && (0, W.jsx)(Rp, {
                 value: `validity`,
                 className: `valuation-tab-content`,
                 children: (0, W.jsxs)(`div`, {
