@@ -179,6 +179,10 @@ test("경제적 수명 종료연도는 정수연도 뒤 마지막 부분연도�
   assert.deepEqual(methods.calculatePeriodFractions(3, 20), [1, 1, 1]);
   assert.deepEqual(methods.calculatePeriodFractions(0, 20), []);
   assert.equal(methods.calculatePeriodFractions(20, 20).length, 20);
+  assert.equal(methods.calculateCalendarPeriodCount("2026-08-24", "2033-08-23"), 7);
+  assert.equal(methods.calculateCalendarPeriodCount("2026-08-24", "2033-08-24"), 8);
+  assert.equal(methods.calculateCalendarPeriodCount("2026-08-24", "2026-08-23"), 0);
+  assert.equal(methods.calculateCalendarPeriodCount("2026-08-24", "2034-01-15"), 8);
 });
 
 test("0·음수·공란·자료부족은 기존 웹 입력 규칙과 로열티Ⅰ 필수검증으로 처리한다", () => {
@@ -304,10 +308,19 @@ test("모형·세금·경제적 수명 UI는 요청된 독립 선택과 확인 �
   assert.ok(source.indexOf("value: `tax`") < source.indexOf("value: `discount`"));
   assert.match(source, /value: lifeModel/);
   assert.match(source, /method1PreparationMonths/);
+  assert.match(source, /function countCalendarYearPeriods/);
+  assert.match(source, /cashFlowPeriodCount = countCalendarYearPeriods\(nn, finalValuationEnd\)/);
+  assert.match(source, /periodCount = cashFlowPeriodCount/);
+  assert.match(source, /function bg\(e, t, n\)[\s\S]*?let i = t \+ 1/);
+  assert.doesNotMatch(source, /Math\.ceil\(valuationPeriodYears\)/);
+  assert.match(source, /소수점 이하 반올림\(정수 적용\)/);
   assert.match(source, /평균 법인세율/);
   assert.match(reporting, /로열티공제법Ⅰ 개척률용 재무상태표/);
   assert.match(css, /\.valuation-method-grid/);
   assert.match(css, /\.valuation-purpose-grid input:focus/);
+  assert.match(css, /\.sticky-summary strong[\s\S]*?white-space: normal/);
+  assert.match(css, /\.sticky-summary \.value-summary[\s\S]*?position: static/);
+  assert.match(css, /\.top-actions \.requesting-institution-field input[\s\S]*?font-size: 11px/);
 });
 
 test("기존 로열티Ⅱ 산출 분기는 유효성 적용 공식을 그대로 유지한다", () => {

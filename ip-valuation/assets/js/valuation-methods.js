@@ -239,6 +239,18 @@
         ));
     }
 
+    function calculateCalendarPeriodCount(startDate, endDate) {
+        const start = parseIsoDate(startDate);
+        const end = parseIsoDate(endDate);
+        if (!start || !end) throw new TypeError("현금흐름 시작일과 종료일은 YYYY-MM-DD 형식이어야 합니다.");
+        if (end.getTime() < start.getTime()) return 0;
+
+        const completedYearBoundaries = end.getUTCFullYear() - start.getUTCFullYear();
+        const nextBoundary = new Date(start);
+        nextBoundary.setUTCFullYear(start.getUTCFullYear() + completedYearBoundaries);
+        return completedYearBoundaries + Number(end.getTime() >= nextBoundary.getTime());
+    }
+
     function calculateDiscountedCashFlows({ sales, royaltyRate, discountRate, discountPeriods, companyForm = "corporation" }) {
         if (!Array.isArray(sales) || sales.length === 0) throw new TypeError("일할 후 매출액 자료가 필요합니다.");
         if (discountPeriods !== undefined && (!Array.isArray(discountPeriods) || discountPeriods.length !== sales.length)) {
@@ -320,6 +332,7 @@
         calculateTax,
         prorateAnnualSales,
         calculatePeriodFractions,
+        calculateCalendarPeriodCount,
         calculateDiscountedCashFlows,
         parsePioneeringTableText,
         migrateValuationState
