@@ -134,3 +134,27 @@ test("보고서 평가요약은 중복정보를 제거하고 간이감정에도 
   assert.match(scoringSource, /평가방법은 \$\{h\.valuationMethodLabel\?\?`로열티공제법Ⅱ`\}을 적용함/);
   assert.doesNotMatch(scoringSource, /적용한 지식재산 가치는/);
 });
+
+test("가치기준·전제는 보고서별 절 번호와 평가등급 계열의 둥근 박스를 사용한다", () => {
+  assert.match(
+    scoringSource,
+    /function fairValuePrinciples\(\{purpose:e,evaluationDate:t,sectionNumber:n=6\}\)/,
+  );
+  assert.match(scoringSource, /기술가치평가의 가치기준·전제/);
+  assert.match(
+    scoringSource,
+    /sectionNumber:v===`quick`\?6:9/,
+  );
+  assert.match(
+    overrideCss,
+    /\.quick-fair-value-section ul \{[\s\S]*?border-radius: 10px;[\s\S]*?background: #eef3f8;/,
+  );
+  assert.match(
+    overrideCss,
+    /\.quick-fair-value-section \.quick-footnote \{[\s\S]*?font-size: 9\.4px;[\s\S]*?font-weight: 700;/,
+  );
+  assert.match(
+    overrideCss,
+    /\.quick-fair-value-section ul \{[\s\S]*?box-shadow: inset 0 0 0 1000px #eef2f7 !important;/,
+  );
+});
