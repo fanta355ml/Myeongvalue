@@ -132,6 +132,9 @@ p{margin:0}
 .platform-footer{display:grid;grid-template-columns:1fr auto auto;gap:26px;align-items:center;padding:38px clamp(24px,6vw,90px);color:rgba(255,255,255,.62);background:#061326;font-size:12px}
 .platform-footer .platform-brand strong{color:#fff}
 .platform-footer .platform-brand small{color:rgba(255,255,255,.5)}
+.platform-footer .footer-sitemap{display:flex;align-items:center;justify-content:center;gap:10px 20px;flex-wrap:wrap}
+.platform-footer .footer-sitemap a{color:rgba(255,255,255,.72)}
+.platform-footer .footer-sitemap a:hover{color:var(--gold-soft)}
 
 @media(max-width:1080px){
   .platform-header nav a:not(.header-launch){display:none}
