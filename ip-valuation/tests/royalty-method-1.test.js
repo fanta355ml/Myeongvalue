@@ -315,6 +315,18 @@ test("크레탑 경상개발비는 연도·명세서별 표본기업 수로 나�
   ]), /함께 입력/);
 });
 
+test("StarValue 천원 단위 매출액과 ECOS 백분율로 산출한 연구개발비는 백만원 단위로 환산한다", () => {
+  const rows = [
+    { revenue: 22981870, rate: 0.44 },
+    { revenue: 19568977, rate: 0.47 },
+    { revenue: 20157616, rate: 0.48 },
+  ];
+  const values = rows.map(({ revenue, rate }) => methods.calculateEstimatedIndustryResearch(revenue, rate));
+
+  closeArray(values, [101.120228, 91.9741919, 96.7565568]);
+  close(values.reduce((sum, value) => sum + value, 0) / values.length, 96.61699223333333);
+});
+
 test("ECOS 최신자료는 연도행 형식과 연도열 형식 파일을 업로드용 구조로 인식한다", () => {
   const long = methods.parseEcosResearchRatioText(`산업분류코드,업종명,연도,연구개발비대매출액\nC24,1차 금속,2024,0.43\nC24,1차 금속,2025,0.45`);
   assert.equal(long.rows[0].rates[2025], 0.45);

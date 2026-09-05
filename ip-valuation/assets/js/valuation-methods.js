@@ -125,6 +125,16 @@
         return { costTotal, benchmarkTotal, ratio, recommendedRate, appliedRate, durationYears, investmentPeriods };
     }
 
+    function calculateEstimatedIndustryResearch(revenueThousandWon, ratePercent) {
+        const revenue = requireFinite(revenueThousandWon, "StarValue 매출액");
+        const rate = requireFinite(ratePercent, "ECOS 연구개발비 대 매출액");
+        if (revenue < 0 || rate < 0) {
+            throw new RangeError("StarValue 매출액과 ECOS 연구개발비율은 음수가 될 수 없습니다.");
+        }
+        // StarValue 매출액은 천원 단위, 개척률 기준금액은 백만원 단위로 관리한다.
+        return revenue * rate / 100 / 1000;
+    }
+
     function calculateCretopResearchAverage(rows) {
         if (!Array.isArray(rows) || rows.length !== 3) {
             throw new TypeError("크레탑 최근 3개년 연구개발비 자료가 필요합니다.");
@@ -453,6 +463,7 @@
         calculateAdjustmentCoefficient1,
         calculateTechnologyShare,
         calculatePioneeringRate,
+        calculateEstimatedIndustryResearch,
         calculateCretopResearchAverage,
         calculateForecastCagr,
         recommendSalesGrowthScore,
