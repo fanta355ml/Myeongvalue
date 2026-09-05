@@ -251,6 +251,36 @@
         return completedYearBoundaries + Number(end.getTime() >= nextBoundary.getTime());
     }
 
+    function parseStarValueFinancialText(text, yearCount = 5) {
+        const count = requireFinite(yearCount, "StarValue 연도 수");
+        if (!Number.isInteger(count) || count < 1) throw new RangeError("StarValue 연도 수는 1 이상의 정수여야 합니다.");
+        const incomeLabels = [
+            "매출액", "매출원가", "매출총이익", "판매비와관리비", "영업이익",
+            "영업외수익", "영업외비용", "법인세차감전순이익", "법인세", "당기순이익", "감가상각비"
+        ];
+        const balanceLabels = [
+            "고정자산", "유형자산", "무형자산", "유동자산", "유동부채",
+            "자산총계", "부채총계", "매출채권", "재고자산", "매입채무"
+        ];
+        const numericRows = String(text || "").split(/\r?\n/).map(line => {
+            const tokens = line.match(/[-+]?\d[\d,]*(?:\.\d+)?%?/g) ?? [];
+            if (tokens.length < count) return null;
+            const selected = tokens.slice(-count);
+            const values = selected.map(token => Number(token.replaceAll(",", "").replaceAll("%", "")));
+            if (values.some(value => !Number.isFinite(value))) return null;
+            if (values.every(value => Number.isInteger(value) && value >= 1900 && value <= 2100)) return null;
+            return values;
+        }).filter(Boolean);
+        const toRows = (labels, offset) => labels.map((label, index) => ({
+            label,
+            values: numericRows[offset + index]
+        })).filter(row => Array.isArray(row.values));
+        return {
+            incomeRows: toRows(incomeLabels, 0),
+            balanceRows: toRows(balanceLabels, incomeLabels.length)
+        };
+    }
+
     function calculateDiscountedCashFlows({ sales, royaltyRate, discountRate, discountPeriods, companyForm = "corporation" }) {
         if (!Array.isArray(sales) || sales.length === 0) throw new TypeError("일할 후 매출액 자료가 필요합니다.");
         if (discountPeriods !== undefined && (!Array.isArray(discountPeriods) || discountPeriods.length !== sales.length)) {
@@ -333,6 +363,7 @@
         prorateAnnualSales,
         calculatePeriodFractions,
         calculateCalendarPeriodCount,
+        parseStarValueFinancialText,
         calculateDiscountedCashFlows,
         parsePioneeringTableText,
         migrateValuationState

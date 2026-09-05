@@ -237,10 +237,19 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
     let _e = [ ...r ].sort((e, t) => t.year - e.year)[0], ve = _e ? o.selected.includes(`totalRevenue`) ? _e.totalRevenue : o.selected.reduce((e, t) => e + _e[t], 0) : 0, ye = _e?.totalRevenue ? ve / _e.totalRevenue * 100 : 0, be = Qp(r, o), xe = (e = v) => {
         y(e);
         let t = g === `starvalue` ? 5 : 3, n = new Map, r = e.split(/\r?\n/).map(e => e.trim()).filter(Boolean), balanceLabels = [ `고정자산`, `유형자산`, `무형자산`, `유동자산`, `유동부채`, `자산총계`, `부채총계`, `매출채권`, `재고자산`, `매입채무` ], recognizedLabels = [ ...E_, ...balanceLabels ];
-        if (r.map(e => e.split(`\t`).map(e => e.trim())).forEach(e => {
+        r.map(e => e.split(`\t`).map(e => e.trim())).forEach(e => {
             let r = k_(e[0] ?? ``), i = e.slice(1).filter(e => /[-+]?\d/.test(e)).map(O_).slice(-t);
             i.length && recognizedLabels.includes(r) && n.set(r, Array(Math.max(0, t - i.length)).fill(null).concat(i));
-        }), !n.size) {
+        });
+        if (g === `starvalue`) {
+            let positional = globalThis.MyeongValuationMethods?.parseStarValueFinancialText(e, t);
+            positional?.incomeRows?.forEach(row => {
+                n.has(row.label) || n.set(row.label, row.values);
+            }), positional?.balanceRows?.forEach(row => {
+                n.has(row.label) || n.set(row.label, row.values);
+            });
+        }
+        if (!n.size) {
             let e = r.map(e => {
                 let n = e.match(/[-+]?\d[\d,]*(?:\.\d+)?%?/g) ?? [], r = n[0]?.includes(`%`) || n.length > t ? n.slice(-t) : n;
                 return r.length ? Array(Math.max(0, t - r.length)).fill(0).concat(r.slice(-t).map(O_)) : [];
@@ -514,7 +523,7 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
                     }) ]
                 }), (0, W.jsx)(`p`, {
                     className: `card-help`,
-                    children: g === `starvalue` ? `손익계산서와 재무상태표를 함께 붙여넣으면 계정과목명으로 구분해 인식합니다. 유형자산·무형자산은 최근 3개년 증감 산출 후 로열티공제법Ⅰ 개척률 후보값으로 연결합니다.` : `연도·계정과목명이 복사되지 않아도 11개 행의 고정 순서로 인식하고, 최우측 수치를 최근연도로 보아 왼쪽으로 1년씩 자동 배정합니다.`
+                    children: g === `starvalue` ? `손익계산서 11행 다음에 재무상태표 10행을 붙여넣으면 계정명이 복사되지 않아도 고정 순서로 인식합니다. 유형자산·무형자산은 최근 3개년 증감 산출 후 로열티공제법Ⅰ 개척률 후보값으로 연결합니다.` : `연도·계정과목명이 복사되지 않아도 11개 행의 고정 순서로 인식하고, 최우측 수치를 최근연도로 보아 왼쪽으로 1년씩 자동 배정합니다.`
                 }), (0, W.jsx)(`textarea`, {
                     value: v,
                     onChange: e => y(e.target.value),
@@ -582,7 +591,7 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
                             className: `industry-finance-table`,
                             children: [ (0, W.jsx)(`thead`, { children: (0, W.jsxs)(`tr`, { children: [ (0, W.jsx)(`th`, { children: `구분` }), ie.map(year => (0, W.jsxs)(`th`, { children: [ year, `년` ] }, year)) ] }) }), (0, W.jsx)(`tbody`, { children: starvalueBalanceRows.map(row => (0, W.jsxs)(`tr`, { children: [ (0, W.jsx)(`th`, { children: row.label }), row.values.map((value, index) => (0, W.jsx)(`td`, { children: Number.isFinite(value) ? Number(value).toLocaleString() : `-` }, index)) ] }, row.label)) }) ]
                         })
-                    }) : (0, W.jsx)(`p`, { className: `card-help`, children: `StarValue 재무상태표를 계정과목명과 함께 붙여넣으면 유형자산·무형자산을 별도 인식하여 이 표에 표시합니다.` }), (0, W.jsxs)(`div`, {
+                    }) : (0, W.jsx)(`p`, { className: `card-help`, children: `StarValue 손익계산서 11행 뒤에 재무상태표 10행을 이어 붙여넣으면 고정 순서로 별도 인식하여 이 표에 표시합니다.` }), (0, W.jsxs)(`div`, {
                         className: `reference-match-note`,
                         children: [ (0, W.jsx)(`span`, { children: `개척률 연결 후보` }), (0, W.jsx)(`strong`, { children: starvalueAssetMetrics.complete ? `${starvalueAssetMetrics.averageRecent3Million.toLocaleString(`ko-KR`, { maximumFractionDigits: 6 })}백만원` : `산출 전` }), (0, W.jsx)(`small`, { children: starvalueAssetMetrics.complete ? `유형자산+무형자산의 최근 3개년 순증감 평균 · 평가자가 가치산정에서 확인 후 적용` : `유형자산·무형자산 4개년 이상 자료가 필요합니다.` }) ]
                     }) ]
