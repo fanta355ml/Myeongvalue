@@ -601,13 +601,14 @@
 
 .quick-fair-value-section li + li { margin-top: 3px; }
 
-.quick-fair-value-section .quick-footnote {
-  margin: 10px 0 0;
-  color: #4b5563;
-  text-align: left;
-  font-size: 9.4px;
-  font-weight: 700;
-  line-height: 1.55;
+.quick-disclaimer-group {
+  display: grid;
+  gap: 2px;
+  margin-top: 10px;
+}
+
+.quick-disclaimer-group .quick-disclaimer {
+  margin: 0;
 }
 
 @media print {

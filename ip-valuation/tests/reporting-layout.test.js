@@ -149,12 +149,42 @@ test("가치기준·전제는 보고서별 절 번호와 평가등급 계열의 
     overrideCss,
     /\.quick-fair-value-section ul \{[\s\S]*?border-radius: 10px;[\s\S]*?background: #eef3f8;/,
   );
+  assert.doesNotMatch(scoringSource, /className:`quick-footnote`,children:`※ 가치기준과 전제는/);
+  assert.match(
+    scoringSource,
+    /className:`quick-disclaimer-group`[\s\S]*?※ 가치기준과 전제는[\s\S]*?※ 본 결과는/,
+  );
   assert.match(
     overrideCss,
-    /\.quick-fair-value-section \.quick-footnote \{[\s\S]*?font-size: 9\.4px;[\s\S]*?font-weight: 700;/,
+    /\.quick-disclaimer-group \{[\s\S]*?gap: 2px;[\s\S]*?margin-top: 10px;/,
+  );
+  assert.match(
+    overrideCss,
+    /\.quick-disclaimer-group \.quick-disclaimer \{\s*margin: 0;/,
   );
   assert.match(
     overrideCss,
     /\.quick-fair-value-section ul \{[\s\S]*?box-shadow: inset 0 0 0 1000px #eef2f7 !important;/,
+  );
+});
+
+test("보고서 발급일자는 오늘 날짜를 기본으로 하며 평가기준일과 별도로 수정·저장한다", () => {
+  assert.match(scoringSource, /function reportToday\(\)/);
+  assert.match(
+    scoringSource,
+    /\[issueDate,setIssueDate\]=\(0,C\.useState\)\(reportToday\)/,
+  );
+  assert.match(scoringSource, /contact:j,valuationAmount:N,issueDate/);
+  assert.match(
+    scoringSource,
+    /typeof e\.issueDate==`string`&&setIssueDate\(e\.issueDate\)/,
+  );
+  assert.match(
+    scoringSource,
+    /children:`발급일자`[\s\S]*?type:`date`,value:issueDate/,
+  );
+  assert.match(
+    scoringSource,
+    /children:`발급일자`\}\),\(0,W\.jsx\)\(`b`,\{children:issueDate\}\)/,
   );
 });
