@@ -109,3 +109,28 @@ test("수익성 평가의견 최하단에 매출원가율과 판매관리비율 
   const costStructureOpinion = scoringSource.indexOf("reportCostStructureOpinion(a)", profitabilityOpinion);
   assert.ok(profitabilityOpinion >= 0 && costStructureOpinion > profitabilityOpinion);
 });
+
+test("보고서 평가요약은 중복정보를 제거하고 간이감정에도 평가방법을 표시한다", () => {
+  const deepStart = scoringSource.indexOf(
+    "className:`quick-summary-grid deep-summary-grid`",
+  );
+  const quickStart = scoringSource.indexOf(
+    "className:`quick-summary-grid`",
+    deepStart + 1,
+  );
+  const summaryEnd = scoringSource.indexOf(
+    "v===`deep`&&(0,W.jsxs)(`section`",
+    quickStart,
+  );
+
+  assert.ok(deepStart >= 0 && quickStart > deepStart && summaryEnd > quickStart);
+  const deepSummary = scoringSource.slice(deepStart, quickStart);
+  const quickSummary = scoringSource.slice(quickStart, summaryEnd);
+
+  assert.doesNotMatch(deepSummary, /children:`업체명`/);
+  assert.doesNotMatch(deepSummary, /children:`사업자등록번호`/);
+  assert.doesNotMatch(deepSummary, /children:`평가대상특허`/);
+  assert.match(quickSummary, /children:`평가방법`/);
+  assert.match(scoringSource, /평가방법은 \$\{h\.valuationMethodLabel\?\?`로열티공제법Ⅱ`\}을 적용함/);
+  assert.doesNotMatch(scoringSource, /적용한 지식재산 가치는/);
+});
