@@ -372,6 +372,26 @@ test("모형·세금·경제적 수명 UI는 요청된 독립 선택과 확인 �
   assert.match(css, /\.top-actions \.requesting-institution-field input[\s\S]*?font-size: 11px/);
 });
 
+test("가치산정 핵심값·검산 카드와 모든 탭을 스크롤 없이 표시한다", () => {
+  const source = fs.readFileSync(
+    path.join(__dirname, "../assets/js/valuation-engine.js"),
+    "utf8",
+  );
+  const css = fs.readFileSync(
+    path.join(__dirname, "../assets/css/overrides.css"),
+    "utf8",
+  );
+
+  assert.match(css, /\.valuation-summary-grid > \.valuation-formula-card\s*{[\s\S]*?grid-column: 1;/);
+  assert.match(css, /\.valuation-summary-grid > \.valuation-check-card\s*{[\s\S]*?grid-column: 2;/);
+  assert.match(css, /\.valuation-tabs-list\s*{[\s\S]*?flex-wrap: wrap;[\s\S]*?height: auto !important;[\s\S]*?overflow: visible !important;/);
+  assert.match(css, /\.valuation-tabs-list > button\s*{[\s\S]*?flex: 1 1 140px;/);
+
+  for (const tab of ["scores", "sales", "life", "royalty", "tax", "discount", "validity", "proration"]) {
+    assert.ok(source.includes("value: `" + tab + "`"));
+  }
+});
+
 test("기존 로열티Ⅱ 산출 분기는 유효성 적용 공식을 그대로 유지한다", () => {
   const source = fs.readFileSync(
     path.join(__dirname, "../assets/js/valuation-engine.js"),

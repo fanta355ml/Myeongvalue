@@ -634,3 +634,54 @@
     flex-direction: column;
   }
 }
+
+/* 2026-09-05 valuation overview and tab visibility */
+.valuation-summary-grid {
+  grid-template-columns: minmax(0, 2.35fr) minmax(280px, .65fr);
+  align-items: stretch;
+}
+
+.valuation-summary-grid > .compact-value-hero {
+  grid-column: 1 / -1;
+}
+
+.valuation-summary-grid > .valuation-formula-card {
+  grid-column: 1;
+}
+
+.valuation-summary-grid > .valuation-check-card {
+  grid-column: 2;
+}
+
+.valuation-tabs-list {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-content: stretch;
+  width: 100%;
+  height: auto !important;
+  min-height: 48px;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.valuation-tabs-list > button {
+  flex: 1 1 140px;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .valuation-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .valuation-summary-grid > .compact-value-hero,
+  .valuation-summary-grid > .valuation-formula-card,
+  .valuation-summary-grid > .valuation-check-card {
+    grid-column: 1;
+  }
+
+  .valuation-tabs-list > button {
+    flex-basis: calc(50% - 1px);
+  }
+}
