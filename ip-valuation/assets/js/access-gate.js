@@ -38,12 +38,22 @@
       passwordHash:
         "2c0b6ddc6b8f8b4688c68b6cc877b65fdf64ad4abbbb0e4689a0d5ce6eca92cf",
     },
+    ecredible: {
+      id: "ecredible",
+      kind: "ecredible",
+      name: "이크레더블",
+      subline: "ECREDIBLE",
+      logo: "../assets/ecredible-logo.svg",
+      passwordHash:
+        "3b1905553320e2be254f5a4916c17e844b40c1fd005040e66de986f038da6480",
+    },
   };
 
   const agencyCodes = Object.freeze({
     myeong: "myeongvalue",
     kodata: "kodata",
     juhae: "juhae",
+    ecre: "ecredible",
     admin: "myeongvalue-admin",
   });
 
@@ -160,9 +170,38 @@
     if (!gate) return;
     window.ipValuationAgency = agency;
     document.body.dataset.agency = agency.kind;
+    applyAgencyBrand(agency);
     gate.classList.add("is-hidden");
     gate.setAttribute("aria-hidden", "true");
     document.body.classList.remove("auth-locked");
+  };
+
+  const applyAgencyBrand = (agency) => {
+    const brand = document.querySelector(".sidebar .brand");
+    if (!brand || !agency) return;
+
+    const imageOnlyBrand = agency.kind !== "myeongvalue";
+    const logo = brand.querySelector(".brand-mark img");
+    const text = brand.querySelector(":scope > div:not(.brand-mark)");
+    const name = text?.querySelector("strong");
+    const subline = text?.querySelector("span");
+
+    brand.dataset.agency = agency.kind;
+    brand.classList.toggle("is-agency-logo", imageOnlyBrand);
+    brand.classList.toggle("is-kodata", agency.kind === "kodata");
+    brand.classList.toggle("is-juhae", agency.kind === "juhae");
+    brand.classList.toggle("is-ecredible", agency.kind === "ecredible");
+    brand.classList.toggle("is-myeongvalue", agency.kind === "myeongvalue");
+
+    if (logo) {
+      logo.src = agency.logo;
+      logo.alt = agency.name;
+    }
+    if (text) text.hidden = imageOnlyBrand;
+    if (name && !imageOnlyBrand) name.textContent = "MYEONG VALUE";
+    if (subline && !imageOnlyBrand) {
+      subline.textContent = "IP & Technology Valuation";
+    }
   };
 
   const submitLogin = async () => {
@@ -270,10 +309,14 @@
       });
 
     if (!restoreSession()) resetGate();
-    insertPortalNavigation();
+    const syncAgencyInterface = () => {
+      insertPortalNavigation();
+      if (window.ipValuationAgency) applyAgencyBrand(window.ipValuationAgency);
+    };
+    syncAgencyInterface();
     const root = document.getElementById("root");
     if (root) {
-      new MutationObserver(insertPortalNavigation).observe(root, {
+      new MutationObserver(syncAgencyInterface).observe(root, {
         childList: true,
         subtree: true,
       });

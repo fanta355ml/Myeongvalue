@@ -176,6 +176,15 @@ button, input { font: inherit; }
   object-fit: contain;
 }
 
+.agency-identity.is-logo-white {
+  padding: 9px 13px;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.agency-identity.is-logo-white strong { color: #18304d; }
+.agency-identity.is-logo-white span { color: #64748b; }
+
 .agency-identity strong,
 .agency-identity span { display: block; }
 .agency-identity strong { font-size: 17px; }

@@ -1,14 +1,19 @@
 (function () {
   const STORAGE_KEY = 'myeongvalue-access-deadlines-v1';
   const ADMIN_SESSION_KEY = 'myeongvalue-admin-session-v1';
-  const DEFAULT_DEADLINES = { kodata: '2026-12-31' };
+  const DEFAULT_DEADLINES = {
+    kodata: '2026-12-31',
+    ecredible: '2026-10-31',
+  };
 
   function readDeadlines() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored === null) return { ...DEFAULT_DEADLINES };
       const saved = JSON.parse(stored);
-      return saved && typeof saved === 'object' ? saved : {};
+      return saved && typeof saved === 'object'
+        ? { ...DEFAULT_DEADLINES, ...saved }
+        : { ...DEFAULT_DEADLINES };
     } catch (error) {
       return {};
     }
@@ -33,8 +38,7 @@
   function setDeadline(agencyId, value) {
     const deadlines = readDeadlines();
     const deadline = normalizeDate(value);
-    if (deadline) deadlines[agencyId] = deadline;
-    else delete deadlines[agencyId];
+    deadlines[agencyId] = deadline;
     writeDeadlines(deadlines);
     return deadline;
   }
