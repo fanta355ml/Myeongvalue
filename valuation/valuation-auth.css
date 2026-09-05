@@ -211,21 +211,6 @@ body.auth-locked {
   font-size: 14px;
 }
 
-.agency-preview-card[data-agency="kodata"],
-.agency-preview-card[data-agency="juhae"] {
-  background: #eef1f4;
-}
-
-.agency-preview-card[data-agency="ecredible"] {
-  background: #fff;
-}
-
-.agency-preview-card[data-agency="kodata"] strong,
-.agency-preview-card[data-agency="juhae"] strong,
-.agency-preview-card[data-agency="ecredible"] strong {
-  color: #18304d;
-}
-
 .agency-password-wrap {
   display: flex;
   gap: 10px;

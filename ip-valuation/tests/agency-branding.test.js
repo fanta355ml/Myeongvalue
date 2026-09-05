@@ -29,6 +29,19 @@ test("로그인 기관에 따라 좌측 CI와 배경을 전환한다", () => {
   assert.match(css, /\.brand\.is-ecredible[\s\S]*?background:\s*#fff/);
 });
 
+test("명밸류 CI 동기화는 동일 문구를 다시 써서 감시 루프를 만들지 않는다", () => {
+  const accessGate = read("ip-valuation/assets/js/access-gate.js");
+
+  assert.match(
+    accessGate,
+    /name\.textContent !== "MYEONG VALUE"[\s\S]*?name\.textContent = "MYEONG VALUE"/,
+  );
+  assert.match(
+    accessGate,
+    /subline\.textContent !== "IP & Technology Valuation"[\s\S]*?subline\.textContent = "IP & Technology Valuation"/,
+  );
+});
+
 test("타 기관 보고서에는 명밸류 직인을 노출하지 않는다", () => {
   const css = read("ip-valuation/assets/css/overrides.css");
 
@@ -37,6 +50,19 @@ test("타 기관 보고서에는 명밸류 직인을 노출하지 않는다", ()
     /body:not\(\[data-agency="myeongvalue"\]\) \.report-seal-option/,
   );
   assert.match(css, /quick-report-signature > img\[src\$="report-seal\.png"\]/);
+});
+
+test("결과보고서 CI와 발급기관은 현재 접속기관을 따른다", () => {
+  const accessGate = read("ip-valuation/assets/js/access-gate.js");
+  const css = read("ip-valuation/assets/css/overrides.css");
+
+  assert.match(accessGate, /applyAgencyReportBrand\(window\.ipValuationAgency\)/);
+  assert.match(accessGate, /\.quick-report-brand/);
+  assert.match(
+    accessGate,
+    /\.quick-report-signature > div > strong[\s\S]*?issuer\.textContent = agency\.name/,
+  );
+  assert.match(css, /\.quick-report-brand\.is-agency-logo > img/);
 });
 
 test("이크레더블 기본 접속기한은 2026년 10월 31일이다", () => {

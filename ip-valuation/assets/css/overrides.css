@@ -205,6 +205,22 @@
         height: 42px;
       }
 
+      .quick-report-brand.is-agency-logo > div {
+        display: none;
+      }
+
+      .quick-report-brand.is-agency-logo > img {
+        width: 136px;
+        height: 46px;
+        border-radius: 0;
+        object-fit: contain;
+      }
+
+      .quick-report-brand.is-ecredible > img {
+        width: 154px;
+        height: 42px;
+      }
+
       body:not([data-agency="myeongvalue"]) .report-seal-option,
       body:not([data-agency="myeongvalue"]) .quick-report-signature > img[src$="report-seal.png"] {
         display: none !important;

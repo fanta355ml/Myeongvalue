@@ -197,10 +197,70 @@
       logo.src = agency.logo;
       logo.alt = agency.name;
     }
-    if (text) text.hidden = imageOnlyBrand;
-    if (name && !imageOnlyBrand) name.textContent = "MYEONG VALUE";
-    if (subline && !imageOnlyBrand) {
+    if (text && text.hidden !== imageOnlyBrand) text.hidden = imageOnlyBrand;
+    if (
+      name &&
+      !imageOnlyBrand &&
+      name.textContent !== "MYEONG VALUE"
+    ) {
+      name.textContent = "MYEONG VALUE";
+    }
+    if (
+      subline &&
+      !imageOnlyBrand &&
+      subline.textContent !== "IP & Technology Valuation"
+    ) {
       subline.textContent = "IP & Technology Valuation";
+    }
+  };
+
+  const applyAgencyReportBrand = (agency) => {
+    if (!agency) return;
+
+    const imageOnlyBrand = agency.kind !== "myeongvalue";
+    const reportBrand = document.querySelector(".quick-report-brand");
+    const reportLogo = reportBrand?.querySelector(":scope > img");
+    const reportText = reportBrand?.querySelector(":scope > div");
+    const reportName = reportText?.querySelector("strong");
+    const reportSubline = reportText?.querySelector("span");
+
+    if (reportBrand) {
+      reportBrand.dataset.agency = agency.kind;
+      reportBrand.classList.toggle("is-agency-logo", imageOnlyBrand);
+      reportBrand.classList.toggle(
+        "is-ecredible",
+        agency.kind === "ecredible",
+      );
+    }
+    if (reportLogo?.getAttribute("src") !== agency.logo) {
+      reportLogo?.setAttribute("src", agency.logo);
+    }
+    if (reportLogo && reportLogo.alt !== agency.name) {
+      reportLogo.alt = agency.name;
+    }
+    if (reportText && reportText.hidden !== imageOnlyBrand) {
+      reportText.hidden = imageOnlyBrand;
+    }
+    if (
+      reportName &&
+      !imageOnlyBrand &&
+      reportName.textContent !== "MYEONG VALUE"
+    ) {
+      reportName.textContent = "MYEONG VALUE";
+    }
+    if (
+      reportSubline &&
+      !imageOnlyBrand &&
+      reportSubline.textContent !== "IP & TECHNOLOGY VALUATION"
+    ) {
+      reportSubline.textContent = "IP & TECHNOLOGY VALUATION";
+    }
+
+    const issuer = document.querySelector(
+      ".quick-report-signature > div > strong",
+    );
+    if (issuer && issuer.textContent !== agency.name) {
+      issuer.textContent = agency.name;
     }
   };
 
@@ -311,7 +371,10 @@
     if (!restoreSession()) resetGate();
     const syncAgencyInterface = () => {
       insertPortalNavigation();
-      if (window.ipValuationAgency) applyAgencyBrand(window.ipValuationAgency);
+      if (window.ipValuationAgency) {
+        applyAgencyBrand(window.ipValuationAgency);
+        applyAgencyReportBrand(window.ipValuationAgency);
+      }
     };
     syncAgencyInterface();
     const root = document.getElementById("root");
