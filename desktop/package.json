@@ -1,0 +1,19 @@
+{
+  "name": "myeongvalue-quick-valuation-desktop",
+  "version": "1.1.0",
+  "private": true,
+  "description": "기관별 IP 간이감정 내부 사용용 Windows 데스크톱 앱",
+  "author": "명밸류 파트너스",
+  "main": "main.js",
+  "scripts": {
+    "start:myeongvalue": "node prepare.mjs myeongvalue && electron .",
+    "start:kodata": "node prepare.mjs kodata && electron .",
+    "build:myeongvalue": "node prepare.mjs myeongvalue && electron-builder --config electron-builder.myeongvalue.json --win nsis --x64 --publish never",
+    "build:kodata": "node prepare.mjs kodata && electron-builder --config electron-builder.kodata.json --win nsis --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "43.4.1",
+    "electron-builder": "26.15.3",
+    "xlsx": "0.18.5"
+  }
+}

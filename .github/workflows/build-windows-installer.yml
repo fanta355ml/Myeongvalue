@@ -1,0 +1,73 @@
+name: Build unsigned Windows installer
+
+on:
+  push:
+    branches:
+      - feature/windows-desktop-installer
+    paths:
+      - desktop/**
+      - valuation/**
+      - assets/logo.png
+      - assets/kodata-logo.png
+      - assets/myeongvalue-seal.png
+      - .github/workflows/build-windows-installer.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - desktop/**
+      - valuation/**
+      - assets/logo.png
+      - assets/kodata-logo.png
+      - assets/myeongvalue-seal.png
+      - .github/workflows/build-windows-installer.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    name: Build ${{ matrix.label }} installer
+    runs-on: windows-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - agency: myeongvalue
+            label: Myeongvalue
+            artifact_name: Myeongvalue-Quick-Valuation-Windows-x64
+            artifact_path: desktop/dist/myeongvalue/*.exe
+          - agency: kodata
+            label: KoDATA
+            artifact_name: KoDATA-Quick-Valuation-Windows-x64
+            artifact_path: desktop/dist/kodata/*.exe
+    defaults:
+      run:
+        working-directory: desktop
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install build dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build unsigned NSIS installer
+        run: npm run build:${{ matrix.agency }}
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_path }}
+          if-no-files-found: error
+          retention-days: 30
