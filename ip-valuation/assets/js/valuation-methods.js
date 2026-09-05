@@ -78,6 +78,7 @@
         industryAssetIncrease,
         industryResearchDevelopment,
         preparationYears,
+        preparationMonths,
         overrideRate = null,
         overrideReason = ""
     }) {
@@ -85,16 +86,22 @@
         if (!Number.isInteger(years) || years < 0) {
             throw new RangeError("사업화 준비기간은 0 이상의 정수여야 합니다.");
         }
+        const extraMonths = preparationMonths === undefined ? 0 : requireFinite(preparationMonths, "사업화 준비기간 개월");
+        if (!Number.isInteger(extraMonths) || extraMonths < 0 || extraMonths > 11) {
+            throw new RangeError("사업화 준비기간 개월은 0~11 범위의 정수여야 합니다.");
+        }
+        const durationYears = years + extraMonths / 12;
+        const investmentPeriods = Math.ceil(durationYears);
         let costTotal = 0;
         let benchmarkTotal = 0;
         let ratio = 0;
         let recommendedRate = 100;
-        if (years > 0) {
+        if (durationYears > 0) {
             const costs = Array.isArray(annualCommercializationCosts)
                 ? annualCommercializationCosts
-                : Array.from({ length: years }, () => annualCommercializationCost);
-            if (costs.length < years) throw new RangeError("사업화 준비기간의 연도별 투자금액이 부족합니다.");
-            costTotal = costs.slice(0, years).reduce((sum, value, index) => {
+                : Array.from({ length: investmentPeriods }, () => annualCommercializationCost);
+            if (costs.length < investmentPeriods) throw new RangeError("사업화 준비기간의 구간별 투자금액이 부족합니다.");
+            costTotal = costs.slice(0, investmentPeriods).reduce((sum, value, index) => {
                 const cost = requireFinite(value, `${index + 1}차년도 사업화 투자금액`);
                 if (cost < 0) throw new RangeError("사업화 투자금액은 음수가 될 수 없습니다.");
                 return sum + cost;
@@ -102,7 +109,7 @@
             const assetIncrease = requireFinite(industryAssetIncrease, "동업종 유·무형자산 증감액");
             const researchDevelopment = requireFinite(industryResearchDevelopment, "동업종 연구개발비");
             if (researchDevelopment < 0) throw new RangeError("동업종 연구개발비는 음수가 될 수 없습니다.");
-            benchmarkTotal = (assetIncrease + researchDevelopment) * years;
+            benchmarkTotal = (assetIncrease + researchDevelopment) * durationYears;
             if (benchmarkTotal <= 0) throw new RangeError("사업화 준비기간이 있으면 동업종 기준금액이 필요합니다.");
             ratio = costTotal / benchmarkTotal;
             recommendedRate = ratio > 1 ? 50 : ratio >= 0.5 ? 75 : 100;
@@ -115,7 +122,27 @@
                 throw new RangeError("개척률 자동추천값을 변경하려면 근거를 입력해야 합니다.");
             }
         }
-        return { costTotal, benchmarkTotal, ratio, recommendedRate, appliedRate };
+        return { costTotal, benchmarkTotal, ratio, recommendedRate, appliedRate, durationYears, investmentPeriods };
+    }
+
+    function calculateForecastCagr(sales) {
+        if (!Array.isArray(sales)) throw new TypeError("일할 후 매출액 자료가 필요합니다.");
+        const values = sales.map((value, index) => requireFinite(value, `${index + 1}차년도 매출액`));
+        const firstIndex = values.findIndex(value => value > 0);
+        if (firstIndex < 0) return null;
+        const lastIndex = values.length - 1;
+        if (lastIndex <= firstIndex || values[firstIndex] <= 0 || values[lastIndex] <= 0) return null;
+        return ((values[lastIndex] / values[firstIndex]) ** (1 / (lastIndex - firstIndex)) - 1) * 100;
+    }
+
+    function recommendSalesGrowthScore({ forecastCagr, industryCagr }) {
+        const forecast = requireFinite(forecastCagr, "추정매출 CAGR");
+        const industry = requireFinite(industryCagr, "동업종 CAGR");
+        const difference = forecast - industry;
+        // 실무가이드는 동업종 CAGR과의 비교를 요구하지만 1~5점 수치구간은 제시하지 않는다.
+        // 따라서 자동추천은 보수적으로 2~4점만 사용하고 극단값(1·5점)은 평가자 판단에 맡긴다.
+        const score = difference >= 3 ? 4 : difference > -3 ? 3 : 2;
+        return { score, difference };
     }
 
     function calculateRoyaltyRate1({ baseRoyaltyRate, adjustmentCoefficient, technologyShare, pioneeringRate }) {
@@ -287,6 +314,8 @@
         calculateAdjustmentCoefficient1,
         calculateTechnologyShare,
         calculatePioneeringRate,
+        calculateForecastCagr,
+        recommendSalesGrowthScore,
         calculateRoyaltyRate1,
         calculateTax,
         prorateAnnualSales,

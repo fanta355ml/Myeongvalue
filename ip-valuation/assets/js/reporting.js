@@ -89,6 +89,7 @@ function P_(e, t, n) {
 }
 
 function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, salesMix: r, onSalesMixChange: i, onIndustryRevenueSeriesChange: a, onIndustryAssetMetricsChange: onIndustryAssetMetricsChange, relatedSalesBasis: o, onRelatedSalesBasisChange: s, domesticMarket: c, worldMarket: l, onDomesticMarketChange: u, onWorldMarketChange: d, profitabilityScore: f, onProfitabilityScoreChange: p, onIndustryProfitabilityChange: m, setNotice: h}) {
+    let selectedValuationMethod = window.localStorage.getItem(`ip-valuation-current-method`) ?? `royaltyDeduction2`, showRoyalty1Financials = g => g === `starvalue` || selectedValuationMethod === `royaltyDeduction1`;
     let [g, _] = (0, C.useState)(`starvalue`), [v, y] = (0, C.useState)(``), [b, x] = (0,
     C.useState)(2024), [S, w] = (0, C.useState)(D_), [T, E] = (0, C.useState)(3), [D, O] = (0,
     C.useState)(``), [k, A] = (0, C.useState)(``), [j, M] = (0, C.useState)(() => Math.max(...r.map(e => e.year), 2025)), [N, P] = (0,
@@ -574,14 +575,14 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
                 }), (0, W.jsx)(`p`, {
                     className: `card-help`,
                     children: `표의 모든 금액은 StarValue 원문과 동일한 천 원 단위로 저장·표시합니다. 가치산정에서 금액으로 연결할 때만 백만 원 단위로 자동 변환합니다.`
-                }), g === `starvalue` && (0, W.jsxs)(W.Fragment, {
-                    children: [ (0, W.jsx)(`h3`, { children: `재무상태표 인식 결과` }), starvalueBalanceRows.length ? (0, W.jsx)(`div`, {
+                }), showRoyalty1Financials(g) && (0, W.jsxs)(W.Fragment, {
+                    children: [ (0, W.jsxs)(`h3`, { className: `royalty1-financial-heading`, children: [ `로열티공제법Ⅰ 개척률용 재무상태표`, (0, W.jsx)(`small`, { children: ` · StarValue 붙여넣기 인식 결과` }) ] }), starvalueBalanceRows.length ? (0, W.jsx)(`div`, {
                         className: `industry-table-wrap`,
                         children: (0, W.jsxs)(`table`, {
                             className: `industry-finance-table`,
                             children: [ (0, W.jsx)(`thead`, { children: (0, W.jsxs)(`tr`, { children: [ (0, W.jsx)(`th`, { children: `구분` }), ie.map(year => (0, W.jsxs)(`th`, { children: [ year, `년` ] }, year)) ] }) }), (0, W.jsx)(`tbody`, { children: starvalueBalanceRows.map(row => (0, W.jsxs)(`tr`, { children: [ (0, W.jsx)(`th`, { children: row.label }), row.values.map((value, index) => (0, W.jsx)(`td`, { children: Number.isFinite(value) ? Number(value).toLocaleString() : `-` }, index)) ] }, row.label)) }) ]
                         })
-                    }) : (0, W.jsx)(`p`, { className: `card-help`, children: `StarValue 재무상태표를 계정과목명과 함께 붙여넣으면 별도로 인식합니다.` }), (0, W.jsxs)(`div`, {
+                    }) : (0, W.jsx)(`p`, { className: `card-help`, children: `StarValue 재무상태표를 계정과목명과 함께 붙여넣으면 유형자산·무형자산을 별도 인식하여 이 표에 표시합니다.` }), (0, W.jsxs)(`div`, {
                         className: `reference-match-note`,
                         children: [ (0, W.jsx)(`span`, { children: `개척률 연결 후보` }), (0, W.jsx)(`strong`, { children: starvalueAssetMetrics.complete ? `${starvalueAssetMetrics.averageRecent3Million.toLocaleString(`ko-KR`, { maximumFractionDigits: 6 })}백만원` : `산출 전` }), (0, W.jsx)(`small`, { children: starvalueAssetMetrics.complete ? `유형자산+무형자산의 최근 3개년 순증감 평균 · 평가자가 가치산정에서 확인 후 적용` : `유형자산·무형자산 4개년 이상 자료가 필요합니다.` }) ]
                     }) ]

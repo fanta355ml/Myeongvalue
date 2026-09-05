@@ -222,6 +222,41 @@ test("개척률 직접확정은 50~100%와 변경근거를 요구한다", () => 
   }).appliedRate, 70);
 });
 
+test("사업화 준비기간은 연·개월을 합산하고 마지막 부분연도 투자구간을 포함한다", () => {
+  const result = methods.calculatePioneeringRate({
+    annualCommercializationCosts: [120, 60],
+    industryAssetIncrease: 40,
+    industryResearchDevelopment: 20,
+    preparationYears: 1,
+    preparationMonths: 6,
+  });
+  assert.equal(result.durationYears, 1.5);
+  assert.equal(result.investmentPeriods, 2);
+  assert.equal(result.costTotal, 180);
+  assert.equal(result.benchmarkTotal, 90);
+  assert.equal(result.recommendedRate, 50);
+});
+
+test("매출성장 추세 자동추천은 최초 발생·최종연도 CAGR을 동업종과 비교하되 2~4점만 제시한다", () => {
+  close(methods.calculateForecastCagr([0, 100, 110, 121]), 10);
+  assert.equal(methods.calculateForecastCagr([0, 100, 0]), null);
+  assert.equal(methods.recommendSalesGrowthScore({ forecastCagr: 10, industryCagr: 2 }).score, 4);
+  assert.equal(methods.recommendSalesGrowthScore({ forecastCagr: 4, industryCagr: 2 }).score, 3);
+  assert.equal(methods.recommendSalesGrowthScore({ forecastCagr: -5, industryCagr: 2 }).score, 2);
+});
+
+test("2026년 법인세 표준세율·누진공제와 지방소득세를 자동 계산한다", () => {
+  const lower = methods.calculateTax(100, "corporation");
+  close(lower.national, 10);
+  close(lower.local, 1);
+  close(lower.total, 11);
+
+  const middle = methods.calculateTax(1000, "corporation");
+  close(middle.national, 180);
+  close(middle.local, 18);
+  close(middle.total, 198);
+});
+
 test("저장·불러오기 왕복과 평가방법 없는 기존 파일의 하위 호환성을 유지한다", () => {
   const method1 = {
     valuationMethod: methods.ROYALTY_METHOD_1,
@@ -248,6 +283,31 @@ test("DCF 선택지는 업데이트 예정 안내만 표시하고 지원 모형�
   assert.equal(methods.normalizeValuationMethod("discountedCashFlow"), methods.ROYALTY_METHOD_2);
   assert.equal(methods.migrateValuationState({ valuationMethod: "discountedCashFlow" }).valuationMethod, methods.ROYALTY_METHOD_2);
   assert.match(css, /\.method1-valuation-workbench \.quickvalue-rating-table th/);
+});
+
+test("모형·세금·경제적 수명 UI는 요청된 독립 선택과 확인 순서를 유지한다", () => {
+  const source = fs.readFileSync(
+    path.join(__dirname, "../assets/js/valuation-engine.js"),
+    "utf8",
+  );
+  const reporting = fs.readFileSync(
+    path.join(__dirname, "../assets/js/reporting.js"),
+    "utf8",
+  );
+  const css = fs.readFileSync(
+    path.join(__dirname, "../assets/css/overrides.css"),
+    "utf8",
+  );
+
+  assert.doesNotMatch(source, /로열티공제법Ⅱ · 기존 방식/);
+  assert.ok(source.indexOf("value: `royalty`") < source.indexOf("value: `tax`"));
+  assert.ok(source.indexOf("value: `tax`") < source.indexOf("value: `discount`"));
+  assert.match(source, /value: lifeModel/);
+  assert.match(source, /method1PreparationMonths/);
+  assert.match(source, /평균 법인세율/);
+  assert.match(reporting, /로열티공제법Ⅰ 개척률용 재무상태표/);
+  assert.match(css, /\.valuation-method-grid/);
+  assert.match(css, /\.valuation-purpose-grid input:focus/);
 });
 
 test("기존 로열티Ⅱ 산출 분기는 유효성 적용 공식을 그대로 유지한다", () => {

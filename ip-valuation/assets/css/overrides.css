@@ -407,6 +407,23 @@
 .valuation-purpose-grid select,
 .requesting-institution-field input {
   width: 100%;
+  min-height: 40px;
+  padding: 8px 36px 8px 11px;
+  border: 1px solid #b9c8d8;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #19324c;
+  font: inherit;
+  box-shadow: 0 1px 2px rgba(19, 43, 70, .04);
+}
+
+.valuation-purpose-grid input:focus,
+.valuation-purpose-grid select:focus,
+.requesting-institution-field input:focus,
+.valuation-method-selector select:focus {
+  border-color: #477ca8;
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(71, 124, 168, .14);
 }
 
 .requesting-institution-field input { min-width: 150px; }
@@ -426,6 +443,71 @@
 }
 
 .valuation-method-planned-note strong { color: #193a5d; }
+
+.valuation-method-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.valuation-method-display,
+.valuation-method-selector { min-height: 142px; }
+
+.valuation-method-selector label {
+  display: grid;
+  gap: 8px;
+  color: #52657a;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.valuation-method-selector select {
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 36px 8px 11px;
+  border: 1px solid #b9c8d8;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #19324c;
+  font: inherit;
+  font-weight: 700;
+}
+
+.valuation-formula-card { grid-column: 1 / -1; }
+.valuation-formula-list { display: grid; gap: 8px; margin-top: 10px; }
+.valuation-formula-list > div { display: grid; grid-template-columns: 118px minmax(0, 1fr); gap: 10px; align-items: center; padding: 9px 11px; border: 1px solid #e0e7ef; border-radius: 8px; background: #f8fafc; }
+.valuation-formula-list > div.is-active { border-color: #8daec9; background: #f0f6fb; }
+.valuation-formula-list code { color: #334d66; font-family: inherit; font-size: 12px; white-space: normal; }
+
+.preparation-period-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+
+.sales-growth-auto-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 9px 11px;
+  border: 1px solid #c8d9e8;
+  border-radius: 8px;
+  background: #f4f8fc;
+  color: #35536e;
+  font-size: 11px;
+}
+
+.sales-growth-auto-note button { padding: 5px 9px; border: 1px solid #9db6ca; border-radius: 7px; background: #fff; color: #244c6d; cursor: pointer; }
+.royalty1-financial-heading { margin: 18px 0 9px; color: #19324c; font-size: 14px; }
+.royalty1-financial-heading small { color: #6c7e90; font-size: 11px; font-weight: 600; }
+.tax-engine-card-in-discount { display: none !important; }
+
+.method1-valuation-workbench .industry-finance-table th,
+.method1-valuation-workbench .industry-finance-table td,
+.method1-valuation-workbench .tax-calculation-table th,
+.method1-valuation-workbench .tax-calculation-table td {
+  height: auto !important;
+  min-height: 0 !important;
+  white-space: normal;
+}
 
 .quick-fair-value-section ul {
   margin: 0;
@@ -477,6 +559,8 @@
   .competitor-import-grid,
   .quickvalue-rating-sections,
   .valuation-purpose-grid,
+  .valuation-method-grid,
+  .preparation-period-grid,
   .pioneering-confirm-grid { grid-template-columns: 1fr; }
   .quickvalue-rating-section:nth-child(1),
   .quickvalue-rating-section:nth-child(2),
