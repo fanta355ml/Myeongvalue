@@ -1218,7 +1218,7 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
     C.useState)(null), [method1PioneeringReason, setMethod1PioneeringReason] = (0, C.useState)(``), [method1PioneeringSource, setMethod1PioneeringSource] = (0,
     C.useState)(`starvalue-ecos`), [method1SourceDetail, setMethod1SourceDetail] = (0, C.useState)(``), [method1SourceBaseYear, setMethod1SourceBaseYear] = (0,
     C.useState)(``), [method1SourceSampleCount, setMethod1SourceSampleCount] = (0, C.useState)(``), [method1BenchmarkLookbackYears, setMethod1BenchmarkLookbackYears] = (0,
-    C.useState)(3), [method1CretopIndustryCode, setMethod1CretopIndustryCode] = (0, C.useState)(String(n.code ?? ``).slice(0, 4)), [method1CretopIndustryName, setMethod1CretopIndustryName] = (0,
+    C.useState)(3), [method1CretopIndustryCode, setMethod1CretopIndustryCode] = (0, C.useState)(String(n.code ?? ``).toUpperCase().replace(/[^A-Z0-9]/g, ``).slice(0, 6)), [method1CretopIndustryName, setMethod1CretopIndustryName] = (0,
     C.useState)(n.name ?? ``), [method1CretopResearchRows, setMethod1CretopResearchRows] = (0, C.useState)(() => {
         let e = [ ...o ].sort((e, t) => e.year - t.year).at(-1)?.year ?? new Date().getUTCFullYear() - 1;
         return Array.from({ length: 3 }, (t, n) => ({
@@ -1398,7 +1398,7 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
         rate: ecosMatch.rates[e.year],
         assetIncrease: method1AssetChangeByYear.get(e.year),
         researchDevelopment: globalThis.MyeongValuationMethods.calculateEstimatedIndustryResearch(e.revenue, ecosMatch.rates[e.year])
-    })), method1AvailableLookbackYears = method1AutoBenchmarkRows.length, method1AppliedLookbackYears = method1AvailableLookbackYears ? Math.min(method1BenchmarkLookbackYears, method1AvailableLookbackYears) : 0, ecosResearchValues = method1AppliedLookbackYears ? method1AutoBenchmarkRows.slice(-method1AppliedLookbackYears) : [], starvalueAutoAssetIncrease = ecosResearchValues.length ? ecosResearchValues.reduce((e, t) => e + t.assetIncrease, 0) / ecosResearchValues.length : null, ecosAutoResearchDevelopment = ecosResearchValues.length ? ecosResearchValues.reduce((e, t) => e + t.researchDevelopment, 0) / ecosResearchValues.length : null, method1CretopAssetRows = method1AssetChanges.slice(-3), method1CretopAutoAssetIncrease = method1CretopAssetRows.length === 3 ? method1CretopAssetRows.reduce((e, t) => e + t.value / 1000, 0) / 3 : null, method1CretopMetadataReady = method1CretopIndustryCode.trim().length === 4 && !!method1CretopIndustryName.trim(), method1CretopHasInput = method1CretopResearchRows.some(e => [ e.incomeExpense, e.incomeSampleCount, e.manufacturingExpense, e.manufacturingSampleCount ].some(e => e !== `` && e !== null && e !== undefined)), method1CretopCalculation = null, method1CretopError = ``;
+    })), method1AvailableLookbackYears = method1AutoBenchmarkRows.length, method1AppliedLookbackYears = method1AvailableLookbackYears ? Math.min(method1BenchmarkLookbackYears, method1AvailableLookbackYears) : 0, ecosResearchValues = method1AppliedLookbackYears ? method1AutoBenchmarkRows.slice(-method1AppliedLookbackYears) : [], starvalueAutoAssetIncrease = ecosResearchValues.length ? ecosResearchValues.reduce((e, t) => e + t.assetIncrease, 0) / ecosResearchValues.length : null, ecosAutoResearchDevelopment = ecosResearchValues.length ? ecosResearchValues.reduce((e, t) => e + t.researchDevelopment, 0) / ecosResearchValues.length : null, method1CretopAssetRows = method1AssetChanges.slice(-3), method1CretopAutoAssetIncrease = method1CretopAssetRows.length === 3 ? method1CretopAssetRows.reduce((e, t) => e + t.value / 1000, 0) / 3 : null, method1CretopMetadataReady = /^[A-Z]\d{5}$/.test(method1CretopIndustryCode.trim()) && !!method1CretopIndustryName.trim(), method1CretopHasInput = method1CretopResearchRows.some(e => [ e.incomeExpense, e.incomeSampleCount, e.manufacturingExpense, e.manufacturingSampleCount ].some(e => e !== `` && e !== null && e !== undefined)), method1CretopCalculation = null, method1CretopError = ``;
     if (method1CretopHasInput) try {
         method1CretopCalculation = globalThis.MyeongValuationMethods?.calculateCretopResearchAverage(method1CretopResearchRows) ?? null;
     } catch (e) {
@@ -1771,11 +1771,11 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
             className: `cretop-pioneering-card`,
             children: [ (0, W.jsxs)(`div`, {
                 className: `cretop-pioneering-head`,
-                children: [ (0, W.jsxs)(`div`, { children: [ (0, W.jsx)(`strong`, { children: `크레탑 산업통계 경상개발비` }), (0, W.jsx)(`small`, { children: `산업분류 세세분류(넷째 자리) 기준 · 최근 3개년` }) ] }), (0, W.jsx)(`span`, { children: method1CretopCalculation && method1CretopAutoAssetIncrease !== null && method1CretopMetadataReady ? `자동 반영됨` : `입력 대기` }) ]
+                children: [ (0, W.jsxs)(`div`, { children: [ (0, W.jsx)(`strong`, { children: `크레탑 산업통계 경상개발비` }), (0, W.jsx)(`small`, { children: `산업분류 세세분류(영문 1자 + 숫자 5자리) 기준 · 최근 3개년` }) ] }), (0, W.jsx)(`span`, { children: method1CretopCalculation && method1CretopAutoAssetIncrease !== null && method1CretopMetadataReady ? `자동 반영됨` : `입력 대기` }) ]
             }), (0, W.jsxs)(`div`, {
                 className: `section-grid two-columns`,
                 children: [ (0, W.jsx)(Dg, {
-                    label: `산업분류코드(넷째 자리)`, children: (0, W.jsx)(`input`, { value: method1CretopIndustryCode, maxLength: 4, onChange: e => setMethod1CretopIndustryCode(e.target.value.replace(/\s/g, ``).slice(0, 4)) })
+                    label: `산업분류코드(영문 1자 + 숫자 5자리)`, children: (0, W.jsx)(`input`, { value: method1CretopIndustryCode, maxLength: 6, placeholder: `예: C24321`, onChange: e => setMethod1CretopIndustryCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ``).slice(0, 6)) })
                 }), (0, W.jsx)(Dg, {
                     label: `산업분류명`, children: (0, W.jsx)(`input`, { value: method1CretopIndustryName, onChange: e => setMethod1CretopIndustryName(e.target.value) })
                 }) ]
@@ -1789,7 +1789,7 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                         }, t))
                     }) ]
                 })
-            }), (0, W.jsx)(`small`, { className: `cretop-unit-note`, children: `금액 단위: 백만원 · 각 명세서의 합계를 해당 연도·해당 명세서 대상기업 수로 나눈 뒤 합산합니다.` }), !method1CretopMetadataReady && (0, W.jsx)(`p`, { className: `cretop-input-error`, children: `산업분류코드 넷째 자리와 산업분류명을 입력해 주세요.` }), method1CretopError && (0, W.jsx)(`p`, { className: `cretop-input-error`, children: method1CretopError }), (0, W.jsxs)(`div`, {
+            }), (0, W.jsx)(`small`, { className: `cretop-unit-note`, children: `금액 단위: 백만원 · 각 명세서의 합계를 해당 연도·해당 명세서 대상기업 수로 나눈 뒤 합산합니다.` }), !method1CretopMetadataReady && (0, W.jsx)(`p`, { className: `cretop-input-error`, children: `산업분류코드 영문 1자와 숫자 5자리(총 6자), 산업분류명을 입력해 주세요.` }), method1CretopError && (0, W.jsx)(`p`, { className: `cretop-input-error`, children: method1CretopError }), (0, W.jsxs)(`div`, {
                 className: `reference-match-note`,
                 children: [ (0, W.jsx)(`span`, { children: `최근 3개년 자동산출` }), (0, W.jsx)(`strong`, { children: method1CretopCalculation ? `${method1CretopCalculation.average.toLocaleString(`ko-KR`, { maximumFractionDigits: 6 })}백만원` : `산출 전` }), (0, W.jsx)(`small`, { children: `StarValue 유·무형자산 증감액과 크레탑 기업당 경상개발비 평균을 자동 결합합니다.` }) ]
             }), (0, W.jsx)(`p`, {

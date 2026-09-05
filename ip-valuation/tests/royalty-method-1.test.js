@@ -465,7 +465,10 @@ test("개척률 UI는 StarValue·ECOS를 필수 자동연결하고 크레탑 대
   assert.doesNotMatch(source, /ECOS 산출값 적용/);
   assert.match(source, /필수 자동연결 · StarValue \+ ECOS/);
   assert.match(source, /value: `starvalue-cretop`/);
-  assert.match(source, /산업분류코드\(넷째 자리\)/);
+  assert.match(source, /산업분류코드\(영문 1자 \+ 숫자 5자리\)/);
+  assert.match(source, /\^\[A-Z\]\\d\{5\}\$/);
+  assert.match(source, /maxLength: 6/);
+  assert.match(source, /placeholder: `예: C24321`/);
   assert.match(source, /손익계산서 및 제조원가명세서상의 경상개발비/);
   assert.match(source, /무형자산 개발비 및 개발비상각액은 유·무형자산 증감액과의 중복 반영을 방지하기 위해 제외/);
   assert.match(source, /ECOS 최신자료 업로드/);
