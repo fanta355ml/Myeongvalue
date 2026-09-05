@@ -351,6 +351,10 @@ test("모형·세금·경제적 수명 UI는 요청된 독립 선택과 확인 �
     path.join(__dirname, "../assets/css/overrides.css"),
     "utf8",
   );
+  const uiFixes = fs.readFileSync(
+    path.join(__dirname, "../assets/js/ui-fixes.js"),
+    "utf8",
+  );
 
   assert.doesNotMatch(source, /로열티공제법Ⅱ · 기존 방식/);
   assert.ok(source.indexOf("value: `royalty`") < source.indexOf("value: `tax`"));
@@ -370,6 +374,12 @@ test("모형·세금·경제적 수명 UI는 요청된 독립 선택과 확인 �
   assert.match(css, /\.sticky-summary strong[\s\S]*?white-space: normal/);
   assert.match(css, /\.sticky-summary \.value-summary[\s\S]*?position: static/);
   assert.match(css, /\.top-actions \.requesting-institution-field input[\s\S]*?font-size: 11px/);
+  assert.match(uiFixes, /basicValuationMethodSelector/);
+  assert.match(uiFixes, /purposeCard\.insertAdjacentElement\("afterend", card\)/);
+  assert.match(uiFixes, /setNativeSelectValue\(currentEngineSelect, requestedMethod\)/);
+  assert.match(css, /\.valuation-method-grid > \.valuation-method-selector\s*{ display: none; }/);
+  assert.match(css, /\.valuation-method-grid > \.valuation-formula-card\s*{ grid-column: 2; }/);
+  assert.match(css, /\.basic-valuation-method-selector/);
 });
 
 test("가치산정 핵심값·검산 카드와 모든 탭을 스크롤 없이 표시한다", () => {

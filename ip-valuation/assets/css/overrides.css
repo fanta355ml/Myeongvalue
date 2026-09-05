@@ -508,12 +508,12 @@
 
 .valuation-method-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(250px, .78fr) minmax(0, 1.42fr);
   gap: 12px;
 }
 
 .valuation-method-display,
-.valuation-method-selector { min-height: 142px; }
+.valuation-method-grid > .valuation-formula-card { min-height: 142px; }
 
 .valuation-method-selector label {
   display: grid;
@@ -535,7 +535,8 @@
   font-weight: 700;
 }
 
-.valuation-formula-card { grid-column: 1 / -1; }
+.valuation-method-grid > .valuation-method-selector { display: none; }
+.valuation-method-grid > .valuation-formula-card { grid-column: 2; }
 .valuation-formula-list { display: grid; gap: 8px; margin-top: 10px; }
 .valuation-formula-list > div { display: grid; grid-template-columns: 118px minmax(0, 1fr); gap: 10px; align-items: center; padding: 9px 11px; border: 1px solid #e0e7ef; border-radius: 8px; background: #f8fafc; }
 .valuation-formula-list > div.is-active { border-color: #8daec9; background: #f0f6fb; }
@@ -558,6 +559,20 @@
 }
 
 .sales-growth-auto-note button { padding: 5px 9px; border: 1px solid #9db6ca; border-radius: 7px; background: #fff; color: #244c6d; cursor: pointer; }
+.basic-valuation-method-selector {
+  min-height: 0;
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+.basic-valuation-method-selector > label {
+  grid-template-columns: minmax(120px, .28fr) minmax(260px, 1fr);
+  align-items: center;
+}
+
+.basic-valuation-method-selector .valuation-method-planned-note {
+  margin-top: 10px;
+}
 .royalty1-financial-heading { margin: 18px 0 9px; color: #19324c; font-size: 14px; }
 .royalty1-financial-heading small { color: #6c7e90; font-size: 11px; font-weight: 600; }
 .tax-engine-card-in-discount { display: none !important; }
@@ -632,6 +647,14 @@
   .competitor-card-controls {
     align-items: flex-end;
     flex-direction: column;
+  }
+
+  .valuation-method-grid > .valuation-formula-card {
+    grid-column: 1;
+  }
+
+  .basic-valuation-method-selector > label {
+    grid-template-columns: 1fr;
   }
 }
 
