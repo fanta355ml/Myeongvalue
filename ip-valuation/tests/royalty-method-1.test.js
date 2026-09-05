@@ -288,6 +288,43 @@ test("사업화 준비기간은 연·개월을 합산하고 마지막 부분연�
   assert.equal(result.costTotal, 180);
   assert.equal(result.benchmarkTotal, 90);
   assert.equal(result.recommendedRate, 50);
+
+  const immediate = methods.calculatePioneeringRate({
+    annualCommercializationCosts: [],
+    industryAssetIncrease: 0,
+    industryResearchDevelopment: 0,
+    preparationYears: 0,
+    preparationMonths: 0,
+  });
+  assert.equal(immediate.durationYears, 0);
+  assert.equal(immediate.recommendedRate, 100);
+});
+
+test("크레탑 경상개발비는 연도·명세서별 표본기업 수로 나눈 기업당 금액을 합산한 뒤 3개년 평균한다", () => {
+  const result = methods.calculateCretopResearchAverage([
+    { year: 2023, incomeExpense: 1000, incomeSampleCount: 100, manufacturingExpense: 600, manufacturingSampleCount: 60 },
+    { year: 2024, incomeExpense: 1200, incomeSampleCount: 120, manufacturingExpense: 800, manufacturingSampleCount: 80 },
+    { year: 2025, incomeExpense: 1500, incomeSampleCount: 100, manufacturingExpense: 500, manufacturingSampleCount: 100 },
+  ]);
+  closeArray(result.details.map((row) => row.researchDevelopment), [20, 20, 20]);
+  close(result.average, 20);
+  assert.throws(() => methods.calculateCretopResearchAverage([
+    { year: 2023, incomeExpense: 1000, incomeSampleCount: "", manufacturingExpense: 600, manufacturingSampleCount: 60 },
+    { year: 2024, incomeExpense: 1200, incomeSampleCount: 120, manufacturingExpense: 800, manufacturingSampleCount: 80 },
+    { year: 2025, incomeExpense: 1500, incomeSampleCount: 100, manufacturingExpense: 500, manufacturingSampleCount: 100 },
+  ]), /함께 입력/);
+});
+
+test("ECOS 최신자료는 연도행 형식과 연도열 형식 파일을 업로드용 구조로 인식한다", () => {
+  const long = methods.parseEcosResearchRatioText(`산업분류코드,업종명,연도,연구개발비대매출액\nC24,1차 금속,2024,0.43\nC24,1차 금속,2025,0.45`);
+  assert.equal(long.rows[0].rates[2025], 0.45);
+
+  const wide = methods.parseEcosResearchRatioText(`code\tname\t2023\t2024\nC243\t금속 주조업\t0.47\t0.48`);
+  assert.deepEqual(wide.rows[0], {
+    code: "C243",
+    name: "금속 주조업",
+    rates: { 2023: 0.47, 2024: 0.48 },
+  });
 });
 
 test("매출성장 추세 자동추천은 최초 발생·최종연도 CAGR을 동업종과 비교하되 2~4점만 제시한다", () => {
@@ -400,6 +437,29 @@ test("가치산정 핵심값·검산 카드와 모든 탭을 스크롤 없이 �
   for (const tab of ["scores", "sales", "life", "royalty", "tax", "discount", "validity", "proration"]) {
     assert.ok(source.includes("value: `" + tab + "`"));
   }
+});
+
+test("개척률 UI는 StarValue·ECOS를 필수 자동연결하고 크레탑 대체 산출을 조건부 제공한다", () => {
+  const source = fs.readFileSync(
+    path.join(__dirname, "../assets/js/valuation-engine.js"),
+    "utf8",
+  );
+  const reporting = fs.readFileSync(
+    path.join(__dirname, "../assets/js/reporting.js"),
+    "utf8",
+  );
+
+  assert.doesNotMatch(source, /StarValue 산출값 적용/);
+  assert.doesNotMatch(source, /ECOS 산출값 적용/);
+  assert.match(source, /필수 자동연결 · StarValue \+ ECOS/);
+  assert.match(source, /value: `starvalue-cretop`/);
+  assert.match(source, /산업분류코드\(넷째 자리\)/);
+  assert.match(source, /손익계산서 및 제조원가명세서상의 경상개발비/);
+  assert.match(source, /무형자산 개발비 및 개발비상각액은 유·무형자산 증감액과의 중복 반영을 방지하기 위해 제외/);
+  assert.match(source, /ECOS 최신자료 업로드/);
+  assert.match(source, /method1AutomaticBenchmarkReady/);
+  assert.match(source, /setMethod1IndustryAssetIncrease\(``\)/);
+  assert.match(reporting, /가치산정에서 ECOS 연구개발비율과 자동 결합/);
 });
 
 test("기존 로열티Ⅱ 산출 분기는 유효성 적용 공식을 그대로 유지한다", () => {

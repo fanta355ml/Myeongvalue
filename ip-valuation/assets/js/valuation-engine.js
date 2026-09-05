@@ -1216,9 +1216,20 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
     C.useState)(``), [method1Investments, setMethod1Investments] = (0, C.useState)([]), [method1IndustryAssetIncrease, setMethod1IndustryAssetIncrease] = (0,
     C.useState)(``), [method1IndustryResearchDevelopment, setMethod1IndustryResearchDevelopment] = (0, C.useState)(``), [method1PioneeringOverride, setMethod1PioneeringOverride] = (0,
     C.useState)(null), [method1PioneeringReason, setMethod1PioneeringReason] = (0, C.useState)(``), [method1PioneeringSource, setMethod1PioneeringSource] = (0,
-    C.useState)(`direct`), [method1SourceDetail, setMethod1SourceDetail] = (0, C.useState)(``), [method1SourceBaseYear, setMethod1SourceBaseYear] = (0,
-    C.useState)(``), [method1SourceSampleCount, setMethod1SourceSampleCount] = (0, C.useState)(``), [method1PdfCandidate, setMethod1PdfCandidate] = (0,
-    C.useState)(null), method1PdfInputRef = (0, C.useRef)(null), Je = {
+    C.useState)(`starvalue-ecos`), [method1SourceDetail, setMethod1SourceDetail] = (0, C.useState)(``), [method1SourceBaseYear, setMethod1SourceBaseYear] = (0,
+    C.useState)(``), [method1SourceSampleCount, setMethod1SourceSampleCount] = (0, C.useState)(``), [method1BenchmarkLookbackYears, setMethod1BenchmarkLookbackYears] = (0,
+    C.useState)(3), [method1CretopIndustryCode, setMethod1CretopIndustryCode] = (0, C.useState)(String(n.code ?? ``).slice(0, 4)), [method1CretopIndustryName, setMethod1CretopIndustryName] = (0,
+    C.useState)(n.name ?? ``), [method1CretopResearchRows, setMethod1CretopResearchRows] = (0, C.useState)(() => {
+        let e = [ ...o ].sort((e, t) => e.year - t.year).at(-1)?.year ?? new Date().getUTCFullYear() - 1;
+        return Array.from({ length: 3 }, (t, n) => ({
+            year: e - 2 + n,
+            incomeExpense: ``,
+            incomeSampleCount: ``,
+            manufacturingExpense: ``,
+            manufacturingSampleCount: ``
+        }));
+    }), [method1EcosCustomData, setMethod1EcosCustomData] = (0, C.useState)(null), [method1PdfCandidate, setMethod1PdfCandidate] = (0,
+    C.useState)(null), method1PdfInputRef = (0, C.useRef)(null), method1EcosInputRef = (0, C.useRef)(null), Je = {
         ...Ke,
         profitability: v
     }, [Ye, Xe] = (0, C.useState)(`kisti`), [Ze, Qe] = (0, C.useState)(`median`), [$e, et] = (0,
@@ -1286,6 +1297,11 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
         method1SourceDetail,
         method1SourceBaseYear,
         method1SourceSampleCount,
+        method1BenchmarkLookbackYears,
+        method1CretopIndustryCode,
+        method1CretopIndustryName,
+        method1CretopResearchRows,
+        method1EcosCustomData,
         royaltySource: Ye,
         royaltyStatistic: Ze,
         royaltyOverride: $e,
@@ -1335,6 +1351,11 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
         typeof e.method1SourceDetail == `string` && setMethod1SourceDetail(e.method1SourceDetail),
         (typeof e.method1SourceBaseYear == `number` || typeof e.method1SourceBaseYear == `string`) && setMethod1SourceBaseYear(e.method1SourceBaseYear),
         (typeof e.method1SourceSampleCount == `number` || typeof e.method1SourceSampleCount == `string`) && setMethod1SourceSampleCount(e.method1SourceSampleCount),
+        typeof e.method1BenchmarkLookbackYears == `number` && setMethod1BenchmarkLookbackYears(Math.max(1, e.method1BenchmarkLookbackYears)),
+        typeof e.method1CretopIndustryCode == `string` && setMethod1CretopIndustryCode(e.method1CretopIndustryCode),
+        typeof e.method1CretopIndustryName == `string` && setMethod1CretopIndustryName(e.method1CretopIndustryName),
+        Array.isArray(e.method1CretopResearchRows) && setMethod1CretopResearchRows(e.method1CretopResearchRows),
+        e.method1EcosCustomData && Array.isArray(e.method1EcosCustomData.rows) && setMethod1EcosCustomData(e.method1EcosCustomData),
         e.royaltySource && Xe(e.royaltySource), typeof e.royaltyStatistic == `string` && Qe(e.royaltyStatistic),
         (typeof e.royaltyOverride == `number` || e.royaltyOverride === null) && et(e.royaltyOverride),
         typeof e.utilization == `number` && nt(e.utilization), Array.isArray(e.utilRows) && it(e.utilRows),
@@ -1371,12 +1392,50 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
     }, [ ai, k ]), (0, C.useEffect)(() => {
         si > 0 && lt > si && ut(si), si === 0 && st === `company` && ct(`industry`);
     }, [ si, lt, st ]);
-    let ecosRows = globalThis.ECOS_RD_RATIO_DATA?.rows ?? [], normalizedIndustryCode = String(n.code ?? ``).replace(/[^A-Z0-9]/gi, ``).toUpperCase(), ecosMatch = ecosRows.filter(e => normalizedIndustryCode.startsWith(e.code)).sort((e, t) => t.code.length - e.code.length)[0] ?? null, ecosResearchValues = [ ...o ].sort((e, t) => e.year - t.year).filter(e => Number.isFinite(e.revenue) && Number.isFinite(ecosMatch?.rates?.[e.year])).slice(-3).map(e => ({
+    let ecosRows = method1EcosCustomData?.rows ?? globalThis.ECOS_RD_RATIO_DATA?.rows ?? [], ecosSourceLabel = method1EcosCustomData?.source ?? globalThis.ECOS_RD_RATIO_DATA?.source ?? `한국은행 경제통계시스템(ECOS)`, normalizedIndustryCode = String(n.code ?? ``).replace(/[^A-Z0-9]/gi, ``).toUpperCase(), ecosMatch = ecosRows.map(e => ({ ...e, normalizedCode: String(e.code ?? ``).replace(/[^A-Z0-9]/gi, ``).toUpperCase() })).filter(e => normalizedIndustryCode.startsWith(e.normalizedCode) || normalizedIndustryCode.replace(/^[A-Z]/, ``).startsWith(e.normalizedCode)).sort((e, t) => t.normalizedCode.length - e.normalizedCode.length)[0] ?? null, method1AssetChanges = (industryAssetMetrics?.changes ?? []).filter(e => Number.isFinite(e.value)).sort((e, t) => e.year - t.year), method1AssetChangeByYear = new Map(method1AssetChanges.map(e => [ e.year, e.value / 1000 ])), method1AutoBenchmarkRows = [ ...o ].sort((e, t) => e.year - t.year).filter(e => Number.isFinite(e.revenue) && Number.isFinite(ecosMatch?.rates?.[e.year]) && Number.isFinite(method1AssetChangeByYear.get(e.year))).map(e => ({
         year: e.year,
         revenue: e.revenue,
         rate: ecosMatch.rates[e.year],
+        assetIncrease: method1AssetChangeByYear.get(e.year),
         researchDevelopment: e.revenue * ecosMatch.rates[e.year] / 100
-    })), ecosAutoResearchDevelopment = ecosResearchValues.length ? ecosResearchValues.reduce((e, t) => e + t.researchDevelopment, 0) / ecosResearchValues.length : null;
+    })), method1AvailableLookbackYears = method1AutoBenchmarkRows.length, method1AppliedLookbackYears = method1AvailableLookbackYears ? Math.min(method1BenchmarkLookbackYears, method1AvailableLookbackYears) : 0, ecosResearchValues = method1AppliedLookbackYears ? method1AutoBenchmarkRows.slice(-method1AppliedLookbackYears) : [], starvalueAutoAssetIncrease = ecosResearchValues.length ? ecosResearchValues.reduce((e, t) => e + t.assetIncrease, 0) / ecosResearchValues.length : null, ecosAutoResearchDevelopment = ecosResearchValues.length ? ecosResearchValues.reduce((e, t) => e + t.researchDevelopment, 0) / ecosResearchValues.length : null, method1CretopAssetRows = method1AssetChanges.slice(-3), method1CretopAutoAssetIncrease = method1CretopAssetRows.length === 3 ? method1CretopAssetRows.reduce((e, t) => e + t.value / 1000, 0) / 3 : null, method1CretopMetadataReady = method1CretopIndustryCode.trim().length === 4 && !!method1CretopIndustryName.trim(), method1CretopHasInput = method1CretopResearchRows.some(e => [ e.incomeExpense, e.incomeSampleCount, e.manufacturingExpense, e.manufacturingSampleCount ].some(e => e !== `` && e !== null && e !== undefined)), method1CretopCalculation = null, method1CretopError = ``;
+    if (method1CretopHasInput) try {
+        method1CretopCalculation = globalThis.MyeongValuationMethods?.calculateCretopResearchAverage(method1CretopResearchRows) ?? null;
+    } catch (e) {
+        method1CretopError = e instanceof Error ? e.message : `크레탑 경상개발비 입력값을 확인해 주세요.`;
+    }
+    (0, C.useEffect)(() => {
+        if (method1PioneeringSource !== `starvalue-ecos`) return;
+        if (starvalueAutoAssetIncrease === null || ecosAutoResearchDevelopment === null) {
+            setMethod1IndustryAssetIncrease(``);
+            setMethod1IndustryResearchDevelopment(``);
+            setMethod1SourceBaseYear(``);
+            setMethod1SourceSampleCount(``);
+            setMethod1SourceDetail(`StarValue 자산증감·매출액과 ${ecosSourceLabel} 연구개발비율의 공통연도 자료가 필요합니다.`);
+            return;
+        }
+        setMethod1IndustryAssetIncrease(Number(starvalueAutoAssetIncrease.toFixed(6)));
+        setMethod1IndustryResearchDevelopment(Number(ecosAutoResearchDevelopment.toFixed(6)));
+        setMethod1SourceBaseYear(ecosResearchValues.at(-1)?.year ?? ``);
+        setMethod1SourceSampleCount(``);
+        setMethod1SourceDetail(`KISTI StarValue 동업종 재무통계 + ${ecosSourceLabel} 연구개발비대매출액`);
+    }, [ method1PioneeringSource, starvalueAutoAssetIncrease, ecosAutoResearchDevelopment, method1AppliedLookbackYears, ecosResearchValues.at(-1)?.year, ecosSourceLabel ]);
+    (0, C.useEffect)(() => {
+        if (method1PioneeringSource !== `starvalue-cretop`) return;
+        if (method1CretopAutoAssetIncrease === null || !method1CretopMetadataReady || !method1CretopCalculation) {
+            setMethod1IndustryAssetIncrease(``);
+            setMethod1IndustryResearchDevelopment(``);
+            setMethod1SourceBaseYear(``);
+            setMethod1SourceSampleCount(``);
+            setMethod1SourceDetail(`크레탑 산업분류·최근 3개년 경상개발비·연도별 대상기업 수와 StarValue 최근 3개년 자산증감 자료가 필요합니다.`);
+            return;
+        }
+        setMethod1IndustryAssetIncrease(Number(method1CretopAutoAssetIncrease.toFixed(6)));
+        setMethod1IndustryResearchDevelopment(Number(method1CretopCalculation.average.toFixed(6)));
+        setMethod1SourceBaseYear(method1CretopCalculation.details.at(-1)?.year ?? ``);
+        setMethod1SourceSampleCount(``);
+        setMethod1SourceDetail(`KISTI StarValue 동업종 재무상태표 + 크레탑 산업통계(손익계산서·제조원가명세서 경상개발비)`);
+    }, [ method1PioneeringSource, method1CretopAutoAssetIncrease, method1CretopMetadataReady, method1CretopCalculation?.average, method1CretopCalculation?.details?.at(-1)?.year ]);
     let Lt = Sg(o, k, M), Rt = B ?? Lt, qt = xg(Ut, `productRevenue`, D), Jt = Yp(i, D), Yt = T === `productRevenue` && qt === null, Xt = Yt ? `totalRevenue` : T, Zt = (Xt === `productRevenue` ? qt : Jt) ?? 0, Qt = lm(u), $t = lm(d), en = (Qt + $t) / 2, tn = U === `domestic` ? Qt : U === `world` ? $t : en, nn = pg(r), rn = nn.getUTCFullYear(), an = rn, on = rn + ke.length - 1, sn = um(u, rn, on), cn = um(d, rn, on), ln = (pe === `domestic` ? um(u, _e, _e)[0]?.value : pe === `world` ? um(d, _e, _e)[0]?.value : (um(u, _e, _e)[0]?.value ?? 0) + (um(d, _e, _e)[0]?.value ?? 0)) ?? 0, un = ln * ye / 100, dn = Math.max(1, Math.min(5, on - an + 1)), fn = Math.min(xe, dn), pn = Array.from({
         length: fn
     }, (e, t) => an + t), mn = pn.map(e => Te.reduce((t, n) => {
@@ -1400,7 +1459,7 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
             amount: Math.round(m),
             rateBasis: d
         }), e;
-    }, []), Kn = km(jt.royalty, n.code), qn = Ze === `average` ? Kn?.average : Kn?.median, Jn = $e ?? qn ?? 0, Yn = Kn?.q1 ?? Jn, Xn = Kn?.median ?? Jn, Zn = Kn?.q3 ?? Jn, Qn = Tn <= 30 ? Yn + (Xn - Yn) * Math.max(0, Tn - 10) / 20 : Xn + (Zn - Xn) * Math.min(20, Tn - 30) / 20, $n = Jn ? Qn / Jn : 0, method1AssetInputProvided = method1IndustryAssetIncrease !== `` && Number.isFinite(Number(method1IndustryAssetIncrease)), method1ResearchInputProvided = method1IndustryResearchDevelopment !== `` && Number.isFinite(Number(method1IndustryResearchDevelopment)), method1InvestmentInputsReady = preparationTotalMonths === 0 || method1Investments.length >= preparationInvestmentPeriods && method1Investments.slice(0, preparationInvestmentPeriods).every(e => e !== `` && Number.isFinite(Number(e)) && Number(e) >= 0), method1CostTotal = preparationTotalMonths === 0 ? 0 : method1InvestmentInputsReady ? method1Investments.slice(0, preparationInvestmentPeriods).reduce((e, t) => e + Number(t), 0) : NaN, method1BenchmarkTotal = (Number(method1IndustryAssetIncrease) + Number(method1IndustryResearchDevelopment)) * preparationDurationYears, method1PioneeringInputsReady = preparationTotalMonths === 0 || method1InvestmentInputsReady && method1AssetInputProvided && method1ResearchInputProvided && method1BenchmarkTotal > 0, method1PioneeringRatio = preparationTotalMonths === 0 ? 0 : method1PioneeringInputsReady ? method1CostTotal / method1BenchmarkTotal : NaN, method1PioneeringRecommended = !method1PioneeringInputsReady ? null : preparationTotalMonths === 0 || method1PioneeringRatio < .5 ? 100 : method1PioneeringRatio <= 1 ? 75 : 50, method1PioneeringOverrideValid = method1PioneeringOverride === null || Number.isFinite(method1PioneeringOverride) && method1PioneeringOverride >= 50 && method1PioneeringOverride <= 100, method1PioneeringRate = method1PioneeringInputsReady && method1PioneeringOverrideValid ? method1PioneeringOverride ?? method1PioneeringRecommended : null, method1CalculationReady = !isMethod1 || method1PioneeringInputsReady && method1PioneeringOverrideValid, er = isMethod1 ? method1CalculationReady ? Jn * method1AdjustmentCoefficient * tt / 100 * method1PioneeringRate / 100 : NaN : Qn * tt / 100, tr = rt.reduce((e, t) => e + t.weight * t.patentShare / 100, 0), nr = rt.reduce((e, t) => e + t.weight, 0), rr = oi.map(im), ir = Math.min(lt, rr.length), ar = ir ? rr.slice(0, ir).reduce((e, t) => e + t, 0) / ir : 0, or = km(Mt.discount, n.code), sr = Dm(m), cr = or?.equityRatio ?? 0, lr = st === `company` && ir > 0 ? ar : st === `direct` ? G : cr, ur = or?.costOfEquity[sr] ?? 0, dr = ur + Dn, fr = or?.costOfDebt[sr] ?? 0, pr = new Date(Date.UTC(rn, 11, 31)), mr = hg(gg(nn, 1), -1), hr = vg(nn, pr), gr = new Date(Date.UTC(rn + 1, 0, 1)), _r = vg(gr, mr), vr = mg(mr), periodCount = cashFlowPeriodCount, periodStarts = Array.from({ length: periodCount }, (e, t) => gg(nn, t)), xr = periodStarts.map((e, t) => {
+    }, []), Kn = km(jt.royalty, n.code), qn = Ze === `average` ? Kn?.average : Kn?.median, Jn = $e ?? qn ?? 0, Yn = Kn?.q1 ?? Jn, Xn = Kn?.median ?? Jn, Zn = Kn?.q3 ?? Jn, Qn = Tn <= 30 ? Yn + (Xn - Yn) * Math.max(0, Tn - 10) / 20 : Xn + (Zn - Xn) * Math.min(20, Tn - 30) / 20, $n = Jn ? Qn / Jn : 0, method1AssetInputProvided = method1IndustryAssetIncrease !== `` && Number.isFinite(Number(method1IndustryAssetIncrease)), method1ResearchInputProvided = method1IndustryResearchDevelopment !== `` && Number.isFinite(Number(method1IndustryResearchDevelopment)), method1AutomaticBenchmarkReady = method1PioneeringSource === `starvalue-ecos` ? starvalueAutoAssetIncrease !== null && ecosAutoResearchDevelopment !== null : method1PioneeringSource === `starvalue-cretop` ? method1CretopAutoAssetIncrease !== null && method1CretopMetadataReady && !!method1CretopCalculation : true, method1InvestmentInputsReady = preparationTotalMonths === 0 || method1Investments.length >= preparationInvestmentPeriods && method1Investments.slice(0, preparationInvestmentPeriods).every(e => e !== `` && Number.isFinite(Number(e)) && Number(e) >= 0), method1CostTotal = preparationTotalMonths === 0 ? 0 : method1InvestmentInputsReady ? method1Investments.slice(0, preparationInvestmentPeriods).reduce((e, t) => e + Number(t), 0) : NaN, method1BenchmarkTotal = (Number(method1IndustryAssetIncrease) + Number(method1IndustryResearchDevelopment)) * preparationDurationYears, method1PioneeringInputsReady = preparationTotalMonths === 0 || method1AutomaticBenchmarkReady && method1InvestmentInputsReady && method1AssetInputProvided && method1ResearchInputProvided && method1BenchmarkTotal > 0, method1PioneeringRatio = preparationTotalMonths === 0 ? 0 : method1PioneeringInputsReady ? method1CostTotal / method1BenchmarkTotal : NaN, method1PioneeringRecommended = !method1PioneeringInputsReady ? null : preparationTotalMonths === 0 || method1PioneeringRatio < .5 ? 100 : method1PioneeringRatio <= 1 ? 75 : 50, method1PioneeringOverrideValid = method1PioneeringOverride === null || Number.isFinite(method1PioneeringOverride) && method1PioneeringOverride >= 50 && method1PioneeringOverride <= 100, method1PioneeringRate = method1PioneeringInputsReady && method1PioneeringOverrideValid ? method1PioneeringOverride ?? method1PioneeringRecommended : null, method1CalculationReady = !isMethod1 || method1PioneeringInputsReady && method1PioneeringOverrideValid, er = isMethod1 ? method1CalculationReady ? Jn * method1AdjustmentCoefficient * tt / 100 * method1PioneeringRate / 100 : NaN : Qn * tt / 100, tr = rt.reduce((e, t) => e + t.weight * t.patentShare / 100, 0), nr = rt.reduce((e, t) => e + t.weight, 0), rr = oi.map(im), ir = Math.min(lt, rr.length), ar = ir ? rr.slice(0, ir).reduce((e, t) => e + t, 0) / ir : 0, or = km(Mt.discount, n.code), sr = Dm(m), cr = or?.equityRatio ?? 0, lr = st === `company` && ir > 0 ? ar : st === `direct` ? G : cr, ur = or?.costOfEquity[sr] ?? 0, dr = ur + Dn, fr = or?.costOfDebt[sr] ?? 0, pr = new Date(Date.UTC(rn, 11, 31)), mr = hg(gg(nn, 1), -1), hr = vg(nn, pr), gr = new Date(Date.UTC(rn + 1, 0, 1)), _r = vg(gr, mr), vr = mg(mr), periodCount = cashFlowPeriodCount, periodStarts = Array.from({ length: periodCount }, (e, t) => gg(nn, t)), xr = periodStarts.map((e, t) => {
         let n = hg(gg(nn, t + 1), -1);
         return n.getTime() > finalValuationEnd.getTime() ? finalValuationEnd : n;
     }), yr = periodStarts.map((e, t) => vg(e, xr[t]) / 365), br = periodStarts.map((e, t) => yr[t] < .999 || e.getTime() < commercializationStart.getTime() && xr[t].getTime() >= commercializationStart.getTime()), Sr = mg(xr.at(-1) ?? hg(nn, -1)), Cr = periodStarts.map((e, t) => `${mg(e)}~${mg(xr[t])}`), wr = Math.max(0, preparationTotalMonths + Math.round(Vn * 12)), Tr = `${Math.floor(wr / 12)}년 ${wr % 12}개월`, Er = periodStarts.map((e, t) => xr[t].getTime() < commercializationStart.getTime() ? 0 : Up(mg(e.getTime() < commercializationStart.getTime() ? commercializationStart : e), mg(xr[t]), Gn.map(e => ({
@@ -1545,6 +1604,13 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
             pioneeringSourceDetail: isMethod1 ? method1SourceDetail : null,
             pioneeringSourceBaseYear: isMethod1 ? method1SourceBaseYear : null,
             pioneeringSourceSampleCount: isMethod1 ? method1SourceSampleCount : null,
+            pioneeringAverageYears: isMethod1 ? method1PioneeringSource === `starvalue-ecos` ? method1AppliedLookbackYears : 3 : null,
+            pioneeringIndustryAssetIncrease: isMethod1 && method1AssetInputProvided ? Number(method1IndustryAssetIncrease) : null,
+            pioneeringIndustryResearchDevelopment: isMethod1 && method1ResearchInputProvided ? Number(method1IndustryResearchDevelopment) : null,
+            pioneeringCretopIndustryCode: isMethod1 && method1PioneeringSource === `starvalue-cretop` ? method1CretopIndustryCode : null,
+            pioneeringCretopIndustryName: isMethod1 && method1PioneeringSource === `starvalue-cretop` ? method1CretopIndustryName : null,
+            pioneeringCretopRows: isMethod1 && method1PioneeringSource === `starvalue-cretop` ? method1CretopCalculation?.details ?? [] : [],
+            pioneeringEcosSource: isMethod1 && method1PioneeringSource === `starvalue-ecos` ? ecosSourceLabel : null,
             discountRate: Fr,
             validityRate: isMethod1 ? null : zr,
             presentValueTotal: method1CalculationReady ? Gr : null,
@@ -1559,7 +1625,7 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
             }))
         }, i = JSON.stringify(r);
         i !== Ot.current && (Ot.current = i, x(r));
-    }, [ Gn, Vn, Tr, Je, br, Cr, Er, Zt, se, Fr, Sn, er, Kr, Bn, x, Ur, Gr, vn, H, jr, S, Mr, Hr, Wr, tt, zr, yn, Jn, valuationMethod, isMethod1, lifeModel, method1PreparationYears, method1PreparationMonths, valuationPeriodYears, method1AdjustmentCoefficient, method1AdjustmentScore, method1PioneeringRate, method1PioneeringRatio, method1CostTotal, method1BenchmarkTotal, method1PioneeringSource, method1SourceDetail, method1SourceBaseYear, method1SourceSampleCount, method1CalculationReady, method1PioneeringInputsReady, method1InvestmentInputsReady ]);
+    }, [ Gn, Vn, Tr, Je, br, Cr, Er, Zt, se, Fr, Sn, er, Kr, Bn, x, Ur, Gr, vn, H, jr, S, Mr, Hr, Wr, tt, zr, yn, Jn, valuationMethod, isMethod1, lifeModel, method1PreparationYears, method1PreparationMonths, valuationPeriodYears, method1AdjustmentCoefficient, method1AdjustmentScore, method1PioneeringRate, method1PioneeringRatio, method1CostTotal, method1BenchmarkTotal, method1PioneeringSource, method1SourceDetail, method1SourceBaseYear, method1SourceSampleCount, method1AppliedLookbackYears, method1IndustryAssetIncrease, method1IndustryResearchDevelopment, method1CretopIndustryCode, method1CretopIndustryName, method1CretopResearchRows, method1CretopCalculation?.average, ecosSourceLabel, method1CalculationReady, method1PioneeringInputsReady, method1InvestmentInputsReady ]);
     let Yr = (e, t, n, r) => {
         Ee(i => i.map(i => i.id === e ? {
             ...i,
@@ -1620,9 +1686,11 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                 value: method1PioneeringSource,
                 onChange: e => setMethod1PioneeringSource(e.target.value),
                 children: [ (0, W.jsx)(`option`, {
-                    value: `direct`, children: `평가자 직접입력`
+                    value: `starvalue-ecos`, children: `StarValue + 한국은행 ECOS 자동산출`
                 }), (0, W.jsx)(`option`, {
-                    value: `starvalue-ecos`, children: `StarValue + 한국은행 ECOS`
+                    value: `starvalue-cretop`, children: `StarValue + 크레탑 산업통계`
+                }), (0, W.jsx)(`option`, {
+                    value: `direct`, children: `평가자 직접입력`
                 }), (0, W.jsx)(`option`, {
                     value: `kodata-table`, children: `KoDATA 업종별 개척률 표`
                 }), (0, W.jsx)(`option`, {
@@ -1642,10 +1710,10 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                 }
                 e.currentTarget.value = ``;
             }
-        }), (0, W.jsxs)(`button`, {
+        }), method1PioneeringSource === `pdf` && (0, W.jsxs)(`button`, {
             className: `detail-calc-button`, type: `button`, onClick: () => method1PdfInputRef.current?.click(),
             children: [ (0, W.jsx)(R, { size: 15 }), ` 개척률 산정표 PDF 불러오기` ]
-        }), method1PdfCandidate && (0, W.jsxs)(`div`, {
+        }), method1PioneeringSource === `pdf` && method1PdfCandidate && (0, W.jsxs)(`div`, {
             className: `reference-match-note`,
             children: [ (0, W.jsx)(`span`, { children: `PDF 인식 후보 · 자동확정 안 함` }), (0, W.jsx)(`strong`, { children: method1PdfCandidate.fileName }), (0, W.jsxs)(`small`, {
                 children: [ `준비기간 `, method1PdfCandidate.preparationYears ?? `미인식`, `년 · 연간 투자 `, method1PdfCandidate.annualCommercializationCost ?? `미인식`, ` · 자산증감 `, method1PdfCandidate.industryAssetIncrease ?? `미인식`, ` · 연구개발비 `, method1PdfCandidate.industryResearchDevelopment ?? `미인식` ]
@@ -1661,33 +1729,73 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                 },
                 children: `인식값 적용`
             }) ]
-        }), (0, W.jsxs)(`div`, {
-            className: `reference-match-note`,
-            children: [ (0, W.jsx)(`span`, { children: `StarValue 재무상태표 후보` }), (0, W.jsx)(`strong`, {
-                children: industryAssetMetrics?.complete ? `${industryAssetMetrics.averageRecent3Million.toLocaleString(`ko-KR`, { maximumFractionDigits: 6 })}백만원` : `산출 전`
-            }), (0, W.jsx)(`small`, {
-                children: industryAssetMetrics?.complete ? `유형자산+무형자산 최근 3개년 순증감 평균 · 자동확정 안 함` : `업종평균·시장정보에서 유형자산과 무형자산 4개년 이상을 붙여넣어 주세요.`
-            }), (0, W.jsx)(`button`, {
-                type: `button`, disabled: !industryAssetMetrics?.complete,
-                onClick: () => {
-                    if (!industryAssetMetrics?.complete) return;
-                    setMethod1IndustryAssetIncrease(Number(industryAssetMetrics.averageRecent3Million.toFixed(6))), setMethod1PioneeringSource(`starvalue-ecos`), setMethod1SourceBaseYear(industryAssetMetrics.years?.at(-1) ?? ``), setMethod1SourceDetail(`KISTI StarValue 동업종 재무상태표`), y(`StarValue 유·무형자산 최근 3개년 증감 후보값을 반영했습니다.`);
-                },
-                children: `StarValue 산출값 적용`
+        }), (0, W.jsx)(`input`, {
+            className: `sr-only`, ref: method1EcosInputRef, type: `file`, accept: `.json,.csv,.tsv,.txt,application/json,text/csv,text/tab-separated-values,text/plain`,
+            onChange: async e => {
+                let t = e.target.files?.[0];
+                if (!t) return;
+                try {
+                    let n = globalThis.MyeongValuationMethods?.parseEcosResearchRatioText(await t.text());
+                    if (!n?.rows?.length) throw new Error(`유효한 업종별 비율이 없습니다.`);
+                    setMethod1EcosCustomData({ ...n, source: `${n.source} · ${t.name}` }), y(`${t.name}의 ECOS 연구개발비율 ${n.rows.length}개 업종을 불러왔습니다.`);
+                } catch (n) {
+                    y(n instanceof Error ? n.message : `ECOS 연구개발비율 파일을 인식하지 못했습니다.`);
+                }
+                e.currentTarget.value = ``;
+            }
+        }), method1PioneeringSource === `starvalue-ecos` && (0, W.jsxs)(`div`, {
+            className: `reference-match-note pioneering-auto-note`,
+            children: [ (0, W.jsx)(`span`, { children: `필수 자동연결 · StarValue + ECOS` }), (0, W.jsx)(`strong`, {
+                children: starvalueAutoAssetIncrease !== null && ecosAutoResearchDevelopment !== null ? `자동 반영됨 · 최근 ${method1AppliedLookbackYears}개년 평균` : `자료 대기`
+            }), (0, W.jsxs)(`small`, {
+                children: [ `유·무형자산 증감액 `, starvalueAutoAssetIncrease === null ? `산출 전` : `${starvalueAutoAssetIncrease.toLocaleString(`ko-KR`, { maximumFractionDigits: 6 })}백만원`, ` + 연구개발비 `, ecosAutoResearchDevelopment === null ? `산출 전` : `${ecosAutoResearchDevelopment.toLocaleString(`ko-KR`, { maximumFractionDigits: 6 })}백만원`, ` · `, ecosMatch?.code ?? `-`, ` `, ecosMatch?.name ?? `ECOS 일치 업종 없음` ]
+            }), (0, W.jsxs)(`div`, {
+                className: `pioneering-auto-controls`,
+                children: [ (0, W.jsxs)(`label`, {
+                    children: [ (0, W.jsx)(`span`, { children: `평균기간` }), (0, W.jsx)(`select`, {
+                        value: method1AppliedLookbackYears || method1BenchmarkLookbackYears,
+                        disabled: method1AvailableLookbackYears < 1,
+                        onChange: e => setMethod1BenchmarkLookbackYears(Number(e.target.value)),
+                        children: Array.from({ length: Math.max(1, method1AvailableLookbackYears) }, (e, t) => (0, W.jsxs)(`option`, { value: t + 1, children: [ t + 1, `개년` ] }, t + 1))
+                    }) ]
+                }), (0, W.jsxs)(`button`, {
+                    type: `button`, onClick: () => method1EcosInputRef.current?.click(),
+                    children: [ (0, W.jsx)(R, { size: 14 }), ` ECOS 최신자료 업로드` ]
+                }), method1EcosCustomData && (0, W.jsx)(`button`, {
+                    type: `button`, onClick: () => setMethod1EcosCustomData(null), children: `웹 내장자료로 복원`
+                }) ]
+            }), (0, W.jsxs)(`small`, {
+                children: [ ecosSourceLabel, ` · `, ecosResearchValues.map(e => `${e.year}년 ${e.revenue.toLocaleString(`ko-KR`, { maximumFractionDigits: 3 })}×${e.rate}%`).join(` · `) || `StarValue 자산증감·매출액과 ECOS 비율의 공통연도 자료가 필요합니다.` ]
             }) ]
-        }), (0, W.jsxs)(`div`, {
-            className: `reference-match-note`,
-            children: [ (0, W.jsx)(`span`, { children: `웹 내장 ECOS 매칭` }), (0, W.jsxs)(`strong`, { children: [ ecosMatch?.code ?? `-`, ` · `, ecosMatch?.name ?? `일치 업종 없음` ] }), (0, W.jsxs)(`small`, {
-                children: [ `한국은행 경제통계시스템(ECOS) 동업종 통계자료 · 연구개발비대매출액 · `, ecosResearchValues.map(e => `${e.year}년 ${e.rate}%`).join(` · `) || `적용 가능한 업종매출 연도 없음` ]
-            }), (0, W.jsx)(`button`, {
-                type: `button`, disabled: ecosAutoResearchDevelopment === null,
-                onClick: () => {
-                    if (ecosAutoResearchDevelopment === null) return;
-                    setMethod1IndustryResearchDevelopment(Number(ecosAutoResearchDevelopment.toFixed(6))), setMethod1PioneeringSource(`starvalue-ecos`), setMethod1SourceBaseYear(ecosResearchValues.at(-1)?.year ?? ``), setMethod1SourceDetail(`StarValue 산업분류별 재무통계 + 한국은행 경제통계시스템(ECOS) 동업종 통계자료`), y(`최근 ${ecosResearchValues.length}개년 ECOS 비율 적용 연구개발비를 반영했습니다.`);
-                },
-                children: `ECOS 산출값 적용`
+        }), method1PioneeringSource === `starvalue-cretop` && (0, W.jsxs)(`div`, {
+            className: `cretop-pioneering-card`,
+            children: [ (0, W.jsxs)(`div`, {
+                className: `cretop-pioneering-head`,
+                children: [ (0, W.jsxs)(`div`, { children: [ (0, W.jsx)(`strong`, { children: `크레탑 산업통계 경상개발비` }), (0, W.jsx)(`small`, { children: `산업분류 세세분류(넷째 자리) 기준 · 최근 3개년` }) ] }), (0, W.jsx)(`span`, { children: method1CretopCalculation && method1CretopAutoAssetIncrease !== null && method1CretopMetadataReady ? `자동 반영됨` : `입력 대기` }) ]
+            }), (0, W.jsxs)(`div`, {
+                className: `section-grid two-columns`,
+                children: [ (0, W.jsx)(Dg, {
+                    label: `산업분류코드(넷째 자리)`, children: (0, W.jsx)(`input`, { value: method1CretopIndustryCode, maxLength: 4, onChange: e => setMethod1CretopIndustryCode(e.target.value.replace(/\s/g, ``).slice(0, 4)) })
+                }), (0, W.jsx)(Dg, {
+                    label: `산업분류명`, children: (0, W.jsx)(`input`, { value: method1CretopIndustryName, onChange: e => setMethod1CretopIndustryName(e.target.value) })
+                }) ]
+            }), (0, W.jsx)(`div`, {
+                className: `cretop-pioneering-table-wrap`,
+                children: (0, W.jsxs)(`table`, {
+                    className: `cretop-pioneering-table`,
+                    children: [ (0, W.jsx)(`thead`, { children: (0, W.jsxs)(`tr`, { children: [ (0, W.jsx)(`th`, { children: `연도` }), (0, W.jsx)(`th`, { children: `손익 경상개발비 합계` }), (0, W.jsx)(`th`, { children: `손익 대상기업 수` }), (0, W.jsx)(`th`, { children: `제조원가 경상개발비 합계` }), (0, W.jsx)(`th`, { children: `제조원가 대상기업 수` }), (0, W.jsx)(`th`, { children: `기업당 합계` }) ] }) }), (0, W.jsx)(`tbody`, {
+                        children: method1CretopResearchRows.map((e, t) => (0, W.jsxs)(`tr`, {
+                            children: [ (0, W.jsx)(`td`, { children: (0, W.jsx)(`input`, { type: `number`, value: e.year, onChange: e => setMethod1CretopResearchRows(n => n.map((n, r) => r === t ? { ...n, year: e.target.value === `` ? `` : Number(e.target.value) } : n)) }) }), (0, W.jsx)(`td`, { children: (0, W.jsx)(`input`, { type: `number`, min: `0`, value: e.incomeExpense, onChange: e => setMethod1CretopResearchRows(n => n.map((n, r) => r === t ? { ...n, incomeExpense: e.target.value === `` ? `` : Math.max(0, Number(e.target.value)) } : n)) }) }), (0, W.jsx)(`td`, { children: (0, W.jsx)(`input`, { type: `number`, min: `1`, value: e.incomeSampleCount, onChange: e => setMethod1CretopResearchRows(n => n.map((n, r) => r === t ? { ...n, incomeSampleCount: e.target.value === `` ? `` : Math.max(1, Math.floor(Number(e.target.value))) } : n)) }) }), (0, W.jsx)(`td`, { children: (0, W.jsx)(`input`, { type: `number`, min: `0`, value: e.manufacturingExpense, onChange: e => setMethod1CretopResearchRows(n => n.map((n, r) => r === t ? { ...n, manufacturingExpense: e.target.value === `` ? `` : Math.max(0, Number(e.target.value)) } : n)) }) }), (0, W.jsx)(`td`, { children: (0, W.jsx)(`input`, { type: `number`, min: `1`, value: e.manufacturingSampleCount, onChange: e => setMethod1CretopResearchRows(n => n.map((n, r) => r === t ? { ...n, manufacturingSampleCount: e.target.value === `` ? `` : Math.max(1, Math.floor(Number(e.target.value))) } : n)) }) }), (0, W.jsx)(`td`, { children: method1CretopCalculation?.details?.[t] ? `${method1CretopCalculation.details[t].researchDevelopment.toLocaleString(`ko-KR`, { maximumFractionDigits: 6 })}` : `-` }) ]
+                        }, t))
+                    }) ]
+                })
+            }), (0, W.jsx)(`small`, { className: `cretop-unit-note`, children: `금액 단위: 백만원 · 각 명세서의 합계를 해당 연도·해당 명세서 대상기업 수로 나눈 뒤 합산합니다.` }), !method1CretopMetadataReady && (0, W.jsx)(`p`, { className: `cretop-input-error`, children: `산업분류코드 넷째 자리와 산업분류명을 입력해 주세요.` }), method1CretopError && (0, W.jsx)(`p`, { className: `cretop-input-error`, children: method1CretopError }), (0, W.jsxs)(`div`, {
+                className: `reference-match-note`,
+                children: [ (0, W.jsx)(`span`, { children: `최근 3개년 자동산출` }), (0, W.jsx)(`strong`, { children: method1CretopCalculation ? `${method1CretopCalculation.average.toLocaleString(`ko-KR`, { maximumFractionDigits: 6 })}백만원` : `산출 전` }), (0, W.jsx)(`small`, { children: `StarValue 유·무형자산 증감액과 크레탑 기업당 경상개발비 평균을 자동 결합합니다.` }) ]
+            }), (0, W.jsx)(`p`, {
+                className: `cretop-exclusion-note`, children: `※ 연구개발비는 손익계산서 및 제조원가명세서상의 경상개발비를 기준으로 산정하며, 무형자산 개발비 및 개발비상각액은 유·무형자산 증감액과의 중복 반영을 방지하기 위해 제외함.`
             }) ]
-        }), (0, W.jsxs)(`div`, {
+        }), ![ `starvalue-ecos`, `starvalue-cretop` ].includes(method1PioneeringSource) && (0, W.jsxs)(`div`, {
             className: `section-grid two-columns`,
             children: [ (0, W.jsx)(Dg, {
                 label: `기준연도`, children: (0, W.jsx)(`input`, { type: `number`, value: method1SourceBaseYear, placeholder: `예: 2024`, onChange: e => setMethod1SourceBaseYear(e.target.value) })
@@ -1695,9 +1803,9 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                 label: `표본기업 수`, children: (0, W.jsx)(`input`, { type: `number`, min: `1`, value: method1SourceSampleCount, placeholder: `확인된 경우`, onChange: e => setMethod1SourceSampleCount(e.target.value) })
             }) ]
         }), (0, W.jsx)(Dg, {
-            label: `동업종 평균 유·무형자산 증감(백만원)`, children: (0, W.jsx)(`input`, { type: `number`, value: method1IndustryAssetIncrease, onChange: e => setMethod1IndustryAssetIncrease(e.target.value === `` ? `` : Number(e.target.value)) })
+            label: `동업종 평균 유·무형자산 증감(백만원)`, children: (0, W.jsx)(`input`, { type: `number`, readOnly: [ `starvalue-ecos`, `starvalue-cretop` ].includes(method1PioneeringSource), value: method1IndustryAssetIncrease, onChange: e => setMethod1IndustryAssetIncrease(e.target.value === `` ? `` : Number(e.target.value)) })
         }), (0, W.jsx)(Dg, {
-            label: `동업종 평균 연구개발비(백만원)`, children: (0, W.jsx)(`input`, { type: `number`, min: `0`, value: method1IndustryResearchDevelopment, onChange: e => setMethod1IndustryResearchDevelopment(e.target.value === `` ? `` : Math.max(0, Number(e.target.value))) })
+            label: `동업종 평균 연구개발비(백만원)`, children: (0, W.jsx)(`input`, { type: `number`, min: `0`, readOnly: [ `starvalue-ecos`, `starvalue-cretop` ].includes(method1PioneeringSource), value: method1IndustryResearchDevelopment, onChange: e => setMethod1IndustryResearchDevelopment(e.target.value === `` ? `` : Math.max(0, Number(e.target.value))) })
         }), preparationTotalMonths > 0 && (0, W.jsxs)(`div`, {
             className: `method1-investment-grid`,
             children: [ (0, W.jsx)(`strong`, { children: `사업화 준비기간 구간별 투자금액(백만원)` }), Array.from({ length: preparationInvestmentPeriods }, (e, t) => (0, W.jsx)(Dg, {
@@ -1711,7 +1819,7 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
                 })
             }, t)) ]
         }), (0, W.jsx)(Dg, {
-            label: `출처 상세`, children: (0, W.jsx)(`textarea`, { value: method1SourceDetail, onChange: e => setMethod1SourceDetail(e.target.value), placeholder: `자료명·작성기관·기준일` })
+            label: `출처 상세`, children: (0, W.jsx)(`textarea`, { readOnly: [ `starvalue-ecos`, `starvalue-cretop` ].includes(method1PioneeringSource), value: method1SourceDetail, onChange: e => setMethod1SourceDetail(e.target.value), placeholder: `자료명·작성기관·기준일` })
         }), (0, W.jsx)(Dg, {
             label: `개척률 확정값`,
             children: (0, W.jsxs)(`div`, {
@@ -1728,7 +1836,7 @@ function wg({bank: e, companyForm: t, industry: n, evaluationDate: r, companyFin
             label: `확정 근거`, children: (0, W.jsx)(`textarea`, { value: method1PioneeringReason, onChange: e => setMethod1PioneeringReason(e.target.value) })
         }), (0, W.jsxs)(`div`, {
             className: `result-callout`,
-            children: [ (0, W.jsx)(`span`, { children: `개척률` }), (0, W.jsx)(`strong`, { children: method1PioneeringRate === null ? `산출 전` : `${method1PioneeringRate}%` }), (0, W.jsx)(`small`, { children: method1PioneeringInputsReady ? `투자금액 ${method1CostTotal.toLocaleString()} ÷ 기준금액 ${method1BenchmarkTotal.toLocaleString()} · 비율 ${method1PioneeringRatio.toFixed(2)}` : `준비기간·연도별 투자금액·동업종 기준자료를 입력해 주세요.` }) ]
+            children: [ (0, W.jsx)(`span`, { children: `개척률` }), (0, W.jsx)(`strong`, { children: method1PioneeringRate === null ? `산출 전` : `${method1PioneeringRate}%` }), (0, W.jsx)(`small`, { children: preparationTotalMonths === 0 ? `사업화 준비기간 0개월: 즉시 사업화 가능한 상태로 보아 개척률 100%를 적용합니다.` : method1PioneeringInputsReady ? `투자금액 ${method1CostTotal.toLocaleString()} ÷ 기준금액 ${method1BenchmarkTotal.toLocaleString()} · 기간 ${preparationDurationYears.toFixed(4)}년 · 비율 ${method1PioneeringRatio.toFixed(2)}` : `준비기간·연도별 투자금액·동업종 기준자료를 입력해 주세요. 개월은 12로 나눈 소수연수로 자동 환산합니다.` }) ]
         }) ]
     }) : null;
     return (0, W.jsxs)(`section`, {

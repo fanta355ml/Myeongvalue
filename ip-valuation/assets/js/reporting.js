@@ -593,7 +593,7 @@ function F_({industry: e, companyFinancials: t, onCompanyFinancialsChange: n, sa
                         })
                     }) : (0, W.jsx)(`p`, { className: `card-help`, children: `StarValue 손익계산서 11행 뒤에 재무상태표 10행을 이어 붙여넣으면 고정 순서로 별도 인식하여 이 표에 표시합니다.` }), (0, W.jsxs)(`div`, {
                         className: `reference-match-note`,
-                        children: [ (0, W.jsx)(`span`, { children: `개척률 연결 후보` }), (0, W.jsx)(`strong`, { children: starvalueAssetMetrics.complete ? `${starvalueAssetMetrics.averageRecent3Million.toLocaleString(`ko-KR`, { maximumFractionDigits: 6 })}백만원` : `산출 전` }), (0, W.jsx)(`small`, { children: starvalueAssetMetrics.complete ? `유형자산+무형자산의 최근 3개년 순증감 평균 · 평가자가 가치산정에서 확인 후 적용` : `유형자산·무형자산 4개년 이상 자료가 필요합니다.` }) ]
+                        children: [ (0, W.jsx)(`span`, { children: `개척률 자동연결` }), (0, W.jsx)(`strong`, { children: starvalueAssetMetrics.complete ? `${starvalueAssetMetrics.averageRecent3Million.toLocaleString(`ko-KR`, { maximumFractionDigits: 6 })}백만원` : `산출 전` }), (0, W.jsx)(`small`, { children: starvalueAssetMetrics.complete ? `유형자산+무형자산의 최근 3개년 순증감 평균 · 가치산정에서 ECOS 연구개발비율과 자동 결합` : `유형자산·무형자산 4개년 이상 자료가 필요합니다.` }) ]
                     }) ]
                 }) ]
             }), (0, W.jsxs)(`article`, {

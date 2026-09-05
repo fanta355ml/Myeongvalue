@@ -125,6 +125,47 @@
         return { costTotal, benchmarkTotal, ratio, recommendedRate, appliedRate, durationYears, investmentPeriods };
     }
 
+    function calculateCretopResearchAverage(rows) {
+        if (!Array.isArray(rows) || rows.length !== 3) {
+            throw new TypeError("크레탑 최근 3개년 연구개발비 자료가 필요합니다.");
+        }
+        const details = rows.map((row, index) => {
+            const year = requireFinite(row?.year, `${index + 1}행 연도`);
+            if (!Number.isInteger(year)) throw new RangeError("크레탑 기준연도는 정수여야 합니다.");
+
+            const perCompany = (amountValue, sampleValue, label) => {
+                const amountMissing = amountValue === "" || amountValue === null || amountValue === undefined;
+                const sampleMissing = sampleValue === "" || sampleValue === null || sampleValue === undefined;
+                if (amountMissing !== sampleMissing) {
+                    throw new RangeError(`${label} 합계와 대상기업 수를 함께 입력해 주세요.`);
+                }
+                if (amountMissing) return { amount: 0, sampleCount: 0, perCompany: 0, provided: false };
+                const amount = requireFinite(amountValue, `${label} 합계`);
+                const sampleCount = requireFinite(sampleValue, `${label} 대상기업 수`);
+                if (amount < 0 || !Number.isInteger(sampleCount) || sampleCount < 1) {
+                    throw new RangeError(`${label} 합계는 0 이상, 대상기업 수는 1 이상의 정수여야 합니다.`);
+                }
+                return { amount, sampleCount, perCompany: amount / sampleCount, provided: true };
+            };
+
+            const incomeStatement = perCompany(row?.incomeExpense, row?.incomeSampleCount, `${year}년 손익계산서 경상개발비`);
+            const manufacturingCost = perCompany(row?.manufacturingExpense, row?.manufacturingSampleCount, `${year}년 제조원가명세서 경상개발비`);
+            if (!incomeStatement.provided && !manufacturingCost.provided) {
+                throw new RangeError(`${year}년 경상개발비 자료를 한 항목 이상 입력해 주세요.`);
+            }
+            return {
+                year,
+                incomeStatement,
+                manufacturingCost,
+                researchDevelopment: incomeStatement.perCompany + manufacturingCost.perCompany
+            };
+        });
+        return {
+            details,
+            average: details.reduce((sum, row) => sum + row.researchDevelopment, 0) / details.length
+        };
+    }
+
     function calculateForecastCagr(sales) {
         if (!Array.isArray(sales)) throw new TypeError("일할 후 매출액 자료가 필요합니다.");
         const values = sales.map((value, index) => requireFinite(value, `${index + 1}차년도 매출액`));
@@ -341,6 +382,62 @@
         };
     }
 
+    function parseEcosResearchRatioText(text) {
+        const source = String(text || "").trim();
+        if (!source) throw new TypeError("ECOS 연구개발비율 파일이 비어 있습니다.");
+        if (source.startsWith("{") || source.startsWith("[")) {
+            const parsed = JSON.parse(source);
+            const rows = Array.isArray(parsed) ? parsed : parsed?.rows;
+            if (!Array.isArray(rows) || !rows.length) throw new TypeError("ECOS 업종별 자료를 찾지 못했습니다.");
+            return { rows, source: parsed?.source || "사용자 업로드 ECOS 자료" };
+        }
+
+        const lines = source.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+        if (lines.length < 2) throw new TypeError("ECOS 파일의 머리글과 자료행이 필요합니다.");
+        const delimiter = lines[0].includes("\t") ? "\t" : ",";
+        const cells = line => line.split(delimiter).map(value => value.trim().replace(/^"|"$/g, ""));
+        const headers = cells(lines[0]);
+        const normalized = headers.map(value => value.replace(/\s+/g, "").toLowerCase());
+        const findIndex = candidates => normalized.findIndex(value => candidates.some(candidate => value.includes(candidate)));
+        const codeIndex = findIndex(["산업분류코드", "업종코드", "분류코드", "code"]);
+        const nameIndex = findIndex(["산업명", "업종명", "분류명", "name"]);
+        const yearIndex = findIndex(["연도", "year"]);
+        const rateIndex = findIndex(["연구개발비대매출액", "연구개발비율", "비율", "rate"]);
+        if (codeIndex < 0) throw new TypeError("ECOS 파일에서 산업분류코드 열을 찾지 못했습니다.");
+
+        const byCode = new Map();
+        const ensureRow = values => {
+            const code = String(values[codeIndex] || "").replace(/[^A-Z0-9]/gi, "").toUpperCase();
+            if (!code) return null;
+            if (!byCode.has(code)) byCode.set(code, { code, name: values[nameIndex] || code, rates: {} });
+            return byCode.get(code);
+        };
+        if (yearIndex >= 0 && rateIndex >= 0) {
+            lines.slice(1).forEach(line => {
+                const values = cells(line);
+                const row = ensureRow(values);
+                const year = Number(values[yearIndex]);
+                const rate = Number(String(values[rateIndex] || "").replace(/%/g, ""));
+                if (row && Number.isInteger(year) && Number.isFinite(rate)) row.rates[year] = rate;
+            });
+        } else {
+            const yearColumns = headers.map((header, index) => ({ year: Number(String(header).match(/(?:19|20)\d{2}/)?.[0]), index })).filter(item => Number.isInteger(item.year));
+            if (!yearColumns.length) throw new TypeError("ECOS 파일에서 연도별 비율 열을 찾지 못했습니다.");
+            lines.slice(1).forEach(line => {
+                const values = cells(line);
+                const row = ensureRow(values);
+                if (!row) return;
+                yearColumns.forEach(({ year, index }) => {
+                    const rate = Number(String(values[index] || "").replace(/%/g, ""));
+                    if (Number.isFinite(rate)) row.rates[year] = rate;
+                });
+            });
+        }
+        const rows = [ ...byCode.values() ].filter(row => Object.keys(row.rates).length);
+        if (!rows.length) throw new TypeError("ECOS 파일에서 유효한 연구개발비율을 찾지 못했습니다.");
+        return { rows, source: "사용자 업로드 ECOS 자료" };
+    }
+
     function migrateValuationState(saved) {
         const source = saved && typeof saved === "object" ? saved : {};
         return { ...source, valuationMethod: normalizeValuationMethod(source.valuationMethod) };
@@ -356,6 +453,7 @@
         calculateAdjustmentCoefficient1,
         calculateTechnologyShare,
         calculatePioneeringRate,
+        calculateCretopResearchAverage,
         calculateForecastCagr,
         recommendSalesGrowthScore,
         calculateRoyaltyRate1,
@@ -366,6 +464,7 @@
         parseStarValueFinancialText,
         calculateDiscountedCashFlows,
         parsePioneeringTableText,
+        parseEcosResearchRatioText,
         migrateValuationState
     };
 });
