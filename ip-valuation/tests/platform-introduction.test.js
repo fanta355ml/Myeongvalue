@@ -28,6 +28,9 @@ test('main homepage places a concise platform overview immediately after the her
   assert.ok(platformStart > heroEnd);
   assert.ok(platformStart < aboutStart);
   assert.match(homepage, /조건 입력부터 결과보고서까지,<br>하나의 평가 워크플로/);
+  assert.doesNotMatch(homepage, /하나의 평가 워크플로\.<\/h2>/);
+  assert.doesNotMatch(homepage, /체계적인 기술가치평가\.<\/h2>/);
+  assert.match(homepage, /기술가치 진단 및<br>사업화전략 디자인<\/h2>/);
   assert.match(homepage, /ip-platform\/assets\/valuation-workspace-public\.png/);
   assert.match(homepage, /ip-platform\/assets\/report-summary-public\.png/);
   assert.match(homepage, /href="ip-platform\/">플랫폼 자세히 보기/);
