@@ -55,7 +55,7 @@ test('introduction page screenshot assets exist', () => {
   [
     'ip-platform/assets/valuation-workspace-public.png',
     'ip-platform/assets/report-summary-public.png',
-    'ip-platform/assets/report-review.png',
+    'ip-platform/assets/report-review-public.png',
     'ip-platform/assets/report-closing-page.png',
   ].forEach((relativePath) => {
     assert.equal(fs.existsSync(path.join(repositoryRoot, relativePath)), true, `${relativePath} is missing`);
@@ -63,6 +63,7 @@ test('introduction page screenshot assets exist', () => {
 
   assert.equal(fs.existsSync(path.join(repositoryRoot, 'ip-platform/assets/valuation-workspace.png')), false);
   assert.equal(fs.existsSync(path.join(repositoryRoot, 'ip-platform/assets/report-summary.png')), false);
+  assert.equal(fs.existsSync(path.join(repositoryRoot, 'ip-platform/assets/report-review.png')), false);
 });
 
 test('public sitemap includes the IP platform introduction', () => {
